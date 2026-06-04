@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="hmOrangeIcon" x1="30" y1="16" x2="112" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF8C1A" />
+      <stop offset="1" stop-color="#FF6B00" />
+    </linearGradient>
+    <linearGradient id="hmDarkIcon" x1="108" y1="14" x2="206" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#333333" />
+      <stop offset="1" stop-color="#111111" />
+    </linearGradient>
+  </defs>
+
+  <rect width="240" height="120" fill="#F5F5F5" />
+  <path d="M28 18H58V50H90V18H120V102H90V76H58V102H28V18Z" fill="url(#hmOrangeIcon)"/>
+  <path d="M104 18H138L164 52L190 18H214V102H186V58L164 84L142 58V102H114L104 18Z" fill="url(#hmDarkIcon)"/>
+  <path d="M20 95C62 116 173 116 220 95" stroke="#FF6B00" stroke-width="8" stroke-linecap="round"/>
+</svg>
