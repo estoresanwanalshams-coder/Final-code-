@@ -98,8 +98,8 @@ export function AdminOrdersPanel() {
       addressLine1: order.addressLine1,
       addressLine2: order.addressLine2,
       city: order.city,
-      shippingMethod: order.shippingMethod,
-      additionalNotes: order.additionalNotes,
+      shippingMethod: order.shippingMethod ?? "Standard Shipping",
+      additionalNotes: order.additionalNotes ?? "",
       total: String(order.total),
       status: order.status,
     });
