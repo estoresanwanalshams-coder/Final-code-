@@ -355,6 +355,13 @@ for select
 to authenticated
 using ((auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local');
 
+drop policy if exists "Customers can read own profile" on public.customers;
+create policy "Customers can read own profile"
+on public.customers
+for select
+to authenticated
+using (auth.uid() = auth_user_id);
+
 insert into storage.buckets (id, name, public)
 values ('product-images', 'product-images', true)
 on conflict (id) do nothing;

@@ -163,3 +163,43 @@ export async function updateSupabaseOrderStatus(
     throw error;
   }
 }
+
+export async function updateSupabaseOrder(
+  id: string,
+  payload: Partial<OrderPayload> & { status?: OrderStatus },
+) {
+  const updateRow: Record<string, unknown> = {};
+
+  if (payload.fullName !== undefined) updateRow.full_name = payload.fullName;
+  if (payload.email !== undefined) updateRow.email = payload.email.trim().toLowerCase();
+  if (payload.phone !== undefined) updateRow.phone = payload.phone;
+  if (payload.addressLine1 !== undefined) updateRow.address_line_1 = payload.addressLine1;
+  if (payload.addressLine2 !== undefined) updateRow.address_line_2 = payload.addressLine2;
+  if (payload.city !== undefined) updateRow.city = payload.city;
+  if (payload.shippingMethod !== undefined) updateRow.shipping_method = payload.shippingMethod;
+  if (payload.additionalNotes !== undefined) updateRow.additional_notes = payload.additionalNotes;
+  if (payload.items !== undefined) updateRow.items = payload.items;
+  if (payload.total !== undefined) updateRow.total = payload.total;
+  if (payload.status !== undefined) updateRow.status = payload.status;
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update(updateRow)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return mapOrderRow(data as OrderRow);
+}
+
+export async function deleteSupabaseOrder(id: string) {
+  const { error } = await supabase.from("orders").delete().eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}

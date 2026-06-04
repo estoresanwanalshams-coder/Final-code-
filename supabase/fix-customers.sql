@@ -1,4 +1,5 @@
 -- Run in Supabase SQL editor to enable customer profile storage.
+-- Also run supabase/fix-admin-access.sql for admin list/sync functions.
 
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
@@ -43,9 +44,17 @@ to authenticated
 using (auth.uid() = auth_user_id)
 with check (auth.uid() = auth_user_id);
 
+-- Use fix-admin-access.sql for is_admin_email() and admin_list_customers().
 drop policy if exists "Only admin can read customers" on public.customers;
 create policy "Only admin can read customers"
 on public.customers
 for select
 to authenticated
-using ((auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local');
+using (public.is_admin_email());
+
+drop policy if exists "Customers can read own profile" on public.customers;
+create policy "Customers can read own profile"
+on public.customers
+for select
+to authenticated
+using (auth.uid() = auth_user_id);

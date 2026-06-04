@@ -93,7 +93,7 @@ function mapProductToRow(product: Product): ProductRow {
     slug: product.slug,
     category_slug: product.categorySlug,
     actual_price: product.actualPrice ?? null,
-    price: product.price,
+    price: Number(product.price),
     summary: product.summary,
     details: product.details,
     image_url: mainImage,

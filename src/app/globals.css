@@ -331,9 +331,7 @@ a {
 
 .form-field input:focus,
 .form-field select:focus,
-.form-field textarea:focus,
-.light-form-field input:focus,
-.light-form-field textarea:focus {
+.form-field textarea:focus {
   border-color: #ffffff;
   background: rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
@@ -478,6 +476,20 @@ a {
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+.light-form-field input:focus,
+.light-form-field textarea:focus {
+  border-color: #ff6b00;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+  outline: 2px solid #ff6b00;
+  outline-offset: 1px;
+  transform: none;
+}
+
+.light-form-field input:invalid:not(:placeholder-shown):not(:focus) {
+  border-color: #dc2626;
 }
 
 .page-shell {

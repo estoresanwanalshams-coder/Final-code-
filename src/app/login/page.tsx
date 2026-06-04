@@ -1,14 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { getSafeRedirectPath } from "@/lib/auth-redirect";
 import { isAdminEmail } from "@/lib/auth-role";
-import { createOrUpdateCustomerProfile } from "@/lib/supabase-customers";
+import { syncCustomerProfileForSession } from "@/lib/supabase-customers";
 import { supabase } from "@/lib/supabase";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
+  const registerHref =
+    redirectTo === "/"
+      ? "/register"
+      : `/register?redirect=${encodeURIComponent(redirectTo)}`;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,9 +29,6 @@ export default function LoginPage() {
       normalized.includes("invalid credentials")
     ) {
       return "Incorrect email or password.";
-    }
-    if (normalized.includes("email not confirmed")) {
-      return "Please verify your email first, then login.";
     }
     if (normalized.includes("too many requests")) {
       return "Too many attempts. Please wait and try again.";
@@ -51,27 +56,23 @@ export default function LoginPage() {
     if (isAdminEmail(data.user.email)) {
       setIsSubmitting(false);
       router.push("/admin");
+      router.refresh();
       return;
     }
 
     const fullName =
       (data.user.user_metadata?.full_name as string | undefined) ?? "Customer";
-    const phone =
-      (data.user.user_metadata?.phone as string | undefined) ?? "";
+    const phone = (data.user.user_metadata?.phone as string | undefined) ?? "";
 
-    const customerSync = await createOrUpdateCustomerProfile({
-      authUserId: data.user.id,
+    await syncCustomerProfileForSession({
       fullName,
       email: data.user.email ?? email,
       phone,
     }).catch(() => null);
 
-    if (customerSync && !customerSync.ok) {
-      console.warn("customers table missing. Run supabase/fix-customers.sql.");
-    }
-
     setIsSubmitting(false);
-    router.push("/profile");
+    router.push(redirectTo);
+    router.refresh();
   }
 
   return (
@@ -116,12 +117,20 @@ export default function LoginPage() {
           </button>
           <p className="mt-4 text-sm text-zinc-600">
             New customer?{" "}
-            <Link href="/register" className="font-semibold text-pink-600">
+            <Link href={registerHref} className="font-semibold text-[#FF6B00]">
               Create account
             </Link>
           </p>
         </form>
       </div>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<section className="page-shell min-h-[70vh]" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

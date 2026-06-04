@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  deleteSupabaseOrder,
   fetchSupabaseOrders,
   type OrderRecord,
   type OrderStatus,
+  updateSupabaseOrder,
   updateSupabaseOrderStatus,
 } from "@/lib/supabase-orders";
+import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
 
 const statuses: OrderStatus[] = [
   "pending",
@@ -16,6 +19,19 @@ const statuses: OrderStatus[] = [
   "cancelled",
 ];
 
+const emptyEditForm = {
+  fullName: "",
+  email: "",
+  phone: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  shippingMethod: "Standard Shipping",
+  additionalNotes: "",
+  total: "",
+  status: "pending" as OrderStatus,
+};
+
 export function AdminOrdersPanel() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [message, setMessage] = useState("");
@@ -23,16 +39,32 @@ export function AdminOrdersPanel() {
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
   const [sortOrder, setSortOrder] = useState<"latest" | "oldest">("latest");
   const [latestOnly, setLatestOnly] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(emptyEditForm);
 
-  async function loadOrders() {
-    setOrders(await fetchSupabaseOrders().catch(() => []));
-  }
+  const loadOrders = useCallback(async () => {
+    try {
+      setOrders(await fetchSupabaseOrders());
+      setMessage("");
+    } catch (error) {
+      const detail =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "Unknown error";
+      setMessage(
+        `Unable to load orders. Run supabase/fix-admin-access.sql. ${detail}`,
+      );
+      setOrders([]);
+    }
+  }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(loadOrders, 0);
+    const timer = window.setTimeout(() => {
+      void loadOrders();
+    }, 0);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [loadOrders]);
 
   async function updateStatus(id: string, status: OrderStatus) {
     try {
@@ -54,6 +86,86 @@ export function AdminOrdersPanel() {
       setMessage("Order status updated.");
     } catch {
       setMessage("Unable to update order status.");
+    }
+  }
+
+  function startEdit(order: OrderRecord) {
+    setEditingId(order.id);
+    setEditForm({
+      fullName: order.fullName,
+      email: order.email,
+      phone: order.phone,
+      addressLine1: order.addressLine1,
+      addressLine2: order.addressLine2,
+      city: order.city,
+      shippingMethod: order.shippingMethod,
+      additionalNotes: order.additionalNotes,
+      total: String(order.total),
+      status: order.status,
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditForm(emptyEditForm);
+  }
+
+  async function saveEdit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editingId) {
+      return;
+    }
+
+    if (!isValidPhoneNumber(editForm.phone)) {
+      setMessage("Please enter a valid phone number (7 to 15 digits).");
+      return;
+    }
+
+    const total = Number(editForm.total);
+    if (!Number.isFinite(total) || total < 0) {
+      setMessage("Please enter a valid order total.");
+      return;
+    }
+
+    try {
+      await updateSupabaseOrder(editingId, {
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phone: editForm.phone,
+        addressLine1: editForm.addressLine1,
+        addressLine2: editForm.addressLine2,
+        city: editForm.city,
+        shippingMethod: editForm.shippingMethod,
+        additionalNotes: editForm.additionalNotes,
+        total,
+        status: editForm.status,
+      });
+      cancelEdit();
+      await loadOrders();
+      setMessage("Order updated.");
+    } catch (error) {
+      const detail =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "Unknown error";
+      setMessage(`Unable to update order: ${detail}`);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm("Delete this order permanently?")) {
+      return;
+    }
+
+    try {
+      await deleteSupabaseOrder(id);
+      if (editingId === id) {
+        cancelEdit();
+      }
+      await loadOrders();
+      setMessage("Order deleted.");
+    } catch {
+      setMessage("Unable to delete order.");
     }
   }
 
@@ -96,14 +208,143 @@ export function AdminOrdersPanel() {
         <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
           Orders
         </p>
-        <h2 className="mt-3 text-3xl font-bold text-zinc-950">
-          Customer orders
-        </h2>
+        <h2 className="mt-3 text-3xl font-bold text-zinc-950">Customer orders</h2>
         {message ? (
           <p className="mt-4 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-700">
             {message}
           </p>
         ) : null}
+
+        {editingId ? (
+          <form
+            onSubmit={saveEdit}
+            className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-5 md:grid-cols-2"
+          >
+            <label className="light-form-field">
+              Full name
+              <input
+                value={editForm.fullName}
+                onChange={(event) =>
+                  setEditForm((current) => ({ ...current, fullName: event.target.value }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field">
+              Email
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={(event) =>
+                  setEditForm((current) => ({ ...current, email: event.target.value }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field">
+              Phone
+              <input
+                type="tel"
+                value={editForm.phone}
+                onChange={(event) =>
+                  setEditForm((current) => ({
+                    ...current,
+                    phone: normalizePhoneInput(event.target.value),
+                  }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field">
+              Total (AED)
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={editForm.total}
+                onChange={(event) =>
+                  setEditForm((current) => ({ ...current, total: event.target.value }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field md:col-span-2">
+              Address line 1
+              <input
+                value={editForm.addressLine1}
+                onChange={(event) =>
+                  setEditForm((current) => ({
+                    ...current,
+                    addressLine1: event.target.value,
+                  }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field">
+              Address line 2
+              <input
+                value={editForm.addressLine2}
+                onChange={(event) =>
+                  setEditForm((current) => ({
+                    ...current,
+                    addressLine2: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="light-form-field">
+              City
+              <input
+                value={editForm.city}
+                onChange={(event) =>
+                  setEditForm((current) => ({ ...current, city: event.target.value }))
+                }
+                required
+              />
+            </label>
+            <label className="light-form-field">
+              Status
+              <select
+                value={editForm.status}
+                onChange={(event) =>
+                  setEditForm((current) => ({
+                    ...current,
+                    status: event.target.value as OrderStatus,
+                  }))
+                }
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="light-form-field md:col-span-2">
+              Additional notes
+              <textarea
+                rows={2}
+                value={editForm.additionalNotes}
+                onChange={(event) =>
+                  setEditForm((current) => ({
+                    ...current,
+                    additionalNotes: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <div className="flex gap-2 md:col-span-2">
+              <button type="submit" className="btn-soft">
+                Save order
+              </button>
+              <button type="button" onClick={cancelEdit} className="btn-soft">
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : null}
+
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           <label className="light-form-field">
             Search order/customer
@@ -117,7 +358,9 @@ export function AdminOrdersPanel() {
             Status filter
             <select
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as "all" | OrderStatus)}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as "all" | OrderStatus)
+              }
             >
               <option value="all">All statuses</option>
               {statuses.map((status) => (
@@ -131,7 +374,9 @@ export function AdminOrdersPanel() {
             Sort by date
             <select
               value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value as "latest" | "oldest")}
+              onChange={(event) =>
+                setSortOrder(event.target.value as "latest" | "oldest")
+              }
             >
               <option value="latest">Latest first</option>
               <option value="oldest">Oldest first</option>
@@ -182,22 +427,39 @@ export function AdminOrdersPanel() {
                     </p>
                   ) : null}
                 </div>
-                <label className="light-form-field min-w-52">
-                  Status
-                  <select
-                    value={order.status}
-                    onChange={(event) =>
-                      updateStatus(order.id, event.target.value as OrderStatus)
-                    }
-                    className="rounded-xl border border-zinc-300 p-3"
-                  >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <div className="flex flex-col gap-2">
+                  <label className="light-form-field min-w-52">
+                    Status
+                    <select
+                      value={order.status}
+                      onChange={(event) =>
+                        updateStatus(order.id, event.target.value as OrderStatus)
+                      }
+                    >
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => startEdit(order)}
+                      className="rounded border border-zinc-300 px-3 py-2 text-xs font-semibold"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete(order.id)}
+                      className="rounded border border-red-300 px-3 py-2 text-xs font-semibold text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {order.items.map((item) => (
@@ -207,6 +469,7 @@ export function AdminOrdersPanel() {
                   >
                     <p className="font-bold text-zinc-950">{item.product.name}</p>
                     <p className="text-zinc-600">Qty: {item.quantity}</p>
+                    <p className="text-zinc-600">AED {item.product.price}</p>
                   </div>
                 ))}
               </div>

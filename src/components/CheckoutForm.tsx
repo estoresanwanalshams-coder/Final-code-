@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { OrderSuccessModal } from "@/components/OrderSuccessModal";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { buildAuthHref } from "@/lib/auth-redirect";
 import { isAdminEmail } from "@/lib/auth-role";
 import { getCartItems, saveCartItems, type CartItem } from "@/lib/cart";
 import type { Product } from "@/lib/products";
@@ -10,6 +11,7 @@ import {
   createOrderNumber,
   createSupabaseOrder,
 } from "@/lib/supabase-orders";
+import { fetchCustomerProfileByAuthUserId } from "@/lib/supabase-customers";
 import { supabase } from "@/lib/supabase";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
@@ -23,6 +25,23 @@ export function CheckoutForm({
   fallbackProduct,
   initialQuantity = 1,
 }: CheckoutFormProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const checkoutRedirect = useMemo(() => {
+    const query = searchParams.toString();
+    if (pathname.startsWith("/inquiry")) {
+      return query ? `${pathname}?${query}` : pathname;
+    }
+    if (pathname === "/cart") {
+      return "/cart";
+    }
+    return "/cart";
+  }, [pathname, searchParams]);
+
+  const loginHref = buildAuthHref("/login", checkoutRedirect);
+  const registerHref = buildAuthHref("/register", checkoutRedirect);
+
   const [items, setItems] = useState<CartItem[]>([]);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,7 +52,6 @@ export function CheckoutForm({
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [shippingCharge, setShippingCharge] = useState(defaultSiteSettings.shippingCharge);
   const [message, setMessage] = useState("");
-  const [successOrderNumber, setSuccessOrderNumber] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdminAccount, setIsAdminAccount] = useState(false);
   const [continueAsGuest, setContinueAsGuest] = useState(false);
@@ -53,7 +71,7 @@ export function CheckoutForm({
   }, [fallbackProduct, initialQuantity]);
 
   useEffect(() => {
-    const timer = window.setTimeout(async () => {
+    async function loadAuthenticatedCustomer() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -66,10 +84,35 @@ export function CheckoutForm({
       const adminUser = isAdminEmail(user.email);
       setIsAdminAccount(adminUser);
       setIsAuthenticated(true);
-      setEmail((currentEmail) => currentEmail || user.email || "");
+
+      const profile = await fetchCustomerProfileByAuthUserId(user.id).catch(
+        () => null,
+      );
+
+      const metadataName =
+        (user.user_metadata?.full_name as string | undefined) ?? "";
+      const metadataPhone =
+        (user.user_metadata?.phone as string | undefined) ?? "";
+
+      setFullName((current) => current || profile?.fullName || metadataName);
+      setEmail((current) => current || profile?.email || user.email || "");
+      setPhone((current) => current || profile?.phone || metadataPhone);
+    }
+
+    const timer = window.setTimeout(() => {
+      void loadAuthenticatedCustomer();
     }, 0);
 
-    return () => window.clearTimeout(timer);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void loadAuthenticatedCustomer();
+    });
+
+    return () => {
+      window.clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -141,8 +184,7 @@ export function CheckoutForm({
         }),
       }).catch(() => null);
       saveCartItems([]);
-      setSuccessOrderNumber(orderNumber);
-      setMessage("");
+      router.push(`/order-success?order=${encodeURIComponent(orderNumber)}`);
     } catch (error) {
       const detail =
         error && typeof error === "object" && "message" in error
@@ -175,10 +217,10 @@ export function CheckoutForm({
             : "You must be logged in before placing any order through Buy Now or Cart."}
         </p>
         <div className="mt-2 flex gap-3">
-          <Link href="/login" className="btn-soft">
+          <Link href={loginHref} className="btn-soft">
             Login
           </Link>
-          <Link href="/register" className="btn-soft">
+          <Link href={registerHref} className="btn-soft">
             Register
           </Link>
           {!isAdminAccount ? (
@@ -203,13 +245,6 @@ export function CheckoutForm({
 
   return (
     <>
-      {successOrderNumber ? (
-        <OrderSuccessModal
-          orderNumber={successOrderNumber}
-          onClose={() => setSuccessOrderNumber("")}
-        />
-      ) : null}
-
       <form
         onSubmit={handleSubmit}
         className="checkout-form checkout-form-panel grid gap-5 p-6 sm:p-8 lg:p-10 md:grid-cols-2"

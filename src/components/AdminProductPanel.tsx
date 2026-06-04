@@ -19,6 +19,7 @@ import {
 import { compressImageFile } from "@/lib/image-compression";
 import { normalizeImageUrl, normalizeImageUrls } from "@/lib/image-url";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
+import { supabase } from "@/lib/supabase";
 
 const emptyForm = {
   name: "",
@@ -350,6 +351,24 @@ export function AdminProductPanel() {
     }
 
     const slug = editingSlug ?? createProductSlug(form.name);
+    const parsedPrice = Number(form.price);
+    const parsedActualPrice = form.actualPrice.trim()
+      ? Number(form.actualPrice)
+      : undefined;
+
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      setMessage("Please enter a valid discounted price.");
+      return;
+    }
+
+    if (
+      parsedActualPrice !== undefined &&
+      (!Number.isFinite(parsedActualPrice) || parsedActualPrice < 0)
+    ) {
+      setMessage("Please enter a valid actual price.");
+      return;
+    }
+
     setIsSaving(true);
 
     try {
@@ -412,8 +431,8 @@ export function AdminProductPanel() {
         name: form.name,
         slug,
         categorySlug: form.categorySlug,
-        actualPrice: form.actualPrice ? Number(form.actualPrice) : undefined,
-        price: Number(form.price),
+        actualPrice: parsedActualPrice,
+        price: parsedPrice,
         imageUrl: mainImageUrl,
         imageUrls,
         videoUrl: form.videoUrl || undefined,
@@ -422,7 +441,23 @@ export function AdminProductPanel() {
       };
 
       await upsertSupabaseProduct(product);
-      setAdminProducts(await fetchSupabaseProducts());
+      const refreshedProducts = await fetchSupabaseProducts();
+      setAdminProducts(refreshedProducts);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetch("/api/admin/revalidate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ slug }),
+        }).catch(() => null);
+      }
+
       setMessage(editingSlug ? "Product updated." : "Product added.");
       resetForm();
     } catch (error) {

@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { getSafeRedirectPath } from "@/lib/auth-redirect";
 import { isAdminEmail } from "@/lib/auth-role";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
-import { createOrUpdateCustomerProfile } from "@/lib/supabase-customers";
+import { syncCustomerProfileForSession } from "@/lib/supabase-customers";
 import { supabase } from "@/lib/supabase";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = getSafeRedirectPath(searchParams.get("redirect"));
+  const loginHref =
+    redirectTo === "/"
+      ? "/login"
+      : `/login?redirect=${encodeURIComponent(redirectTo)}`;
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -47,8 +55,10 @@ export default function RegisterPage() {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       password,
       options: {
         data: {
@@ -64,27 +74,43 @@ export default function RegisterPage() {
       return;
     }
 
-    const customerSync = await createOrUpdateCustomerProfile({
-      authUserId: data.user.id,
+    let activeSession = data.session;
+
+    if (!activeSession) {
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+
+      if (signInError || !signInData.session) {
+        setMessage(
+          "Account created. Disable email confirmation in Supabase Auth settings, then login.",
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      activeSession = signInData.session;
+    }
+
+    const customerSync = await syncCustomerProfileForSession({
       fullName: fullName.trim(),
-      email: data.user.email ?? email,
+      email: data.user.email ?? normalizedEmail,
       phone: phone.trim(),
-    }).catch(() => null);
+    }).catch(() => ({ ok: false as const, reason: "error" as const }));
+
+    if (!customerSync.ok) {
+      setMessage(
+        "Account created, but profile sync failed. Run supabase/fix-admin-access.sql, then click Sync Auth Users in admin.",
+      );
+      setIsSubmitting(false);
+      return;
+    }
 
     setIsSubmitting(false);
-    if (customerSync && !customerSync.ok) {
-      setMessage(
-        "Account created, but customer table is missing. Run supabase/fix-customers.sql.",
-      );
-      return;
-    }
-
-    if (!data.session) {
-      setMessage("Account created. Please verify your email, then login.");
-      return;
-    }
-
-    router.push("/login");
+    router.push(redirectTo);
+    router.refresh();
   }
 
   return (
@@ -119,11 +145,15 @@ export default function RegisterPage() {
             <label className="light-form-field">
               Phone
               <input
+                type="tel"
                 value={phone}
-                onChange={(event) => setPhone(normalizePhoneInput(event.target.value))}
+                onChange={(event) =>
+                  setPhone(normalizePhoneInput(event.target.value))
+                }
                 inputMode="tel"
                 pattern="[0-9+()\\-\\s]{7,20}"
-                title="Enter a valid phone number"
+                title="Enter a valid phone number (7 to 15 digits)"
+                placeholder="+971 55 123 4567"
                 required
               />
             </label>
@@ -133,6 +163,7 @@ export default function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                minLength={6}
                 required
               />
             </label>
@@ -142,6 +173,7 @@ export default function RegisterPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
+                minLength={6}
                 required
               />
             </label>
@@ -157,12 +189,20 @@ export default function RegisterPage() {
           </button>
           <p className="mt-4 text-sm text-zinc-600">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold text-pink-600">
+            <Link href={loginHref} className="font-semibold text-[#FF6B00]">
               Login
             </Link>
           </p>
         </form>
       </div>
     </section>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<section className="page-shell min-h-[70vh]" />}>
+      <RegisterForm />
+    </Suspense>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { InquiryOrderSummary } from "@/components/InquiryOrderSummary";
@@ -42,7 +43,9 @@ export default async function InquiryPage({ params, searchParams }: InquiryPageP
               <InquiryOrderSummary fallbackProduct={product} initialQuantity={initialQuantity} />
             </aside>
 
-            <CheckoutForm fallbackProduct={product} initialQuantity={initialQuantity} />
+            <Suspense fallback={<div className="checkout-form-panel p-8">Loading checkout...</div>}>
+              <CheckoutForm fallbackProduct={product} initialQuantity={initialQuantity} />
+            </Suspense>
           </div>
         </div>
       </div>

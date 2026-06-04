@@ -65,6 +65,7 @@ export function HeaderSearch({ onNavigate }: HeaderSearchProps) {
     event.preventDefault();
     const trimmedQuery = query.trim();
     setSuggestions([]);
+    setQuery("");
 
     if (!trimmedQuery) {
       router.push("/categories");
