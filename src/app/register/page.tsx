@@ -57,56 +57,44 @@ function RegisterForm() {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const { data, error } = await supabase.auth.signUp({
-      email: normalizedEmail,
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-          phone: phone.trim(),
-        },
-      },
+    const registerResponse = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName: fullName.trim(),
+        email: normalizedEmail,
+        phone: phone.trim(),
+        password,
+      }),
     });
 
-    if (error || !data.user) {
-      setMessage(error?.message ?? "Unable to create account.");
+    const registerPayload = (await registerResponse.json().catch(() => null)) as
+      | { error?: string }
+      | null;
+
+    if (!registerResponse.ok) {
+      setMessage(registerPayload?.error ?? "Unable to create account.");
       setIsSubmitting(false);
       return;
     }
 
-    let activeSession = data.session;
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
 
-    if (!activeSession) {
-      const { data: signInData, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: normalizedEmail,
-          password,
-        });
-
-      if (signInError || !signInData.session) {
-        setMessage(
-          "Account created. Disable email confirmation in Supabase Auth settings, then login.",
-        );
-        setIsSubmitting(false);
-        return;
-      }
-
-      activeSession = signInData.session;
+    if (signInError || !signInData.session) {
+      setMessage("Account created, but auto-login failed. Please login.");
+      setIsSubmitting(false);
+      return;
     }
 
-    const customerSync = await syncCustomerProfileForSession({
+    await syncCustomerProfileForSession({
       fullName: fullName.trim(),
-      email: data.user.email ?? normalizedEmail,
+      email: signInData.user.email ?? normalizedEmail,
       phone: phone.trim(),
-    }).catch(() => ({ ok: false as const, reason: "error" as const }));
-
-    if (!customerSync.ok) {
-      setMessage(
-        "Account created, but profile sync failed. Run supabase/fix-admin-access.sql, then click Sync Auth Users in admin.",
-      );
-      setIsSubmitting(false);
-      return;
-    }
+    }).catch(() => null);
 
     setIsSubmitting(false);
     router.push(redirectTo);
