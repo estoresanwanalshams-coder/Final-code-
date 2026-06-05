@@ -8,7 +8,7 @@ import { isAdminEmail } from "@/lib/auth-role";
 import { getCartItems, saveCartItems, type CartItem } from "@/lib/cart";
 import type { Product } from "@/lib/products";
 import {
-  createOrderNumber,
+  createNextOrderNumber,
   createSupabaseOrder,
 } from "@/lib/supabase-orders";
 import { fetchCustomerProfileByAuthUserId } from "@/lib/supabase-customers";
@@ -150,9 +150,9 @@ export function CheckoutForm({
     }
 
     setIsSubmitting(true);
-    const orderNumber = createOrderNumber();
 
     try {
+      const orderNumber = await createNextOrderNumber();
       await createSupabaseOrder({
         orderNumber,
         fullName,

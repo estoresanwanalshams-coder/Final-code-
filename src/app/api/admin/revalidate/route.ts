@@ -28,12 +28,18 @@ export async function POST(request: Request) {
 
     const body = (await request.json().catch(() => ({}))) as {
       slug?: string;
+      previousSlug?: string;
     };
 
     revalidatePath("/");
     revalidatePath("/products");
     revalidatePath("/categories");
     revalidatePath("/search");
+
+    if (body.previousSlug && body.previousSlug !== body.slug) {
+      revalidatePath(`/products/${body.previousSlug}`);
+      revalidatePath(`/inquiry/${body.previousSlug}`);
+    }
 
     if (body.slug) {
       revalidatePath(`/products/${body.slug}`);

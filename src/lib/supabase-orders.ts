@@ -59,10 +59,17 @@ function mapOrderRow(row: OrderRow): OrderRecord {
   };
 }
 
-export function createOrderNumber() {
-  return `ORD-${Date.now().toString(36).toUpperCase()}-${Math.floor(
-    Math.random() * 900 + 100,
-  )}`;
+export async function createNextOrderNumber() {
+  const { data, error } = await supabase.rpc("next_order_number");
+
+  if (!error && typeof data === "string" && data.length > 0) {
+    return data;
+  }
+
+  throw new Error(
+    error?.message ??
+      "Unable to generate order number. Run supabase/fix-order-number.sql in Supabase.",
+  );
 }
 
 export async function createSupabaseOrder(order: OrderPayload) {

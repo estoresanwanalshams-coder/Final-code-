@@ -168,7 +168,7 @@ export function Footer() {
 
       {/* Bottom */}
       <div className="border-t border-white/10 px-4 py-5 text-center text-sm text-zinc-400">
-        <p>&copy; 2026 Storefront. All rights reserved.</p>
+        <p>&copy; 2026 HM Shop Online. All rights reserved.</p>
 
         <p className="mt-2">
           Designed and developed by{" "}

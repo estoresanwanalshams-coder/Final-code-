@@ -350,7 +350,8 @@ export function AdminProductPanel() {
       return;
     }
 
-    const slug = editingSlug ?? createProductSlug(form.name);
+    const slug = createProductSlug(form.name);
+    const previousSlug = editingSlug ?? undefined;
     const parsedPrice = Number(form.price);
     const parsedActualPrice = form.actualPrice.trim()
       ? Number(form.actualPrice)
@@ -440,7 +441,7 @@ export function AdminProductPanel() {
         details: form.details,
       };
 
-      await upsertSupabaseProduct(product);
+      await upsertSupabaseProduct(product, { previousSlug });
       const refreshedProducts = await fetchSupabaseProducts();
       setAdminProducts(refreshedProducts);
 
@@ -454,7 +455,7 @@ export function AdminProductPanel() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ slug }),
+          body: JSON.stringify({ slug, previousSlug }),
         }).catch(() => null);
       }
 

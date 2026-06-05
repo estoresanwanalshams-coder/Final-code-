@@ -272,17 +272,41 @@ export async function fetchSupabaseSearchProducts(
   };
 }
 
-export async function upsertSupabaseProduct(product: Product) {
+export async function upsertSupabaseProduct(
+  product: Product,
+  options?: { previousSlug?: string },
+) {
   const payload = mapProductToRow(product);
 
   if (!payload.name.trim() || !payload.slug.trim()) {
     throw new Error("Product name is required.");
   }
 
+  const lookupSlug = options?.previousSlug?.trim() || payload.slug;
+
+  if (
+    options?.previousSlug &&
+    options.previousSlug !== payload.slug
+  ) {
+    const { data: slugConflict, error: slugConflictError } = await supabase
+      .from("products")
+      .select("slug")
+      .eq("slug", payload.slug)
+      .maybeSingle();
+
+    if (slugConflictError) {
+      throw slugConflictError;
+    }
+
+    if (slugConflict) {
+      throw new Error("Another product already uses this URL slug.");
+    }
+  }
+
   const { data: existing, error: lookupError } = await supabase
     .from("products")
     .select("slug")
-    .eq("slug", payload.slug)
+    .eq("slug", lookupSlug)
     .maybeSingle();
 
   if (lookupError) {
@@ -293,7 +317,7 @@ export async function upsertSupabaseProduct(product: Product) {
     const { error } = await supabase
       .from("products")
       .update(payload)
-      .eq("slug", payload.slug);
+      .eq("slug", lookupSlug);
 
     if (error) {
       throw error;
