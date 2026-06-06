@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CartIconLink } from "@/components/CartIconLink";
 import { DynamicCategoryLinks } from "@/components/DynamicCategoryLinks";
 import { HeaderSearch } from "@/components/HeaderSearch";
@@ -31,8 +31,40 @@ function CartIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+      />
+    </svg>
+  );
+}
+
 export function Header() {
   const mobileMenuRef = useRef<HTMLDetailsElement | null>(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        setMobileSearchOpen(false);
+      }
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   function closeMobileMenu() {
     if (mobileMenuRef.current) {
@@ -40,9 +72,13 @@ export function Header() {
     }
   }
 
+  function closeMobileSearch() {
+    setMobileSearchOpen(false);
+  }
+
   return (
     <header className="site-header sticky top-0 z-50 border-b border-zinc-200 !bg-white backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
         <Link
           href="/"
           className="brand-text shrink-0"
@@ -54,14 +90,24 @@ export function Header() {
             width={146}
             height={72}
             priority
-            className="h-14 w-auto sm:h-16"
+            className="h-11 w-auto sm:h-14 lg:h-16"
           />
         </Link>
 
-        <div className="header-search-wrap min-w-0 flex-1">
+        <div className="header-search-wrap hidden min-w-0 flex-1 lg:flex">
           <HeaderSearch />
         </div>
-        <div className="header-actions flex items-center gap-3">
+
+        <div className="header-actions ml-auto flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            className="header-search-toggle icon-action"
+            aria-label={mobileSearchOpen ? "Close search" : "Open search"}
+            aria-expanded={mobileSearchOpen}
+            onClick={() => setMobileSearchOpen((open) => !open)}
+          >
+            <SearchIcon />
+          </button>
           <Link href="/profile" className="icon-action relative" aria-label="Open profile">
             <svg
               aria-hidden="true"
@@ -86,6 +132,17 @@ export function Header() {
           <CartIconLink />
         </div>
       </div>
+
+      {mobileSearchOpen ? (
+        <div className="header-search-panel-mobile border-t border-zinc-100 px-4 py-3">
+          <HeaderSearch
+            onNavigate={() => {
+              closeMobileSearch();
+              closeMobileMenu();
+            }}
+          />
+        </div>
+      ) : null}
 
       <div className="border-t border-zinc-100">
         <div className="mx-auto hidden max-w-7xl items-center gap-7 px-4 py-3 sm:px-6 lg:flex lg:px-8">
@@ -116,7 +173,7 @@ export function Header() {
           <summary className="cursor-pointer list-none rounded-md border border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-900">
             Menu
           </summary>
-          <div className="absolute right-0 mt-3 w-64 border border-zinc-200 bg-white p-4 shadow-xl">
+          <div className="mobile-menu-panel absolute right-0 z-50 mt-3 w-[min(calc(100vw-2rem),18rem)] border border-zinc-200 bg-white p-4 shadow-xl">
             <nav aria-label="Mobile navigation" className="flex flex-col gap-4">
               <Link href="/" className="nav-link" onClick={closeMobileMenu}>
                 Home
@@ -125,7 +182,6 @@ export function Header() {
                 <span className="text-sm font-bold text-zinc-950">Categories</span>
                 <DynamicCategoryLinks mobile onNavigate={closeMobileMenu} />
               </div>
-              <HeaderSearch onNavigate={closeMobileMenu} />
               <Link href="/about" className="nav-link" onClick={closeMobileMenu}>
                 About Us
               </Link>

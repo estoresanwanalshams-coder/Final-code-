@@ -345,7 +345,7 @@ export function AdminOrdersPanel() {
           </form>
         ) : null}
 
-        <div className="mt-5 grid gap-3 md:grid-cols-4">
+        <div className="admin-filter-grid mt-5 grid gap-3 md:grid-cols-4">
           <label className="light-form-field">
             Search order/customer
             <input

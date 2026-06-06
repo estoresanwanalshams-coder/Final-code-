@@ -42,7 +42,7 @@ export function HomeProductCarousel({
     <section className="home-product-section mt-14">
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-3xl font-bold text-zinc-950">
+          <h2 className="text-2xl font-bold text-zinc-950 sm:text-3xl">
             {title}
           </h2>
         </div>

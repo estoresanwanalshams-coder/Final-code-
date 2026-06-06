@@ -240,7 +240,7 @@ export function AdminCustomersPanel() {
           </div>
         </form>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="admin-filter-grid mt-5 grid gap-3 md:grid-cols-3">
           <label className="light-form-field">
             Search customer
             <input
@@ -273,8 +273,8 @@ export function AdminCustomersPanel() {
           </label>
         </div>
 
-        <div className="mt-7 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
+        <div className="mt-7 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+          <table className="min-w-[640px] w-full text-left text-sm">
             <thead className="bg-zinc-50 text-zinc-600">
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>

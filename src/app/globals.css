@@ -14,12 +14,22 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Poppins, "Segoe UI", Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -115,6 +125,21 @@ a {
 
 .header-actions {
   justify-content: flex-end;
+}
+
+.header-search-toggle {
+  display: inline-flex;
+}
+
+.header-search-panel-mobile {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .header-search-toggle,
+  .header-search-panel-mobile {
+    display: none !important;
+  }
 }
 
 .header-search-wrap {
@@ -894,36 +919,50 @@ a {
   }
 }
 
-@media (max-width: 767px) {
-  .header-search-wrap {
-    display: flex;
-    justify-content: center;
-    min-width: 0;
-    width: 100%;
-    flex: 1;
-  }
-  
+@media (max-width: 1023px) {
   .header-search {
-    align-items: center;
-    border: 1px solid #e5e7eb;
-    border-radius: 0;
-    background: #f8fafc;
-    display: flex;
-    flex: 1;
-    height: 3.2rem;
-    max-width: 900px;
-    overflow: hidden;
-    width: 100%;
-    transition:
-      border-color 180ms ease,
-      background 180ms ease,
-      box-shadow 180ms ease;
+    border-radius: 9999px;
+    height: 2.85rem;
   }
 
-  .header-search input {
-    flex: 1;
-    min-width: 0;
+  .search-suggestions {
+    max-height: 16rem;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-shell {
+    min-height: auto;
+  }
+
+  .checkout-form {
+    padding: 1.25rem !important;
+  }
+
+  .checkout-card {
+    border-radius: 0;
+  }
+
+  .inquiry-shell,
+  .checkout-shell {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .product-action-row {
+    flex-direction: column;
     width: 100%;
+  }
+
+  .product-action-row .btn-soft,
+  .product-action-row .animated-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-filter-grid {
+    grid-template-columns: 1fr !important;
   }
 
   .cart-row {
