@@ -85,10 +85,10 @@ export function Header() {
           aria-label="HM shop online home"
         >
           <Image
-            src="/hm-logo.svg"
+            src="/hm-shoponline-logo-1.png"
             alt="HM shop online logo"
-            width={146}
-            height={72}
+            width={125}
+            height={0}
             priority
             className="h-11 w-auto sm:h-14 lg:h-16"
           />
