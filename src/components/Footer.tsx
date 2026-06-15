@@ -69,11 +69,11 @@ export function Footer() {
             className="brand-text inline-flex items-center"
           >
             <Image
-              src="/hm-logo.svg"
+              src="/hm-shoponline-logo-footer1.png"
               alt="HM shop online logo"
-              width={120}
-              height={58}
-              className="h-10 w-auto"
+              width={150}
+              height={0}
+              className="h-10"
             />
           </Link>
 
