@@ -78,9 +78,7 @@ export function Footer() {
           </Link>
 
           <p className="mt-4 max-w-md text-sm leading-6 text-zinc-300">
-            A clean ecommerce experience for curated products,
-            seasonal offers, and simple shopping from product
-            discovery to checkout.
+            HM Shop Online is your trusted destination for trending gadgets, home essentials, beauty products, toys, and innovative everyday solutions. We bring quality products, great value, and a seamless shopping experience to customers worldwide.
           </p>
         </div>
 
@@ -129,7 +127,7 @@ export function Footer() {
           </h2>
 
           <div className="mt-4 space-y-3 text-sm text-zinc-300">
-            <p>support@storefront.com</p>
+            <p>info@hmshoponline.com</p>
 
             <a
               href="tel:+971559319338"
