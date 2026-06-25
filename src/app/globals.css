@@ -514,7 +514,7 @@ a {
 }
 
 .light-form-field input:invalid:not(:placeholder-shown):not(:focus) {
-  border-color: #dc2626;
+  border-color: #d9d9d9;
 }
 
 .page-shell {
