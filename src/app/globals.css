@@ -54,7 +54,7 @@ a {
 }
 
 .nav-link::after {
-  background: #ff6b00;
+  background: #fa710c;
   bottom: -0.35rem;
   content: "";
   height: 2px;
@@ -102,9 +102,9 @@ a {
 
 .icon-action {
   align-items: center;
-  border: 1px solid #ff6b00;
+  border: 1px solid #fa710c;
   border-radius: 9999px;
-  color: #ff6b00;
+  color: #fa710c;
   display: inline-flex;
   height: 2.9rem;
   justify-content: center;
@@ -167,7 +167,7 @@ a {
 
 .header-search:focus-within {
   background: #ffffff;
-  border-color: #ff6b00;
+  border-color: #fa710c;
   box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.18);
 }
 
@@ -216,7 +216,7 @@ a {
 }
 
 .header-search button:hover {
-  color: #ff6b00;
+  color: #fa710c;
 }
 
 .cart-badge {
@@ -505,10 +505,10 @@ a {
 
 .light-form-field input:focus,
 .light-form-field textarea:focus {
-  border-color: #ff6b00;
+  border-color: #fa710c;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
-  outline: 2px solid #ff6b00;
+  outline: 2px solid #fa710c;
   outline-offset: 1px;
   transform: none;
 }
@@ -602,8 +602,8 @@ a {
 
 .btn-soft {
   align-items: center;
-  background: #ff6b00;
-  border: 1px solid #ff6b00;
+  background: #fa710c;
+  border: 1px solid #fa710c;
   border-radius: 0;
   color: #ffffff;
   display: inline-flex;
@@ -854,8 +854,8 @@ a {
 }
 
 .checkout-submit {
-  background: #ff6b00;
-  border: 1px solid #ff6b00;
+  background: #fa710c;
+  border: 1px solid #fa710c;
   border-radius: 0.75rem;
   color: #ffffff;
   font-size: 1rem;
