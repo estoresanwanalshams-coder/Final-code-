@@ -21,7 +21,7 @@ const contactNumber = "+971 55 931 9338";
 const socialLinks = [
   {
     label: "Instagram",
-    href: "https://instagram.com",
+    href: "https://www.instagram.com/hmshoponlineuae/",
     icon: (
       <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2ZM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm5.25-.88a1.13 1.13 0 1 0 0 2.26 1.13 1.13 0 0 0 0-2.26Z" />
@@ -30,7 +30,7 @@ const socialLinks = [
   },
   {
     label: "Facebook",
-    href: "https://facebook.com",
+    href: "https://www.facebook.com/hmshoponlineuae",
     icon: (
       <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M13.5 8.5V6.8c0-.74.16-1.3 1.24-1.3H16V3.05c-.22-.03-.99-.1-1.88-.1-2.79 0-4.12 1.47-4.12 4.22V8.5H7.5V11h2.5v10h3.5V11h2.3l.34-2.5h-2.64Z" />
@@ -130,7 +130,7 @@ export function Footer() {
             <p>info@hmshoponline.com</p>
 
             <a
-              href="tel:+971559319338"
+              href="tel:+971562300750"
               className="w-fit block transition hover:text-white"
             >
               {contactNumber}
