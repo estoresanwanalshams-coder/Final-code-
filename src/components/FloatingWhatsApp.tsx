@@ -1,4 +1,4 @@
-const whatsappNumber = "971559319338";
+const whatsappNumber = "971562300750";
 
 export function FloatingWhatsApp() {
   return (
