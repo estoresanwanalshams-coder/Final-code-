@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
 
-const contactNumber = "+971 55 931 9338";
+const contactNumber = "+971 56 230 0750";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -116,13 +116,13 @@ export default function ContactPage() {
           <div className="mt-8 space-y-6 text-sm text-zinc-300">
             <div>
               <p className="font-bold text-white">Phone / WhatsApp</p>
-              <a href="tel:+971559319338" className="mt-2 block hover:text-white">
+              <a href="tel:+971562300750" className="mt-2 block hover:text-white">
                 {contactNumber}
               </a>
             </div>
             <div>
               <p className="font-bold text-white">Email</p>
-              <p className="mt-2">support@storefront.com</p>
+              <p className="mt-2">info@hmshoponline.com</p>
             </div>
             <div>
               <p className="font-bold text-white">Working hours</p>
@@ -130,7 +130,7 @@ export default function ContactPage() {
             </div>
             <div>
               <p className="font-bold text-white">Location</p>
-              <p className="mt-2">United Arab Emirates</p>
+              <p className="mt-2">Dubai, United Arab Emirates</p>
             </div>
           </div>
         </aside>
