@@ -17,7 +17,7 @@ const policyLinks = [
   { label: "Shipping Policy", href: "/shipping-policy" },
 ];
 
-const contactNumber = "+971 55 931 9338";
+const contactNumber = "+971 56 230 0750";
 const socialLinks = [
   {
     label: "Instagram",
