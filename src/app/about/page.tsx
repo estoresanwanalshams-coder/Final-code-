@@ -10,7 +10,7 @@ export default function AboutUsPage() {
 
       <h1 className="mt-6 text-4xl md:text-6xl font-bold text-[#111111]">
         Discover Trending Products 
-        <span className="text-[#FA710C]">At Amazing Prices</span>
+        <span className="text-[#FA710C]"> At Amazing Prices</span>
       </h1>
 
       <p className="mt-6 max-w-3xl mx-auto text-lg text-[#333333] leading-relaxed">
