@@ -24,13 +24,13 @@ export function ProductCard({ product, index }: ProductCardProps) {
         href={`/products/${product.slug}`}
         className="product-card-media block shrink-0"
       >
-        <div className="product-image relative aspect-[4/3] overflow-hidden bg-zinc-100">
+        <div className="product-image relative aspect-[4/3] overflow-hidden bg-zinc-50">
           <Image
             src={primaryImage}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
           />
           {secondaryImage ? (
@@ -39,7 +39,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
               alt={`${product.name} alternate view`}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              className="object-contain p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               loading="lazy"
             />
           ) : null}

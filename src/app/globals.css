@@ -560,10 +560,6 @@ a {
   transition: transform 320ms ease;
 }
 
-.product-card:hover .product-image {
-  transform: scale(1.03);
-}
-
 .home-marquee {
   overflow: hidden;
   width: 100%;
@@ -775,6 +771,7 @@ a {
   gap: 1rem;
   overflow-x: auto;
   padding-bottom: 0.4rem;
+  padding-right: 4.5rem;
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scroll-snap-type: x mandatory;
@@ -872,13 +869,44 @@ a {
 }
 
 .floating-actions {
-  bottom: 10rem;
+  bottom: 5.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   right: 1.25rem;
   position: fixed;
   z-index: 50;
+}
+
+.floating-whatsapp {
+  align-items: center;
+  background: #25d366;
+  border: 0;
+  border-radius: 9999px;
+  bottom: 1.25rem;
+  box-shadow: 0 14px 32px rgba(37, 211, 102, 0.45);
+  color: #ffffff;
+  display: flex;
+  height: 3.5rem;
+  justify-content: center;
+  position: fixed;
+  right: 1.25rem;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  width: 3.5rem;
+  z-index: 50;
+}
+
+.floating-whatsapp:hover {
+  background: #1ebe57;
+  box-shadow: 0 16px 36px rgba(37, 211, 102, 0.55);
+  transform: scale(1.05);
+}
+
+.floating-whatsapp:focus {
+  outline: none;
+  box-shadow:
+    0 14px 32px rgba(37, 211, 102, 0.45),
+    0 0 0 4px rgba(37, 211, 102, 0.28);
 }
 
 .floating-action-btn {
@@ -976,7 +1004,12 @@ a {
   }
 
   .floating-actions {
-    bottom: 9.25rem;
+    bottom: 5.5rem;
+  }
+
+  .floating-whatsapp {
+    bottom: 1.25rem;
+    right: 1rem;
   }
 
   .home-marquee-item {
