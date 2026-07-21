@@ -24,24 +24,30 @@ export function ProductCard({ product, index }: ProductCardProps) {
         href={`/products/${product.slug}`}
         className="product-card-media block shrink-0"
       >
-        <div className="product-image relative aspect-[4/3] overflow-hidden bg-zinc-50">
+        <div className="product-image relative aspect-square overflow-hidden bg-zinc-50">
           <Image
             src={primaryImage}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
-            className="object-contain p-4 transition-transform duration-500 group-hover:scale-[1.02]"
+            className={`object-contain p-4 transition duration-300 ${
+              secondaryImage
+                ? "group-hover:scale-[1.02] group-hover:opacity-0"
+                : "group-hover:scale-[1.02]"
+            }`}
             loading="lazy"
           />
           {secondaryImage ? (
-            <Image
-              src={secondaryImage}
-              alt={`${product.name} alternate view`}
-              fill
-              sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-contain p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              loading="lazy"
-            />
+            <div className="absolute inset-0 bg-zinc-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <Image
+                src={secondaryImage}
+                alt={`${product.name} alternate view`}
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-contain p-4"
+                loading="lazy"
+              />
+            </div>
           ) : null}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </div>

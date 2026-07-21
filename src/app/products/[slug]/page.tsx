@@ -68,7 +68,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <section className="page-shell bg-zinc-50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="content-reveal grid gap-10 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
           <ProductMediaGallery
             images={product.imageUrls ?? [product.imageUrl]}
             videoUrl={product.videoUrl}

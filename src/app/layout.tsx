@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import { ClientFloatingWidgets } from "@/components/ClientFloatingWidgets";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { ScrollToTopOnNavigate } from "@/components/ScrollToTopOnNavigate";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -41,12 +42,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-      data-scroll-behavior="smooth"
-    >
+    <html lang="en" className="h-full antialiased">
       <body className={`${poppins.className} flex min-h-full flex-col`}>
+        <ScrollToTopOnNavigate />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

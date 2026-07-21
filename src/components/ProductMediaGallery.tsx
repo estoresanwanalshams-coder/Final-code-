@@ -56,13 +56,13 @@ export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryPro
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="product-image relative aspect-square overflow-hidden rounded-xl bg-zinc-100">
+      <div className="product-image relative aspect-square overflow-hidden rounded-xl bg-zinc-50">
         <Image
           src={activeImage}
           alt="Product image"
           fill
           sizes="(max-width: 1024px) 90vw, 45vw"
-          className="object-cover"
+          className="object-contain p-4"
           loading="lazy"
         />
       </div>
@@ -72,7 +72,7 @@ export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryPro
             key={image}
             type="button"
             onClick={() => setActiveImage(image)}
-            className={`relative aspect-square overflow-hidden rounded-lg transition ${
+            className={`relative aspect-square overflow-hidden rounded-lg bg-zinc-50 transition ${
               activeImage === image ? "ring-2 ring-zinc-900" : "ring-1 ring-transparent"
             }`}
             aria-label="Preview product image"
@@ -82,7 +82,7 @@ export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryPro
               alt="Product thumbnail"
               fill
               sizes="120px"
-              className="object-cover"
+              className="object-contain p-1"
               loading="lazy"
             />
           </button>
