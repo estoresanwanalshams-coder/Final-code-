@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
+import { SafeProductImage } from "@/components/SafeProductImage";
 
 type ProductMediaGalleryProps = {
   images: string[];
@@ -50,44 +50,48 @@ function getYouTubeEmbedUrl(url?: string) {
 }
 
 export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryProps) {
-  const safeImages = images.length > 0 ? images : ["/placeholder-product.png"];
-  const [activeImage, setActiveImage] = useState(safeImages[0]);
+  const safeImages = useMemo(
+    () => (images.length > 0 ? images.filter(Boolean) : []),
+    [images],
+  );
+  const [activeImage, setActiveImage] = useState(safeImages[0] ?? "");
   const embedUrl = useMemo(() => getYouTubeEmbedUrl(videoUrl), [videoUrl]);
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
-      <div className="product-image relative aspect-square overflow-hidden rounded-xl bg-zinc-50">
-        <Image
+      <div className="product-image relative aspect-square w-full overflow-hidden rounded-xl bg-zinc-50">
+        <SafeProductImage
+          key={activeImage || "empty"}
           src={activeImage}
           alt="Product image"
           fill
           sizes="(max-width: 1024px) 90vw, 45vw"
-          className="object-contain p-4"
-          loading="lazy"
+          className="object-contain"
         />
       </div>
-      <div className="mt-4 grid grid-cols-5 gap-2">
-        {safeImages.map((image) => (
-          <button
-            key={image}
-            type="button"
-            onClick={() => setActiveImage(image)}
-            className={`relative aspect-square overflow-hidden rounded-lg bg-zinc-50 transition ${
-              activeImage === image ? "ring-2 ring-zinc-900" : "ring-1 ring-transparent"
-            }`}
-            aria-label="Preview product image"
-          >
-            <Image
-              src={image}
-              alt="Product thumbnail"
-              fill
-              sizes="120px"
-              className="object-contain p-1"
-              loading="lazy"
-            />
-          </button>
-        ))}
-      </div>
+      {safeImages.length > 0 ? (
+        <div className="mt-4 grid grid-cols-5 gap-2">
+          {safeImages.map((image) => (
+            <button
+              key={image}
+              type="button"
+              onClick={() => setActiveImage(image)}
+              className={`relative aspect-square overflow-hidden rounded-lg bg-zinc-50 transition ${
+                activeImage === image ? "ring-2 ring-zinc-900" : "ring-1 ring-transparent"
+              }`}
+              aria-label="Preview product image"
+            >
+              <SafeProductImage
+                src={image}
+                alt="Product thumbnail"
+                fill
+                sizes="120px"
+                className="object-contain"
+              />
+            </button>
+          ))}
+        </div>
+      ) : null}
       {embedUrl ? (
         <div className="mt-5 overflow-hidden rounded-xl">
           <iframe

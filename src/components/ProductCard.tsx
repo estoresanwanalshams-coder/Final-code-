@@ -1,6 +1,9 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import type { Product } from "@/lib/products";
 
 type ProductCardProps = {
@@ -12,40 +15,58 @@ export function ProductCard({ product, index }: ProductCardProps) {
   const images = Array.from(
     new Set([product.imageUrl, ...(product.imageUrls ?? [])].filter(Boolean)),
   );
-  const primaryImage = images[0] ?? product.imageUrl;
+  const primaryImage = images[0] ?? product.imageUrl ?? "";
   const secondaryImage = images[1];
+  const [secondaryReady, setSecondaryReady] = useState(false);
+  const [prefetchSecondary, setPrefetchSecondary] = useState(false);
+
+  const showSecondary = Boolean(secondaryImage) && (prefetchSecondary || secondaryReady);
 
   return (
     <article
       className="product-card group flex h-full flex-col overflow-hidden bg-white"
       style={{ animationDelay: `${index * 70}ms` }}
+      onMouseEnter={() => {
+        if (secondaryImage) {
+          setPrefetchSecondary(true);
+        }
+      }}
+      onFocusCapture={() => {
+        if (secondaryImage) {
+          setPrefetchSecondary(true);
+        }
+      }}
     >
       <Link
         href={`/products/${product.slug}`}
         className="product-card-media block shrink-0"
       >
-        <div className="product-image relative aspect-square overflow-hidden bg-zinc-50">
-          <Image
+        <div className="product-image relative aspect-square w-full overflow-hidden bg-zinc-50">
+          <SafeProductImage
             src={primaryImage}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
-            className={`object-contain p-4 transition duration-300 ${
-              secondaryImage
+            className={`object-contain transition duration-300 ${
+              secondaryImage && secondaryReady
                 ? "group-hover:scale-[1.02] group-hover:opacity-0"
                 : "group-hover:scale-[1.02]"
             }`}
-            loading="lazy"
           />
-          {secondaryImage ? (
-            <div className="absolute inset-0 bg-zinc-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <Image
+          {secondaryImage && showSecondary ? (
+            <div
+              className={`absolute inset-0 bg-zinc-50 transition-opacity duration-300 ${
+                secondaryReady ? "opacity-0 group-hover:opacity-100" : "opacity-0"
+              }`}
+            >
+              <SafeProductImage
                 src={secondaryImage}
                 alt={`${product.name} alternate view`}
                 fill
                 sizes="(max-width: 768px) 50vw, 25vw"
-                className="object-contain p-4"
-                loading="lazy"
+                className="object-contain"
+                loading="eager"
+                onLoad={() => setSecondaryReady(true)}
               />
             </div>
           ) : null}

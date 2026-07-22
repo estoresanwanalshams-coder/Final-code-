@@ -586,11 +586,6 @@ a {
   width: min(18rem, 82vw);
 }
 
-.home-product-section {
-  content-visibility: auto;
-  contain-intrinsic-size: 720px;
-}
-
 .animated-button {
   overflow: hidden;
   position: relative;
