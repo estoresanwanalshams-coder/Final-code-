@@ -5,7 +5,12 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { buildAuthHref } from "@/lib/auth-redirect";
 import { isAdminEmail } from "@/lib/auth-role";
-import { getCartItems, saveCartItems, type CartItem } from "@/lib/cart";
+import {
+  getApplicableShippingCharge,
+  getCartItems,
+  saveCartItems,
+  type CartItem,
+} from "@/lib/cart";
 import type { Product } from "@/lib/products";
 import {
   createNextOrderNumber,
@@ -50,7 +55,9 @@ export function CheckoutForm({
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
   const [additionalNotes, setAdditionalNotes] = useState("");
-  const [shippingCharge, setShippingCharge] = useState(defaultSiteSettings.shippingCharge);
+  const [baseShippingCharge, setBaseShippingCharge] = useState(
+    defaultSiteSettings.shippingCharge,
+  );
   const [message, setMessage] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdminAccount, setIsAdminAccount] = useState(false);
@@ -118,7 +125,7 @@ export function CheckoutForm({
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       const settings = await fetchSiteSettings().catch(() => defaultSiteSettings);
-      setShippingCharge(settings.shippingCharge);
+      setBaseShippingCharge(settings.shippingCharge);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -132,6 +139,14 @@ export function CheckoutForm({
       ),
     [items],
   );
+  const shippingCharge = useMemo(
+    () => getApplicableShippingCharge(items, baseShippingCharge),
+    [items, baseShippingCharge],
+  );
+  const shippingMethod =
+    shippingCharge === 0 && items.length > 0
+      ? "Free Shipping"
+      : "Standard Shipping";
   const grandTotal = total + shippingCharge;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -161,7 +176,7 @@ export function CheckoutForm({
         addressLine1,
         addressLine2,
         city,
-        shippingMethod: "Standard Shipping",
+        shippingMethod,
         additionalNotes,
         items,
         total: grandTotal,
@@ -177,7 +192,7 @@ export function CheckoutForm({
           addressLine1,
           addressLine2,
           city,
-          shippingMethod: "Standard Shipping",
+          shippingMethod,
           additionalNotes,
           items,
           total: grandTotal,
@@ -310,8 +325,11 @@ export function CheckoutForm({
         </label>
         <div className="md:col-span-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
           <p className="font-semibold text-zinc-900">Shipping Method</p>
-          <p>Standard Shipping</p>
-          <p className="mt-1">Shipping Charge: AED {shippingCharge}</p>
+          <p>{shippingMethod}</p>
+          <p className="mt-1">
+            Shipping Charge:{" "}
+            {shippingCharge === 0 ? "Free" : `AED ${shippingCharge}`}
+          </p>
           <p className="mt-2 font-semibold text-zinc-900">
             Payment Method: Cash on Delivery (COD) Only
           </p>

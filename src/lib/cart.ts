@@ -84,6 +84,22 @@ export function addProductToCartWithQuantity(product: Product, quantity: number)
   saveCartItems([...items, { product, quantity: safeQuantity }]);
 }
 
+/** Shipping is free when every cart item is marked freeShipping. */
+export function getApplicableShippingCharge(
+  items: CartItem[],
+  baseShippingCharge: number,
+) {
+  if (items.length === 0) {
+    return 0;
+  }
+
+  if (items.every((item) => Boolean(item.product.freeShipping))) {
+    return 0;
+  }
+
+  return Math.max(0, baseShippingCharge);
+}
+
 export function upsertCartProductQuantity(product: Product, quantity: number) {
   const safeQuantity = Math.max(1, Math.floor(quantity));
   const items = getCartItems();

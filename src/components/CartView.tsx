@@ -3,12 +3,19 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { type CartItem, getCartItems, saveCartItems } from "@/lib/cart";
+import {
+  type CartItem,
+  getApplicableShippingCharge,
+  getCartItems,
+  saveCartItems,
+} from "@/lib/cart";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 
 export function CartView() {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [shippingCharge, setShippingCharge] = useState(defaultSiteSettings.shippingCharge);
+  const [baseShippingCharge, setBaseShippingCharge] = useState(
+    defaultSiteSettings.shippingCharge,
+  );
 
   useEffect(() => {
     function loadCart() {
@@ -29,7 +36,7 @@ export function CartView() {
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       const settings = await fetchSiteSettings().catch(() => defaultSiteSettings);
-      setShippingCharge(settings.shippingCharge);
+      setBaseShippingCharge(settings.shippingCharge);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -42,6 +49,10 @@ export function CartView() {
         0,
       ),
     [items],
+  );
+  const shippingCharge = useMemo(
+    () => getApplicableShippingCharge(items, baseShippingCharge),
+    [items, baseShippingCharge],
   );
   const grandTotal = subtotal + shippingCharge;
 
@@ -180,7 +191,11 @@ export function CartView() {
             </div>
             <div className="flex justify-between text-zinc-300">
               <span>Shipping</span>
-              <span>AED {shippingCharge}</span>
+              <span>
+                {shippingCharge === 0 && items.length > 0
+                  ? "Free"
+                  : `AED ${shippingCharge}`}
+              </span>
             </div>
             <div className="border-t border-white/10 pt-4">
               <div className="flex justify-between text-xl font-bold">

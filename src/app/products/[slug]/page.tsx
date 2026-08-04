@@ -91,6 +91,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </p>
               ) : null}
               <p className="text-xl font-bold text-zinc-950">AED {product.price}</p>
+              {product.freeShipping ? (
+                <p className="mt-2 inline-flex rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-emerald-700">
+                  Free Shipping
+                </p>
+              ) : null}
             </div>
             <ProductActionBar product={product} />
             <div className="mt-6">

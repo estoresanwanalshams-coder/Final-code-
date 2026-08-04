@@ -13,6 +13,7 @@ import type { Product } from "@/lib/products";
 import {
   deleteSupabaseProduct,
   fetchSupabaseProducts,
+  updateProductPricing,
   uploadProductImage,
   upsertSupabaseProduct,
 } from "@/lib/supabase-products";
@@ -20,12 +21,14 @@ import { compressImageFile } from "@/lib/image-compression";
 import { normalizeImageUrl, normalizeImageUrls } from "@/lib/image-url";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
 import { supabase } from "@/lib/supabase";
+import { QuickPricingModal } from "@/components/QuickPricingModal";
 
 const emptyForm = {
   name: "",
   categorySlug: "home-and-kitchen" as CategorySlug,
   actualPrice: "",
   price: "",
+  freeShipping: false,
   videoUrl: "",
   summary: "",
   details: "",
@@ -55,6 +58,9 @@ export function AdminProductPanel() {
   const [managedImages, setManagedImages] = useState<ManagedImage[]>([]);
   const [urlInput, setUrlInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [editChoiceProduct, setEditChoiceProduct] = useState<Product | null>(null);
+  const [pricingProduct, setPricingProduct] = useState<Product | null>(null);
+  const [isSavingPrice, setIsSavingPrice] = useState(false);
   const dragImageIndexRef = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -130,7 +136,7 @@ export function AdminProductPanel() {
     });
   }, [allProducts, productSearchQuery, categoryItems]);
 
-  function updateForm(field: keyof ProductForm, value: string) {
+  function updateForm(field: Exclude<keyof ProductForm, "freeShipping">, value: string) {
     setForm((currentForm) => ({
       ...currentForm,
       [field]: value,
@@ -434,6 +440,7 @@ export function AdminProductPanel() {
         categorySlug: form.categorySlug,
         actualPrice: parsedActualPrice,
         price: parsedPrice,
+        freeShipping: form.freeShipping,
         imageUrl: mainImageUrl,
         imageUrls,
         videoUrl: form.videoUrl || undefined,
@@ -474,12 +481,14 @@ export function AdminProductPanel() {
 
   function editProduct(product: Product) {
     const initialUrls = normalizeImageUrls(product.imageUrls ?? [product.imageUrl]);
+    setEditChoiceProduct(null);
     setEditingSlug(product.slug);
     setForm({
       name: product.name,
       categorySlug: product.categorySlug,
       actualPrice: product.actualPrice ? String(product.actualPrice) : "",
       price: String(product.price),
+      freeShipping: Boolean(product.freeShipping),
       videoUrl: product.videoUrl ?? "",
       summary: product.summary,
       details: product.details,
@@ -493,6 +502,47 @@ export function AdminProductPanel() {
         })),
       ),
     );
+  }
+
+  async function handleQuickPriceSave(pricing: {
+    price: number;
+    actualPrice?: number;
+  }) {
+    if (!pricingProduct || isSavingPrice) {
+      return;
+    }
+
+    setIsSavingPrice(true);
+    try {
+      await updateProductPricing(pricingProduct.slug, pricing);
+      const refreshedProducts = await fetchSupabaseProducts();
+      setAdminProducts(refreshedProducts);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetch("/api/admin/revalidate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ slug: pricingProduct.slug }),
+        }).catch(() => null);
+      }
+
+      setMessage(`Price updated for ${pricingProduct.name}.`);
+      setPricingProduct(null);
+    } catch (error) {
+      const detail =
+        error && typeof error === "object" && "message" in error
+          ? String(error.message)
+          : "Unknown error";
+      setMessage(`Unable to update price: ${detail}`);
+    } finally {
+      setIsSavingPrice(false);
+    }
   }
 
   async function deleteProduct(slug: string) {
@@ -567,6 +617,21 @@ export function AdminProductPanel() {
                 placeholder="AED price"
                 required
               />
+            </label>
+
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-white/5 px-4 py-3 text-sm font-semibold text-white">
+              <input
+                type="checkbox"
+                checked={form.freeShipping}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    freeShipping: event.target.checked,
+                  }))
+                }
+                className="h-4 w-4 accent-white"
+              />
+              Free Shipping
             </label>
 
             <div className="rounded-2xl border border-white/20 bg-white/5 p-4">
@@ -780,12 +845,17 @@ export function AdminProductPanel() {
                       ) : (
                         <>AED {product.price}</>
                       )}
+                      {product.freeShipping ? (
+                        <span className="ml-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
+                          Free Shipping
+                        </span>
+                      ) : null}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => editProduct(product)}
+                      onClick={() => setEditChoiceProduct(product)}
                       className="rounded-md border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-950 transition hover:border-zinc-950"
                     >
                       Edit
@@ -809,6 +879,73 @@ export function AdminProductPanel() {
           </div>
         </div>
       </div>
+
+      {editChoiceProduct ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-choice-title"
+          onClick={() => setEditChoiceProduct(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
+              Edit options
+            </p>
+            <h2
+              id="edit-choice-title"
+              className="mt-2 text-xl font-bold text-zinc-950"
+            >
+              {editChoiceProduct.name}
+            </h2>
+            <p className="mt-2 text-sm text-zinc-600">
+              Choose quick pricing or open the full product editor.
+            </p>
+            <div className="mt-6 grid gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setPricingProduct(editChoiceProduct);
+                  setEditChoiceProduct(null);
+                }}
+                className="rounded-md bg-zinc-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
+              >
+                Quick pricing edit
+              </button>
+              <button
+                type="button"
+                onClick={() => editProduct(editChoiceProduct)}
+                className="rounded-md border border-zinc-300 px-4 py-3 text-sm font-bold text-zinc-950 transition hover:border-zinc-950"
+              >
+                Full edit
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditChoiceProduct(null)}
+                className="rounded-md px-4 py-2 text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {pricingProduct ? (
+        <QuickPricingModal
+          product={pricingProduct}
+          isSaving={isSavingPrice}
+          onClose={() => {
+            if (!isSavingPrice) {
+              setPricingProduct(null);
+            }
+          }}
+          onSave={handleQuickPriceSave}
+        />
+      ) : null}
     </section>
   );
 }

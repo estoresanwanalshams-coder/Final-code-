@@ -14,6 +14,7 @@ create table if not exists public.products (
   image_url text not null,
   image_urls text[] not null default '{}',
   video_url text,
+  free_shipping boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -43,6 +44,9 @@ add column if not exists image_urls text[] not null default '{}';
 
 alter table public.products
 add column if not exists video_url text;
+
+alter table public.products
+add column if not exists free_shipping boolean not null default false;
 
 create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),

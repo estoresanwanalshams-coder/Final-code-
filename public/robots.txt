@@ -1,0 +1,38 @@
+# HM Shop Online — robots.txt
+User-agent: *
+Allow: /
+
+# Keep private / utility routes out of search indexes
+Disallow: /admin
+Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /inquiry/
+
+# AI / LLM crawlers — allow public content for GEO visibility
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+Sitemap: https://www.hmshoponline.com/sitemap.xml
+Host: https://www.hmshoponline.com

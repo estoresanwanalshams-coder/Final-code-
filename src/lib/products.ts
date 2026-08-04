@@ -12,6 +12,7 @@ export type Product = {
   imageUrl: string;
   imageUrls?: string[];
   videoUrl?: string;
+  freeShipping?: boolean;
 };
 
 const categoryImages = {

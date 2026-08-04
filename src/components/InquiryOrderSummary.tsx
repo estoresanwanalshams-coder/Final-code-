@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { type CartItem, getCartItems } from "@/lib/cart";
+import {
+  type CartItem,
+  getApplicableShippingCharge,
+  getCartItems,
+} from "@/lib/cart";
 import type { Product } from "@/lib/products";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 
@@ -16,7 +20,9 @@ export function InquiryOrderSummary({
   initialQuantity = 1,
 }: InquiryOrderSummaryProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [shippingCharge, setShippingCharge] = useState(defaultSiteSettings.shippingCharge);
+  const [baseShippingCharge, setBaseShippingCharge] = useState(
+    defaultSiteSettings.shippingCharge,
+  );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setCartItems(getCartItems()), 0);
@@ -27,7 +33,7 @@ export function InquiryOrderSummary({
   useEffect(() => {
     const timer = window.setTimeout(async () => {
       const settings = await fetchSiteSettings().catch(() => defaultSiteSettings);
-      setShippingCharge(settings.shippingCharge);
+      setBaseShippingCharge(settings.shippingCharge);
     }, 0);
 
     return () => window.clearTimeout(timer);
@@ -53,6 +59,10 @@ export function InquiryOrderSummary({
         0,
       ),
     [items],
+  );
+  const shippingCharge = useMemo(
+    () => getApplicableShippingCharge(items, baseShippingCharge),
+    [items, baseShippingCharge],
   );
   const total = subtotal + shippingCharge;
 
@@ -92,7 +102,9 @@ export function InquiryOrderSummary({
         </div>
         <div className="flex justify-between">
           <span>Shipping</span>
-          <span>AED {shippingCharge}</span>
+          <span>
+            {shippingCharge === 0 ? "Free" : `AED ${shippingCharge}`}
+          </span>
         </div>
       </div>
       <div className="mt-2 flex justify-between text-lg font-bold text-zinc-950">

@@ -15,7 +15,14 @@ type ProductRow = {
   image_url: string | null;
   image_urls: string[] | null;
   video_url: string | null;
+  free_shipping?: boolean | null;
 };
+
+const PRODUCT_LIST_COLUMNS =
+  "id, name, slug, category_slug, actual_price, price, summary, details, image_url, image_urls, video_url, free_shipping";
+
+const PRODUCT_CARD_COLUMNS =
+  "id, name, slug, category_slug, actual_price, price, image_url, image_urls, free_shipping";
 
 type ProductImageRow = {
   product_id: string;
@@ -52,6 +59,7 @@ function mapProductRow(row: ProductRow): Product {
       row.image_urls?.length ? row.image_urls : [primaryImage],
     ),
     videoUrl: row.video_url ?? undefined,
+    freeShipping: Boolean(row.free_shipping),
   };
 }
 
@@ -81,6 +89,7 @@ function mapProductRowWithImages(
     imageUrl: primaryImage,
     imageUrls: normalizedImages,
     videoUrl: row.video_url ?? undefined,
+    freeShipping: Boolean(row.free_shipping),
   };
 }
 
@@ -99,13 +108,14 @@ function mapProductToRow(product: Product): ProductRow {
     image_url: mainImage,
     image_urls: imageUrls,
     video_url: product.videoUrl ?? null,
+    free_shipping: Boolean(product.freeShipping),
   };
 }
 
 export async function fetchSupabaseProducts() {
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, slug, category_slug, actual_price, price, summary, details, image_url, image_urls, video_url")
+    .select(PRODUCT_LIST_COLUMNS)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -141,7 +151,7 @@ export async function fetchSupabaseProductsPage(
 
   let query = supabase
     .from("products")
-    .select("id, name, slug, category_slug, price, actual_price, image_url, image_urls", {
+    .select(PRODUCT_CARD_COLUMNS, {
       count: "exact",
     })
     .order("created_at", { ascending: false })
@@ -172,7 +182,7 @@ export async function fetchSupabaseProductsPage(
 export async function fetchSupabaseProductBySlug(slug: string) {
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, slug, category_slug, actual_price, price, summary, details, image_url, image_urls, video_url")
+    .select(PRODUCT_LIST_COLUMNS)
     .eq("slug", slug)
     .maybeSingle();
 
@@ -202,7 +212,7 @@ export async function fetchSupabaseRelatedProducts(
 ) {
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, slug, category_slug, actual_price, price, image_url, image_urls")
+    .select(PRODUCT_CARD_COLUMNS)
     .eq("category_slug", categorySlug)
     .neq("slug", excludeSlug)
     .order("created_at", { ascending: false })
@@ -241,7 +251,7 @@ export async function fetchSupabaseSearchProducts(
 
   let builder = supabase
     .from("products")
-    .select("id, name, slug, category_slug, actual_price, price, image_url, image_urls", {
+    .select(PRODUCT_CARD_COLUMNS, {
       count: "exact",
     })
     .order("created_at", { ascending: false })
@@ -352,6 +362,24 @@ export async function upsertSupabaseProduct(
       ),
       payload.image_url ?? "",
     );
+  }
+}
+
+export async function updateProductPricing(
+  slug: string,
+  pricing: { price: number; actualPrice?: number },
+) {
+  const { error } = await supabase
+    .from("products")
+    .update({
+      price: pricing.price,
+      actual_price: pricing.actualPrice ?? null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("slug", slug);
+
+  if (error) {
+    throw error;
   }
 }
 

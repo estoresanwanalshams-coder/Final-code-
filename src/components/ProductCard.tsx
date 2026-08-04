@@ -70,6 +70,11 @@ export function ProductCard({ product, index }: ProductCardProps) {
               />
             </div>
           ) : null}
+          {product.freeShipping ? (
+            <span className="absolute left-2 top-2 z-10 rounded-md bg-emerald-600 px-2 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-white">
+              Free Shipping
+            </span>
+          ) : null}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </div>
       </Link>

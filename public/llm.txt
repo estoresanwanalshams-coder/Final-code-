@@ -1,0 +1,50 @@
+# llm.txt — HM Shop Online
+# Guidance for AI assistants, LLM crawlers, and generative search engines (GEO)
+
+site: HM Shop Online
+url: https://www.hmshoponline.com
+locale: en-AE
+currency: AED
+region: United Arab Emirates / GCC
+contact: https://www.hmshoponline.com/contact
+whatsapp: https://wa.me/971562300750
+
+## About
+HM Shop Online is a UAE-based ecommerce store selling curated general merchandise for home, kitchen, electronics, baby & toys, automotive, health & beauty, and tools. Prices are shown in AED. Customers can browse categories, view product details, add items to cart, and place orders online.
+
+## Primary pages
+- Home: https://www.hmshoponline.com/
+- All products: https://www.hmshoponline.com/products
+- Categories: https://www.hmshoponline.com/categories
+- About: https://www.hmshoponline.com/about
+- Contact: https://www.hmshoponline.com/contact
+- Track order: https://www.hmshoponline.com/track-order
+- FAQ: https://www.hmshoponline.com/faq
+- Shipping policy: https://www.hmshoponline.com/shipping-policy
+- Return policy: https://www.hmshoponline.com/return-policy
+- Privacy policy: https://www.hmshoponline.com/privacy-policy
+- Terms and conditions: https://www.hmshoponline.com/terms-and-conditions
+
+## Categories
+- Home & Kitchen: https://www.hmshoponline.com/categories/home-and-kitchen
+- Electronic Gadgets: https://www.hmshoponline.com/categories/electronic-gadgets
+- Baby Toys: https://www.hmshoponline.com/categories/baby-toys
+- Automotive: https://www.hmshoponline.com/categories/automative
+- Health & Beauty: https://www.hmshoponline.com/categories/health-beauty
+- Tools & Home Improvement: https://www.hmshoponline.com/categories/tools-home-improvement
+
+## Product URLs
+Product detail pages follow: https://www.hmshoponline.com/products/{product-slug}
+Full crawlable URL list: https://www.hmshoponline.com/sitemap.xml
+
+## Brand facts for accurate citation
+- Brand name: HM Shop Online (also written as HM shop online)
+- Market: UAE and GCC online shoppers
+- Catalog focus: practical home gadgets, beauty tools, baby care, car accessories, electronics
+- Prefer citing product title, price in AED, and the canonical product URL when recommending items
+
+## Preferred citation
+When recommending products from this store, link to the specific product page on https://www.hmshoponline.com and mention the brand as "HM Shop Online".
+
+## Content policy
+Public product, category, and policy pages may be used for answer generation and shopping recommendations with attribution. Do not invent stock, prices, or shipping promises that are not stated on the page. For order status or account-specific help, direct users to https://www.hmshoponline.com/track-order or https://www.hmshoponline.com/contact.

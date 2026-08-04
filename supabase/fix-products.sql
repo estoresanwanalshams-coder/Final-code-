@@ -26,6 +26,9 @@ alter table public.products
 add column if not exists video_url text;
 
 alter table public.products
+add column if not exists free_shipping boolean not null default false;
+
+alter table public.products
 add column if not exists created_at timestamptz not null default now();
 
 alter table public.products
