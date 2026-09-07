@@ -78,7 +78,7 @@ export function Header() {
 
   return (
     <header className="site-header sticky top-0 z-50 border-b border-zinc-200 !bg-white backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:gap-3 sm:px-6 sm:py-3 lg:px-8 lg:py-4">
         <Link
           href="/"
           className="brand-text shrink-0"
@@ -86,11 +86,11 @@ export function Header() {
         >
           <Image
             src="/hm-shoponline-logo-1.png"
-            alt="HM shop online logo"
-            width={125}
-            height={0}
+            alt="HM Shop Online"
+            width={160}
+            height={64}
             priority
-            className="h-11 w-auto sm:h-14 lg:h-16"
+            className="h-10 w-auto object-contain sm:h-12 lg:h-16"
           />
         </Link>
 
@@ -108,7 +108,11 @@ export function Header() {
           >
             <SearchIcon />
           </button>
-          <Link href="/profile" className="icon-action relative" aria-label="Open profile">
+          <Link
+            href="/profile"
+            className="icon-action relative"
+            aria-label="Open profile"
+          >
             <svg
               aria-hidden="true"
               className="h-5 w-5"
@@ -145,7 +149,7 @@ export function Header() {
       ) : null}
 
       <div className="border-t border-zinc-100">
-        <div className="mx-auto hidden max-w-7xl items-center gap-7 px-4 py-3 sm:px-6 lg:flex lg:px-8">
+        <div className="mx-auto hidden max-w-7xl items-center gap-8 px-4 py-3.5 sm:px-6 lg:flex lg:px-8">
           <Link href="/" className="nav-link">
             Home
           </Link>
@@ -168,27 +172,44 @@ export function Header() {
         </div>
       </div>
 
-      <div className="border-t border-zinc-100 px-4 py-2 lg:hidden">
+      <div className="border-t border-zinc-100 bg-white px-4 py-2 lg:hidden">
         <details ref={mobileMenuRef} className="relative">
-          <summary className="cursor-pointer list-none rounded-md border border-zinc-300 px-3 py-2 text-sm font-semibold text-zinc-900">
-            Menu
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-50 hover:text-orange-600">
+            <span aria-hidden="true" className="text-base">
+              ☰
+            </span>
+            Browse Menu
           </summary>
-          <div className="mobile-menu-panel absolute right-0 z-50 mt-3 w-[min(calc(100vw-2rem),18rem)] border border-zinc-200 bg-white p-4 shadow-xl">
+          <div className="mobile-menu-panel absolute left-0 z-50 mt-2 w-[min(calc(100vw-2rem),20rem)] rounded-xl border border-zinc-200 bg-white p-4 shadow-xl">
             <nav aria-label="Mobile navigation" className="flex flex-col gap-4">
               <Link href="/" className="nav-link" onClick={closeMobileMenu}>
                 Home
               </Link>
               <div className="flex flex-col gap-2">
-                <span className="text-sm font-bold text-zinc-950">Categories</span>
+                <span className="text-sm font-bold text-zinc-950">
+                  Categories
+                </span>
                 <DynamicCategoryLinks mobile onNavigate={closeMobileMenu} />
               </div>
-              <Link href="/about" className="nav-link" onClick={closeMobileMenu}>
+              <Link
+                href="/about"
+                className="nav-link"
+                onClick={closeMobileMenu}
+              >
                 About Us
               </Link>
-              <Link href="/contact" className="nav-link" onClick={closeMobileMenu}>
+              <Link
+                href="/contact"
+                className="nav-link"
+                onClick={closeMobileMenu}
+              >
                 Contact Us
               </Link>
-              <Link href="/login" className="nav-link" onClick={closeMobileMenu}>
+              <Link
+                href="/login"
+                className="nav-link"
+                onClick={closeMobileMenu}
+              >
                 Login / Register
               </Link>
               <Link

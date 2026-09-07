@@ -21,7 +21,7 @@ export const categories: Category[] = [
     description: "Baby care items, playful toys, learning products, and gifting picks.",
   },
   {
-    name: "Automative",
+    name: "Automotive",
     slug: "automative",
     description: "Car accessories, maintenance helpers, organizers, and travel tools.",
   },

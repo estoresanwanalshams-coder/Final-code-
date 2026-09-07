@@ -20,9 +20,9 @@ type SiteSettingsRow = {
 };
 
 export const defaultSiteSettings: SiteSettings = {
-  offerText: "Free shipping on orders over Rs. 999 | New season offers are live",
+  offerText: "Shop across the UAE | Cash on Delivery Available | Fast & Reliable Delivery",
   bannerImageUrl: "/banners/banner-1.png",
-  shippingCharge: 40,
+  shippingCharge: 30,
   newArrivalSlugs: [],
   bestSellerSlugs: [],
   featuredSlugs: [],

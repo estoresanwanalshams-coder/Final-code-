@@ -1,5 +1,7 @@
 import { HomeBannerCarousel } from "@/components/HomeBannerCarousel";
+import { HomeCategoryGrid } from "@/components/HomeCategoryGrid";
 import { HomeProductCarousel } from "@/components/HomeProductCarousel";
+import { HomeTrustSection } from "@/components/HomeTrustSection";
 import { categories } from "@/lib/categories";
 import type { Product } from "@/lib/products";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
@@ -78,12 +80,35 @@ export async function HomePageContent() {
     settings.featuredSlugs,
   );
 
+  const homepageCategories = categoryItems.filter((category) =>
+    productSource.some(
+      (product) => product.categorySlug === category.slug,
+    ),
+  );
+
+  const featuredCategorySections = homepageCategories
+    .map((category) => ({
+      category,
+      products: productSource
+        .filter(
+          (product) =>
+            product.categorySlug === category.slug,
+        )
+        .slice(0, 8),
+    }))
+    .filter((section) => section.products.length > 0)
+    .slice(0, 3);
+
   return (
     <section className="page-shell">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-6 sm:pb-8 sm:pt-3 lg:px-8">
         <HomeBannerCarousel
           extraBannerUrl={settings.bannerImageUrl}
         />
+
+        <HomeCategoryGrid categories={homepageCategories} />
+
+        <HomeTrustSection />
 
         <HomeProductCarousel
           title="New Arrivals"
@@ -94,38 +119,29 @@ export async function HomePageContent() {
 
         <HomeProductCarousel
           title="Best Sellers"
-          linkLabel="Browse Categories"
-          href="/categories"
+          linkLabel="Shop Best Sellers"
+          href="/products"
           products={bestSellers}
         />
 
         <HomeProductCarousel
           title="Featured Products"
-          linkLabel="Shop Featured"
+          linkLabel="View All Products"
           href="/products"
           products={featuredProducts}
         />
 
-        {categoryItems.map((category) => {
-          const categoryProducts = productSource.filter(
-            (product) =>
-              product.categorySlug === category.slug,
-          );
-
-          if (categoryProducts.length === 0) {
-            return null;
-          }
-
-          return (
+        {featuredCategorySections.map(
+          ({ category, products }) => (
             <HomeProductCarousel
               key={category.slug}
               title={category.name}
               linkLabel="View Category"
               href={`/categories/${category.slug}`}
-              products={categoryProducts}
+              products={products}
             />
-          );
-        })}
+          ),
+        )}
       </div>
     </section>
   );

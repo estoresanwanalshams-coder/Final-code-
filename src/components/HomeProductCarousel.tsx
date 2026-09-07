@@ -39,10 +39,14 @@ export function HomeProductCarousel({
   }
 
   return (
-    <section className="home-product-section mt-14">
+    <section className="home-product-section mt-12 sm:mt-16">
       <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-950 sm:text-3xl">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">
+            Discover
+          </p>
+
+          <h2 className="mt-1 text-2xl font-bold text-zinc-950 sm:text-3xl">
             {title}
           </h2>
         </div>
@@ -68,7 +72,7 @@ export function HomeProductCarousel({
 
           <Link
             href={href}
-            className="text-sm font-bold text-zinc-950"
+            className="text-sm font-bold text-orange-600 transition hover:text-orange-700"
           >
             {linkLabel}
           </Link>
@@ -81,14 +85,8 @@ export function HomeProductCarousel({
         aria-label={`${title} products`}
       >
         {products.map((product, index) => (
-          <div
-            key={`${product.slug}-${index}`}
-            className="home-product-item"
-          >
-            <ProductCard
-              product={product}
-              index={index + 1}
-            />
+          <div key={`${product.slug}-${index}`} className="home-product-item">
+            <ProductCard product={product} index={index + 1} />
           </div>
         ))}
       </div>

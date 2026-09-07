@@ -1,23 +1,23 @@
 const featureItems = [
   {
-    title: "Easy Return",
-    description: "Hassle-free return process",
-    icon: "↺",
+    title: "UAE Delivery",
+    description: "Reliable delivery across the UAE",
+    icon: "🚚",
   },
   {
     title: "Cash on Delivery",
     description: "Pay when your order arrives",
-    icon: "₹",
+    icon: "💵",
   },
   {
-    title: "Secure Payment",
-    description: "Trusted and encrypted checkout",
-    icon: "🔒",
+    title: "Easy Returns",
+    description: "Simple and hassle-free returns",
+    icon: "↩",
   },
   {
-    title: "Fast Delivery",
-    description: "Quick shipping across GCC",
-    icon: "⚡",
+    title: "WhatsApp Support",
+    description: "Quick help when you need it",
+    icon: "💬",
   },
 ];
 
@@ -25,7 +25,9 @@ type FeatureHighlightsProps = {
   compact?: boolean;
 };
 
-export function FeatureHighlights({ compact = false }: FeatureHighlightsProps) {
+export function FeatureHighlights({
+  compact = false,
+}: FeatureHighlightsProps) {
   return (
     <div
       className={
@@ -37,13 +39,19 @@ export function FeatureHighlights({ compact = false }: FeatureHighlightsProps) {
       {featureItems.map((item) => (
         <div
           key={item.title}
-          className="rounded-xl border border-zinc-200 bg-white/80 p-3 text-center shadow-sm"
+          className="group rounded-xl bg-zinc-50 p-3 text-center transition duration-200 hover:bg-orange-50"
         >
-          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-pink-100 text-lg text-pink-600">
+          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg shadow-sm">
             {item.icon}
           </div>
-          <p className="mt-2 text-sm font-semibold text-zinc-900">{item.title}</p>
-          <p className="mt-1 text-xs text-zinc-600">{item.description}</p>
+
+          <p className="mt-2 text-sm font-semibold text-zinc-900">
+            {item.title}
+          </p>
+
+          <p className="mt-1 text-xs leading-5 text-zinc-600">
+            {item.description}
+          </p>
         </div>
       ))}
     </div>

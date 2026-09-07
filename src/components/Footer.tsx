@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const footerLinks = [
-  { label: "Home", href: "/"},
+  { label: "Home", href: "/" },
   { label: "Categories", href: "/categories" },
   { label: "Track Order", href: "/track-order" },
   { label: "About Us", href: "/about" },
@@ -23,7 +23,14 @@ const socialLinks = [
     label: "Instagram",
     href: "https://www.instagram.com/hmshoponlineuae/",
     icon: (
-      <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        aria-hidden="true"
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2ZM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 1.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm5.25-.88a1.13 1.13 0 1 0 0 2.26 1.13 1.13 0 0 0 0-2.26Z" />
       </svg>
     ),
@@ -32,26 +39,15 @@ const socialLinks = [
     label: "Facebook",
     href: "https://www.facebook.com/hmshoponlineuae",
     icon: (
-      <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        aria-hidden="true"
+        className="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <path d="M13.5 8.5V6.8c0-.74.16-1.3 1.24-1.3H16V3.05c-.22-.03-.99-.1-1.88-.1-2.79 0-4.12 1.47-4.12 4.22V8.5H7.5V11h2.5v10h3.5V11h2.3l.34-2.5h-2.64Z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Twitter/X",
-    href: "https://x.com",
-    icon: (
-      <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M18.9 2H21l-4.6 5.24L22 22h-4.42l-3.46-4.52L10.1 22H8l4.93-5.62L2 2h4.53l3.13 4.13L12.9 2h2.1l-4.3 4.9L18.9 2Zm-1.55 18h1.23L6.06 3.9H4.74L17.35 20Z" />
-      </svg>
-    ),
-  },
-  {
-    label: "LinkedIn",
-    href: "https://linkedin.com",
-    icon: (
-      <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M6.75 8.6H3.5V20h3.25V8.6Zm.23-3.53a1.88 1.88 0 1 0-3.75 0 1.88 1.88 0 0 0 3.75 0ZM20.5 13.46c0-3.42-1.83-5-4.28-5-1.97 0-2.86 1.08-3.35 1.84V8.6H9.62V20h3.25v-5.63c0-1.48.28-2.91 2.1-2.91 1.8 0 1.82 1.68 1.82 3V20h3.25v-6.54Z" />
       </svg>
     ),
   },
@@ -61,30 +57,29 @@ export function Footer() {
   return (
     <footer className="border-t border-zinc-200 bg-zinc-950 text-white">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-5 lg:px-8">
-        
         {/* Brand */}
         <div>
-          <Link
-            href="/"
-            className="brand-text inline-flex items-center"
-          >
+          <Link href="/" className="brand-text inline-flex items-center">
             <Image
               src="/hm-shoponline-logo-footer1.png"
-              alt="HM shop online logo"
+              alt="HM Shop Online"
               width={150}
-              height={0}
-              className="h-10"
+              height={40}
+              className="max-w-full object-contain"
             />
           </Link>
 
           <p className="mt-4 max-w-md text-sm leading-6 text-zinc-300">
-            HM Shop Online is your trusted destination for trending gadgets, home essentials, beauty products, toys, and innovative everyday solutions. We bring quality products, great value, and a seamless shopping experience to customers worldwide.
+            HM Shop Online is your UAE destination for trending products, useful
+            everyday essentials, gadgets, home & kitchen finds, beauty products,
+            toys, and more — bringing great value and convenient shopping
+            straight to your door.
           </p>
         </div>
 
         {/* Main Links */}
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Explore
           </h2>
 
@@ -103,7 +98,7 @@ export function Footer() {
 
         {/* Policy Links */}
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Policies
           </h2>
 
@@ -122,7 +117,7 @@ export function Footer() {
 
         {/* Contact */}
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Contact
           </h2>
 
@@ -142,7 +137,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
+          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Follow us
           </h2>
           <nav className="mt-4 flex flex-col gap-3">

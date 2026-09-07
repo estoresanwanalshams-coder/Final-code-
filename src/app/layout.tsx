@@ -18,26 +18,49 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hmshoponline.com"),
+
   title: {
-    default: "HM shop online",
-    template: "%s | HM shop online",
+    default: "HM Shop Online | Trending Products & Everyday Essentials UAE",
+    template: "%s | HM Shop Online",
   },
-  description: "Shop curated products at HM shop online.",
+
+  description:
+    "Shop trending products, home & kitchen essentials, gadgets, beauty, toys and everyday finds at HM Shop Online. Convenient UAE delivery with Cash on Delivery available.",
+
   keywords: [
-    "GCC ecommerce",
-    "UAE online shopping",
-    "Dubai general products",
+    "HM Shop Online",
+    "online shopping UAE",
+    "UAE ecommerce",
+    "Dubai online shopping",
+    "trending products UAE",
     "home and kitchen UAE",
-    "electronic gadgets GCC",
-    "baby toys UAE",
-    "automotive accessories Gulf",
-    "health beauty products UAE",
+    "gadgets UAE",
+    "beauty products UAE",
+    "toys UAE",
+    "cash on delivery UAE",
   ],
+
   openGraph: {
-    title: "HM shop online",
-    description: "Responsive ecommerce store for curated products.",
+    title: "HM Shop Online",
+    description:
+      "Discover trending products and useful everyday essentials with convenient delivery across the UAE.",
+    url: "https://hmshoponline.com",
+    siteName: "HM Shop Online",
     type: "website",
     locale: "en_AE",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "HM Shop Online",
+    description:
+      "Trending products and everyday essentials delivered across the UAE.",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

@@ -8,7 +8,9 @@ type HomeBannerCarouselProps = {
   extraBannerUrl?: string;
 };
 
-export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) {
+export function HomeBannerCarousel({
+  extraBannerUrl,
+}: HomeBannerCarouselProps) {
   const slides = useMemo(() => {
     const urls = [...homeBannerSlides];
 
@@ -26,7 +28,9 @@ export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) 
   const [activeIndex, setActiveIndex] = useState(0);
 
   function goToPrevious() {
-    setActiveIndex((current) => (current === 0 ? slides.length - 1 : current - 1));
+    setActiveIndex((current) =>
+      current === 0 ? slides.length - 1 : current - 1,
+    );
   }
 
   function goToNext() {
@@ -46,16 +50,18 @@ export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) 
   }, [slides.length]);
 
   return (
-    <div className="banner-carousel content-reveal">
+    <section className="banner-carousel content-reveal">
       <div
         className="banner-carousel-track"
-        style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        style={{
+          transform: `translateX(-${activeIndex * 100}%)`,
+        }}
       >
         {slides.map((slide) => (
           <div key={slide} className="banner-carousel-slide">
             <Image
               src={slide}
-              alt="Store banner"
+              alt="HM Shop Online featured products"
               fill
               loading={slide === slides[0] ? "eager" : "lazy"}
               priority={slide === slides[0]}
@@ -75,6 +81,7 @@ export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) 
           >
             ←
           </button>
+
           <button
             type="button"
             className="banner-nav banner-nav-right"
@@ -83,6 +90,7 @@ export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) 
           >
             →
           </button>
+
           <div className="banner-carousel-dots">
             {slides.map((slide, index) => (
               <button
@@ -96,6 +104,6 @@ export function HomeBannerCarousel({ extraBannerUrl }: HomeBannerCarouselProps) 
           </div>
         </>
       ) : null}
-    </div>
+    </section>
   );
 }

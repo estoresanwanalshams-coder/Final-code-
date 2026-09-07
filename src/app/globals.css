@@ -29,6 +29,7 @@ body {
 img,
 video {
   max-width: 100%;
+  width: auto;
   height: auto;
 }
 
@@ -42,15 +43,17 @@ a {
 }
 
 .nav-link {
-  color: #333333;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  position: relative;
-  transition: color 200ms ease;
+  line-height: 1.25rem;
+  color: #27272a;
+  transition:
+    color 180ms ease,
+    opacity 180ms ease;
 }
 
 .nav-link:hover {
-  color: #111111;
+  color: #f35a0a;
 }
 
 .nav-link::after {
@@ -543,16 +546,18 @@ a {
 }
 
 .product-card {
-  box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+  box-shadow: 0 2px 8px rgba(24, 24, 27, 0.05);
   overflow: hidden;
   transform-origin: center;
   transition:
+    border-color 220ms ease,
     box-shadow 260ms ease,
     transform 260ms ease;
 }
 
 .product-card:hover {
-  box-shadow: 0 16px 40px rgba(24, 24, 27, 0.1);
+  border-color: rgba(250, 113, 12, 0.35);
+  box-shadow: 0 14px 34px rgba(24, 24, 27, 0.1);
   transform: translateY(-4px);
 }
 
@@ -765,7 +770,8 @@ a {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 0.4rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
   padding-right: 4.5rem;
   scroll-behavior: smooth;
   scrollbar-width: thin;
@@ -1010,5 +1016,23 @@ a {
   .home-marquee-item {
     flex-basis: min(14rem, 78vw);
     width: min(14rem, 78vw);
+  }
+
+    .banner-carousel,
+  .banner-carousel-slide {
+    min-height: 220px;
+  }
+    .icon-action {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  .header-actions {
+    gap: 0.4rem;
+  }
+
+  .header-search-panel-mobile {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
   }
 }
