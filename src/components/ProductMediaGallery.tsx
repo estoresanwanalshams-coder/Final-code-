@@ -49,7 +49,10 @@ function getYouTubeEmbedUrl(url?: string) {
   return "";
 }
 
-export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryProps) {
+export function ProductMediaGallery({
+  images,
+  videoUrl,
+}: ProductMediaGalleryProps) {
   const safeImages = useMemo(
     () => (images.length > 0 ? images.filter(Boolean) : []),
     [images],
@@ -65,19 +68,22 @@ export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryPro
           src={activeImage}
           alt="Product image"
           fill
+          loading="eager"
           sizes="(max-width: 1024px) 90vw, 45vw"
           className="object-contain"
         />
       </div>
       {safeImages.length > 0 ? (
         <div className="mt-4 grid grid-cols-5 gap-2">
-          {safeImages.map((image) => (
+          {safeImages.map((image, index) => (
             <button
               key={image}
               type="button"
               onClick={() => setActiveImage(image)}
               className={`relative aspect-square overflow-hidden rounded-lg bg-zinc-50 transition ${
-                activeImage === image ? "ring-2 ring-zinc-900" : "ring-1 ring-transparent"
+                activeImage === image
+                  ? "ring-2 ring-zinc-900"
+                  : "ring-1 ring-transparent"
               }`}
               aria-label="Preview product image"
             >
@@ -85,6 +91,7 @@ export function ProductMediaGallery({ images, videoUrl }: ProductMediaGalleryPro
                 src={image}
                 alt="Product thumbnail"
                 fill
+                loading={index === 0 ? "eager" : "lazy"}
                 sizes="120px"
                 className="object-contain"
               />

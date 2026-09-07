@@ -64,7 +64,7 @@ export function Footer() {
               src="/hm-shoponline-logo-footer1.png"
               alt="HM Shop Online"
               width={150}
-              height={40}
+              height={103}
               className="max-w-full object-contain"
             />
           </Link>
