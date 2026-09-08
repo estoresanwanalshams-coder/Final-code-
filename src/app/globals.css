@@ -831,19 +831,22 @@ a {
 }
 
 .checkout-form .form-field input,
+.checkout-form .form-field select,
 .checkout-form .form-field textarea {
   background: #fafafa;
   border: 1px solid #d4d4d8;
   border-radius: 0.75rem;
   color: #18181b;
   font: inherit;
-  padding: 0.9rem 1rem;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
 .checkout-form .form-field input:focus,
+.checkout-form .form-field select:focus,
 .checkout-form .form-field textarea:focus {
   background: #ffffff;
   border-color: #18181b;
@@ -867,6 +870,12 @@ a {
 .checkout-submit:hover {
   background: #e66000;
   transform: translateY(-1px);
+}
+
+.checkout-form .form-field select {
+  appearance: auto;
+  background-image: none;
+  padding-right: 0.9rem;
 }
 
 .floating-actions {
