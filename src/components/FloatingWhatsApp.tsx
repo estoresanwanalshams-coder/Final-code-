@@ -8,9 +8,10 @@ export function FloatingWhatsApp() {
   const pathname = usePathname();
 
   const hideOnMobile =
-    pathname === "/cart" ||
-    pathname.startsWith("/inquiry/");
-
+  pathname === "/cart" ||
+  pathname.startsWith("/inquiry/") ||
+  pathname === "/track-order";
+  
   return (
     <a
       href={`https://wa.me/${whatsappNumber}`}

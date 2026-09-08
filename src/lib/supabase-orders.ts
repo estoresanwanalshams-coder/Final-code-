@@ -141,23 +141,54 @@ export async function fetchSupabaseOrdersByLookup(
   return (data ?? []).map((row) => mapOrderRow(row as OrderRow));
 }
 
-export async function fetchSupabaseOrdersByIdentifier(identifier: string) {
-  const normalized = identifier.trim();
-  if (!normalized) {
+export type TrackedOrderRecord = {
+  orderNumber: string;
+  items: CartItem[];
+  total: number;
+  status: OrderStatus;
+  createdAt: string;
+  shippingMethod: string;
+};
+
+type TrackedOrderRow = {
+  order_number: string;
+  items: CartItem[];
+  total: number;
+  status: OrderStatus;
+  created_at: string;
+  shipping_method: string | null;
+};
+
+export async function fetchSupabaseOrdersByIdentifier(
+  orderNumber: string,
+  identifier: string,
+) {
+  const normalizedOrderNumber = orderNumber.trim();
+  const normalizedIdentifier = identifier.trim();
+
+  if (!normalizedOrderNumber || !normalizedIdentifier) {
     return [];
   }
 
-  // Use a security-definer RPC so guests (anon role) can track their own
-  // orders by email / order number / phone without a blanket SELECT policy.
   const { data, error } = await supabase.rpc("track_order", {
-    p_identifier: normalized,
+    p_order_number: normalizedOrderNumber,
+    p_identifier: normalizedIdentifier,
   });
 
   if (error) {
     throw error;
   }
 
-  return ((data as OrderRow[] | null) ?? []).map((row) => mapOrderRow(row));
+  return ((data as TrackedOrderRow[] | null) ?? []).map(
+    (row): TrackedOrderRecord => ({
+      orderNumber: row.order_number,
+      items: row.items,
+      total: Number(row.total),
+      status: row.status,
+      createdAt: row.created_at,
+      shippingMethod: row.shipping_method ?? "Standard Shipping",
+    }),
+  );
 }
 
 export async function updateSupabaseOrderStatus(
