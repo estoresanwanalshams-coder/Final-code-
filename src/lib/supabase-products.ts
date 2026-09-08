@@ -36,6 +36,7 @@ export type ProductListResult = {
   hasNextPage: boolean;
   totalPages: number;
   currentPage: number;
+  totalCount: number;
 };
 
 function mapProductRow(row: ProductRow): Product {
@@ -135,10 +136,17 @@ export async function fetchSupabaseProducts() {
   );
 }
 
+export type ProductSort =
+  | "newest"
+  | "price-asc"
+  | "price-desc"
+  | "name-asc";
+
 type FetchSupabaseProductsPageOptions = {
   categorySlug?: string;
   page?: number;
   pageSize?: number;
+  sort?: ProductSort;
 };
 
 export async function fetchSupabaseProductsPage(
@@ -146,20 +154,46 @@ export async function fetchSupabaseProductsPage(
 ): Promise<ProductListResult> {
   const page = Math.max(1, options.page ?? 1);
   const pageSize = Math.max(1, Math.min(60, options.pageSize ?? 24));
+  const sort = options.sort ?? "newest";
   const from = (page - 1) * pageSize;
-  const to = from + pageSize;
+  const to = from + pageSize - 1;
 
   let query = supabase
     .from("products")
     .select(PRODUCT_CARD_COLUMNS, {
       count: "exact",
-    })
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    });
 
   if (options.categorySlug) {
     query = query.eq("category_slug", options.categorySlug);
   }
+
+  switch (sort) {
+    case "price-asc":
+      query = query
+        .order("price", { ascending: true })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "price-desc":
+      query = query
+        .order("price", { ascending: false })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "name-asc":
+      query = query
+        .order("name", { ascending: true })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "newest":
+    default:
+      query = query.order("created_at", { ascending: false });
+      break;
+  }
+
+  query = query.range(from, to);
 
   const { data, error, count } = await query;
 
@@ -168,14 +202,15 @@ export async function fetchSupabaseProductsPage(
   }
 
   const rows = (data ?? []) as ProductRow[];
-  const hasNextPage = rows.length > pageSize;
-  const currentRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   return {
-    products: currentRows.map((row) => mapProductRow(row)),
-    hasNextPage,
-    totalPages: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+    products: rows.map((row) => mapProductRow(row)),
+    hasNextPage: page < totalPages,
+    totalPages,
     currentPage: page,
+    totalCount,
   };
 }
 
@@ -237,6 +272,7 @@ export async function fetchSupabaseRelatedProducts(
 type FetchSupabaseSearchProductsOptions = {
   page?: number;
   pageSize?: number;
+  sort?: ProductSort;
 };
 
 export async function fetchSupabaseSearchProducts(
@@ -245,17 +281,16 @@ export async function fetchSupabaseSearchProducts(
 ): Promise<ProductListResult> {
   const page = Math.max(1, options.page ?? 1);
   const pageSize = Math.max(1, Math.min(60, options.pageSize ?? 24));
+  const sort = options.sort ?? "newest";
   const from = (page - 1) * pageSize;
-  const to = from + pageSize;
+  const to = from + pageSize - 1;
   const query = queryText.trim();
 
   let builder = supabase
     .from("products")
     .select(PRODUCT_CARD_COLUMNS, {
       count: "exact",
-    })
-    .order("created_at", { ascending: false })
-    .range(from, to);
+    });
 
   if (query) {
     const likeQuery = `%${query}%`;
@@ -264,6 +299,33 @@ export async function fetchSupabaseSearchProducts(
     );
   }
 
+  switch (sort) {
+    case "price-asc":
+      builder = builder
+        .order("price", { ascending: true })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "price-desc":
+      builder = builder
+        .order("price", { ascending: false })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "name-asc":
+      builder = builder
+        .order("name", { ascending: true })
+        .order("created_at", { ascending: false });
+      break;
+
+    case "newest":
+    default:
+      builder = builder.order("created_at", { ascending: false });
+      break;
+  }
+
+  builder = builder.range(from, to);
+
   const { data, error, count } = await builder;
 
   if (error) {
@@ -271,14 +333,16 @@ export async function fetchSupabaseSearchProducts(
   }
 
   const rows = (data ?? []) as ProductRow[];
-  const hasNextPage = rows.length > pageSize;
-  const currentRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const hasNextPage = page < totalPages;
 
   return {
-    products: currentRows.map((row) => mapProductRow(row)),
+    products: rows.map((row) => mapProductRow(row)),
     hasNextPage,
-    totalPages: Math.max(1, Math.ceil((count ?? 0) / pageSize)),
+    totalPages,
     currentPage: page,
+    totalCount,
   };
 }
 

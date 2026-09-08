@@ -3,6 +3,8 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ProductGridSkeleton";
 import { categories, getCategoryBySlug } from "@/lib/categories";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
+import type { ProductSort } from "@/lib/supabase-products";
+import { ProductCategoryNav } from "@/components/ProductCategoryNav";
 
 type CategoryPageProps = {
   params: Promise<{
@@ -10,6 +12,7 @@ type CategoryPageProps = {
   }>;
   searchParams: Promise<{
     page?: string;
+    sort?: string;
   }>;
 };
 
@@ -19,9 +22,22 @@ function parsePage(page?: string) {
   const parsed = Number(page ?? "1");
   return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1;
 }
+function parseSort(sort?: string): ProductSort {
+  switch (sort) {
+    case "price-asc":
+    case "price-desc":
+    case "name-asc":
+      return sort;
+
+    default:
+      return "newest";
+  }
+}
 
 export async function generateStaticParams() {
-  const mergedCategories = await fetchMergedCategories().catch(() => categories);
+  const mergedCategories = await fetchMergedCategories().catch(
+    () => categories,
+  );
 
   return mergedCategories.map((category) => ({
     slug: category.slug,
@@ -33,8 +49,9 @@ export default async function CategoryPage({
   searchParams,
 }: CategoryPageProps) {
   const { slug } = await params;
-  const { page } = await searchParams;
+  const { page, sort } = await searchParams;
   const currentPage = parsePage(page);
+  const currentSort = parseSort(sort);
   const allCategories = await fetchMergedCategories().catch(() => categories);
   const category = getCategoryBySlug(slug, allCategories) ?? {
     name: slug
@@ -58,7 +75,12 @@ export default async function CategoryPage({
           <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-600">
             {category.description}
           </p>
-
+          <div className="mt-8">
+            <ProductCategoryNav
+              activeSlug={category.slug}
+              categoryList={allCategories}
+            />
+          </div>
           <div className="mt-8">
             <Suspense fallback={<ProductGridSkeleton count={24} />}>
               <ProductGrid
@@ -66,6 +88,7 @@ export default async function CategoryPage({
                 page={currentPage}
                 pageSize={24}
                 basePath={`/categories/${category.slug}`}
+                sort={currentSort}
               />
             </Suspense>
           </div>
