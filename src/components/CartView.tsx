@@ -35,7 +35,9 @@ export function CartView() {
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
-      const settings = await fetchSiteSettings().catch(() => defaultSiteSettings);
+      const settings = await fetchSiteSettings().catch(
+        () => defaultSiteSettings,
+      );
       setBaseShippingCharge(settings.shippingCharge);
     }, 0);
 
@@ -65,9 +67,7 @@ export function CartView() {
     const nextQuantity = Math.max(1, quantity);
     updateItems(
       items.map((item) =>
-        item.product.slug === slug
-          ? { ...item, quantity: nextQuantity }
-          : item,
+        item.product.slug === slug ? { ...item, quantity: nextQuantity } : item,
       ),
     );
   }
@@ -88,8 +88,8 @@ export function CartView() {
               Your cart is empty
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-zinc-600">
-              Add products from categories, new arrivals, best sellers, or product
-              detail pages.
+              Add products from categories, new arrivals, best sellers, or
+              product detail pages.
             </p>
             <Link
               href="/categories"
@@ -105,118 +105,187 @@ export function CartView() {
 
   return (
     <section className="page-shell">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="content-reveal">
-          <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
-            Cart
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+            Your cart
           </p>
-          <h1 className="mt-3 text-4xl font-bold text-zinc-950">Shopping cart</h1>
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-bold text-zinc-950 sm:text-4xl">
+                Shopping Cart
+              </h1>
+              <p className="mt-2 text-sm text-zinc-600">
+                Review your items before checkout.
+              </p>
+            </div>
 
-          <div className="mt-8 space-y-4">
+            <p className="text-sm font-semibold text-zinc-600">
+              {items.reduce((total, item) => total + item.quantity, 0)} item
+              {items.reduce((total, item) => total + item.quantity, 0) === 1
+                ? ""
+                : "s"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="content-reveal space-y-4">
             {items.map((item) => (
               <article
                 key={item.product.slug}
-                className="cart-row rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
+                className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
               >
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
-                  <Image
-                    src={item.product.imageUrl}
-                    alt={item.product.name}
-                    fill
-                    sizes="80px"
-                    loading="lazy"
-                    className="object-cover"
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-bold text-zinc-950">
-                    {item.product.name}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.product.slug)}
-                    className="mt-3 text-sm font-bold text-red-600 transition hover:text-red-700"
+                <div className="flex gap-4">
+                  <Link
+                    href={`/products/${item.product.slug}`}
+                    className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-100 sm:h-28 sm:w-28"
                   >
-                    Remove
-                  </button>
-                </div>
-
-                <div className="flex flex-col items-end gap-4">
-                  <div className="quantity-control">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateQuantity(item.product.slug, item.quantity - 1)
-                      }
-                    >
-                      -
-                    </button>
-                    <input
-                      value={item.quantity}
-                      onChange={(event) =>
-                        updateQuantity(
-                          item.product.slug,
-                          Number(event.target.value) || 1,
-                        )
-                      }
-                      aria-label={`Quantity for ${item.product.name}`}
+                    <Image
+                      src={item.product.imageUrl}
+                      alt={item.product.name}
+                      fill
+                      sizes="112px"
+                      loading="lazy"
+                      className="object-cover"
                     />
+                  </Link>
+
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/products/${item.product.slug}`}
+                      className="line-clamp-2 text-base font-bold leading-6 text-zinc-950 transition hover:text-orange-600 sm:text-lg"
+                    >
+                      {item.product.name}
+                    </Link>
+
+                    <p className="mt-2 text-sm font-semibold text-zinc-600">
+                      AED {item.product.price} each
+                    </p>
+
+                    {item.product.freeShipping ? (
+                      <p className="mt-2 inline-flex rounded-md bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+                        Free Shipping
+                      </p>
+                    ) : null}
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                      <div className="inline-flex items-center rounded-xl border border-zinc-200 bg-zinc-50">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(item.product.slug, item.quantity - 1)
+                          }
+                          className="flex h-10 w-10 items-center justify-center text-lg font-bold text-zinc-700 transition hover:bg-zinc-100"
+                          aria-label={`Decrease quantity for ${item.product.name}`}
+                        >
+                          −
+                        </button>
+
+                        <input
+                          value={item.quantity}
+                          onChange={(event) =>
+                            updateQuantity(
+                              item.product.slug,
+                              Number(event.target.value) || 1,
+                            )
+                          }
+                          aria-label={`Quantity for ${item.product.name}`}
+                          inputMode="numeric"
+                          className="h-10 w-12 border-x border-zinc-200 bg-white text-center text-sm font-bold text-zinc-950 outline-none"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateQuantity(item.product.slug, item.quantity + 1)
+                          }
+                          className="flex h-10 w-10 items-center justify-center text-lg font-bold text-zinc-700 transition hover:bg-zinc-100"
+                          aria-label={`Increase quantity for ${item.product.name}`}
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <p className="text-lg font-bold text-zinc-950">
+                        AED {item.product.price * item.quantity}
+                      </p>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() =>
-                        updateQuantity(item.product.slug, item.quantity + 1)
-                      }
+                      onClick={() => removeItem(item.product.slug)}
+                      className="mt-4 text-sm font-bold text-red-600 transition hover:text-red-700"
                     >
-                      +
+                      Remove
                     </button>
                   </div>
                 </div>
               </article>
             ))}
           </div>
-        </div>
 
-        <aside className="content-reveal h-fit rounded-2xl bg-zinc-950 p-6 text-white shadow-xl">
-          <p className="text-sm font-semibold uppercase tracking-wider text-zinc-400">
-            Order summary
-          </p>
-          <div className="mt-6 space-y-4 text-sm">
-            <div className="flex justify-between text-zinc-300">
-              <span>Items</span>
-              <span>{items.reduce((total, item) => total + item.quantity, 0)}</span>
-            </div>
-            <div className="flex justify-between text-zinc-300">
-              <span>Subtotal</span>
-              <span>AED {subtotal}</span>
-            </div>
-            <div className="flex justify-between text-zinc-300">
-              <span>Shipping</span>
-              <span>
-                {shippingCharge === 0 && items.length > 0
-                  ? "Free"
-                  : `AED ${shippingCharge}`}
-              </span>
-            </div>
-            <div className="border-t border-white/10 pt-4">
-              <div className="flex justify-between text-xl font-bold">
-                <span>Total</span>
-                <span>AED {grandTotal}</span>
+          <aside className="content-reveal h-fit rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm lg:sticky lg:top-28">
+            <h2 className="text-xl font-bold text-zinc-950">Order Summary</h2>
+
+            <div className="mt-5 space-y-3 text-sm">
+              <div className="flex justify-between text-zinc-600">
+                <span>
+                  Items (
+                  {items.reduce((total, item) => total + item.quantity, 0)})
+                </span>
+                <span className="font-semibold text-zinc-900">
+                  AED {subtotal}
+                </span>
+              </div>
+
+              <div className="flex justify-between text-zinc-600">
+                <span>Shipping</span>
+                <span className="font-semibold text-zinc-900">
+                  {shippingCharge === 0 && items.length > 0
+                    ? "Free"
+                    : `AED ${shippingCharge}`}
+                </span>
               </div>
             </div>
-          </div>
-          <Link
-            href={`/inquiry/${items[0]?.product.slug ?? ""}`}
-            className="animated-button mt-7 flex bg-white px-6 py-3 text-center text-sm font-bold text-zinc-950 transition hover:bg-zinc-200"
-          >
-            Checkout
-          </Link>
-          <Link
-            href="/categories"
-            className="mt-3 flex justify-center border border-white/20 px-6 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-          >
-            Continue Shopping
-          </Link>
-        </aside>
+
+            <div className="mt-5 border-t border-zinc-200 pt-5">
+              <div className="flex items-center justify-between">
+                <span className="text-base font-bold text-zinc-950">Total</span>
+                <span className="text-2xl font-bold text-zinc-950">
+                  AED {grandTotal}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50/50 p-4">
+              <p className="text-sm font-bold text-zinc-950">
+                Cash on Delivery
+              </p>
+              <p className="mt-1 text-xs leading-5 text-zinc-600">
+                Pay when your order arrives at your delivery address.
+              </p>
+            </div>
+
+            <Link
+              href={`/inquiry/${items[0]?.product.slug ?? ""}`}
+              className="mt-5 flex w-full items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#e66000]"
+            >
+              Proceed to Checkout • AED {grandTotal}
+            </Link>
+
+            <Link
+              href="/categories"
+              className="mt-3 flex w-full items-center justify-center rounded-xl border border-zinc-300 px-5 py-3 text-sm font-bold text-zinc-900 transition hover:bg-zinc-50"
+            >
+              Continue Shopping
+            </Link>
+
+            <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
+              Secure checkout • UAE delivery • Cash on Delivery
+            </p>
+          </aside>
+        </div>
       </div>
     </section>
   );

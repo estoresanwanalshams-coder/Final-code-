@@ -906,6 +906,12 @@ a {
   z-index: 50;
 }
 
+@media (max-width: 767px) {
+  .floating-whatsapp-hide-mobile {
+    display: none;
+  }
+}
+
 .floating-whatsapp:hover {
   background: #1ebe57;
   box-shadow: 0 16px 36px rgba(37, 211, 102, 0.55);
