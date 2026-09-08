@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { FeatureHighlights } from "@/components/FeatureHighlights";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductActionBar } from "@/components/ProductActionBar";
 import { ProductMediaGallery } from "@/components/ProductMediaGallery";
@@ -10,6 +9,7 @@ import {
   fetchSupabaseProductBySlug,
   fetchSupabaseRelatedProducts,
 } from "@/lib/supabase-products";
+import { ProductTrustPanel } from "@/components/ProductTrustPanel";
 
 type ProductPageProps = {
   params: Promise<{
@@ -118,10 +118,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </div>
 
               <ProductActionBar product={product} />
-            </div>
-
-            <div className="mt-4">
-              <FeatureHighlights compact />
+              <ProductTrustPanel />
             </div>
           </div>
         </div>

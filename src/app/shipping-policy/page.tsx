@@ -1,40 +1,75 @@
 export default function ShippingPolicyPage() {
   return (
-    <section className="max-w-4xl mx-auto px-4 py-12">
-  <h1 className="text-4xl font-bold text-[#111111] mb-8">Shipping Policy</h1>
+    <section className="mx-auto max-w-4xl px-4 py-12">
+      <h1 className="mb-8 text-4xl font-bold text-[#111111]">
+        Shipping Policy
+      </h1>
 
-  <p className="text-gray-600 mb-6">Last Updated: June 2026</p>
+      <p className="mb-6 text-gray-600">Last Updated: September 2026</p>
 
-  <h2 className="text-2xl font-semibold mb-4">Order Processing</h2>
-  <p className="mb-6 text-[#333333]">
-    Orders are usually processed within 1–3 business days after payment confirmation.
-  </p>
+      <h2 className="mb-4 text-2xl font-semibold">Delivery Area</h2>
+      <p className="mb-6 text-[#333333]">
+        HM Shop Online currently accepts retail orders for delivery within the
+        United Arab Emirates.
+      </p>
 
-  <h2 className="text-2xl font-semibold mb-4">Estimated Delivery Times</h2>
+      <h2 className="mb-4 text-2xl font-semibold">Order Processing</h2>
+      <p className="mb-6 text-[#333333]">
+        Cash on Delivery orders are processed after the order is successfully
+        placed and the required contact and delivery information has been
+        provided.
+      </p>
 
-  <ul className="list-disc pl-6 mb-6 text-[#333333]">
-    <li>UAE: 1–5 Business Days</li>
-    <li>GCC Countries: 5–10 Business Days</li>
-    <li>International Orders: 7–21 Business Days</li>
-  </ul>
+      <h2 className="mb-4 text-2xl font-semibold">
+        Estimated Delivery Time
+      </h2>
+      <p className="mb-6 text-[#333333]">
+        Delivery times may vary depending on the delivery location, product
+        availability, order volume, and courier schedule. We aim to deliver UAE
+        orders as quickly as reasonably possible.
+      </p>
 
-  <h2 className="text-2xl font-semibold mb-4">Order Tracking</h2>
+      <h2 className="mb-4 text-2xl font-semibold">Shipping Charges</h2>
+      <p className="mb-6 text-[#333333]">
+        The applicable shipping charge is displayed during checkout before you
+        place your order. Some products may qualify for free shipping where
+        indicated on the product page.
+      </p>
 
-  <p className="mb-6 text-[#333333]">
-    Tracking details will be provided once your order has been dispatched.
-  </p>
+      <h2 className="mb-4 text-2xl font-semibold">Cash on Delivery</h2>
+      <p className="mb-6 text-[#333333]">
+        Orders placed through HMshoponline.com are currently available with
+        Cash on Delivery. No online card payment is required at checkout.
+      </p>
 
-  <h2 className="text-2xl font-semibold mb-4">Shipping Charges</h2>
+      <h2 className="mb-4 text-2xl font-semibold">Order Tracking</h2>
+      <p className="mb-6 text-[#333333]">
+        You can check your order through the Track Order page using your order
+        number together with the email address or mobile number used when
+        placing the order.
+      </p>
 
-  <p className="mb-6 text-[#333333]">
-    Shipping charges are calculated during checkout based on destination and package size.
-  </p>
+      <h2 className="mb-4 text-2xl font-semibold">Delivery Information</h2>
+      <p className="mb-6 text-[#333333]">
+        Please provide a complete and accurate UAE delivery address, including
+        your emirate, area, building or villa details, and a reachable mobile or
+        WhatsApp number. Incorrect or incomplete information may delay delivery.
+      </p>
 
-  <h2 className="text-2xl font-semibold mb-4">Contact Us</h2>
+      <h2 className="mb-4 text-2xl font-semibold">
+        Delays and Delivery Issues
+      </h2>
+      <p className="mb-6 text-[#333333]">
+        Delivery may occasionally be affected by courier delays, public
+        holidays, high order volumes, weather conditions, or other circumstances
+        outside our reasonable control. If you need help with an order, please
+        contact our support team.
+      </p>
 
-  <p className="text-[#333333]">
-    Email: support@hmshoponline.com
-  </p>
-</section>
+      <h2 className="mb-4 text-2xl font-semibold">Contact Us</h2>
+      <p className="text-[#333333]">
+        Email: info@hmshoponline.com
+      </p>
+    </section>
   );
 }

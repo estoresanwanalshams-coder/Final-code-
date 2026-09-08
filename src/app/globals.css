@@ -1051,3 +1051,13 @@ a {
     padding-bottom: 0.65rem;
   }
 }
+/* Checkout form placeholder visibility */
+.checkout-form input::placeholder,
+.checkout-form textarea::placeholder {
+  color: #a1a1aa;
+  opacity: 1;
+}
+
+.checkout-form select {
+  color: #18181b;
+}

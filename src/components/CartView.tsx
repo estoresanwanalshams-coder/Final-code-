@@ -257,16 +257,35 @@ export function CartView() {
                 </span>
               </div>
             </div>
+            <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#fa710c] shadow-sm">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="6" width="18" height="12" rx="2" />
+                    <path d="M7 10h4" />
+                    <circle cx="17" cy="12" r="2" />
+                  </svg>
+                </div>
 
-            <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50/50 p-4">
-              <p className="text-sm font-bold text-zinc-950">
-                Cash on Delivery
-              </p>
-              <p className="mt-1 text-xs leading-5 text-zinc-600">
-                Pay when your order arrives at your delivery address.
-              </p>
+                <div>
+                  <p className="text-sm font-bold text-zinc-950">
+                    Cash on Delivery
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-zinc-600">
+                    No online payment required. Place your order now and pay
+                    when it arrives.
+                  </p>
+                </div>
+              </div>
             </div>
-
             <Link
               href={`/inquiry/${items[0]?.product.slug ?? ""}`}
               className="mt-5 flex w-full items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#e66000]"
@@ -282,7 +301,7 @@ export function CartView() {
             </Link>
 
             <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
-              Secure checkout • UAE delivery • Cash on Delivery
+              UAE delivery • Cash on Delivery • Easy returns
             </p>
           </aside>
         </div>
