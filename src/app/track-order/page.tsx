@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   fetchSupabaseOrdersByIdentifier,
@@ -52,7 +53,10 @@ function getProgressIndex(status: OrderStatus) {
 }
 
 export default function TrackOrderPage() {
-  const [orderNumber, setOrderNumber] = useState("");
+  const searchParams = useSearchParams();
+  const orderNumberFromUrl = searchParams.get("order")?.trim() ?? "";
+
+  const [orderNumber, setOrderNumber] = useState(orderNumberFromUrl);
   const [identifier, setIdentifier] = useState("");
   const [order, setOrder] = useState<TrackedOrderRecord | null>(null);
   const [message, setMessage] = useState("");
@@ -65,8 +69,7 @@ export default function TrackOrderPage() {
     const normalizedIdentifier = identifier.trim();
 
     const isValidOrderNumber = /^ORD[-\w]+$/i.test(normalizedOrderNumber);
-    const isEmail =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedIdentifier);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedIdentifier);
     const isPhone = /^[+()\-\s\d]{6,}$/.test(normalizedIdentifier);
 
     if (!isValidOrderNumber) {
@@ -266,9 +269,7 @@ export default function TrackOrderPage() {
 
                               <p
                                 className={`mt-3 text-sm font-bold ${
-                                  completed
-                                    ? "text-zinc-950"
-                                    : "text-zinc-500"
+                                  completed ? "text-zinc-950" : "text-zinc-500"
                                 }`}
                               >
                                 {step.label}
@@ -306,9 +307,7 @@ export default function TrackOrderPage() {
                           <div>
                             <p
                               className={`text-sm font-bold ${
-                                completed
-                                  ? "text-zinc-950"
-                                  : "text-zinc-500"
+                                completed ? "text-zinc-950" : "text-zinc-500"
                               }`}
                             >
                               {step.label}
@@ -395,9 +394,7 @@ export default function TrackOrderPage() {
 
                 <div className="mt-5 border-t border-zinc-200 pt-5">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-zinc-950">
-                      Order Total
-                    </span>
+                    <span className="font-bold text-zinc-950">Order Total</span>
 
                     <span className="text-xl font-bold text-zinc-950">
                       AED {order.total}
