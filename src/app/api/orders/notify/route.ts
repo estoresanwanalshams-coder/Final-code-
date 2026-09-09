@@ -1,26 +1,28 @@
 import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin";
 import { canSendEmail, getOwnerEmail, sendMail } from "@/lib/mailer";
-
-type OrderItem = {
-  product: {
-    name: string;
-  };
-  quantity: number;
-};
+import type { CartItem } from "@/lib/cart";
 
 type OrderNotifyPayload = {
   orderNumber: string;
-  fullName: string;
   email: string;
-  phone: string;
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  total: number;
-  items: OrderItem[];
 };
 
-function formatItems(items: OrderItem[]) {
+type StoredOrder = {
+  order_number: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  address_line_1: string;
+  address_line_2: string | null;
+  city: string;
+  shipping_method: string | null;
+  additional_notes: string | null;
+  items: CartItem[];
+  total: number;
+};
+
+function formatItems(items: CartItem[]) {
   return items
     .map((item) => `- ${item.product.name} x ${item.quantity}`)
     .join("\n");
@@ -30,65 +32,144 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as OrderNotifyPayload;
 
-    if (!payload.email || !payload.orderNumber) {
+    const orderNumber = payload.orderNumber?.trim();
+    const email = payload.email?.trim().toLowerCase();
+
+    if (!orderNumber || !email) {
       return NextResponse.json(
-        { error: "Missing order email details." },
+        { error: "Missing order verification details." },
         { status: 400 },
       );
     }
+
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    if (!supabaseAdmin) {
+      console.error(
+        "Order notify configuration error: SUPABASE_SERVICE_ROLE_KEY is missing.",
+      );
+
+      return NextResponse.json(
+        { error: "Order notification service is not configured." },
+        { status: 500 },
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select(
+        [
+          "order_number",
+          "full_name",
+          "email",
+          "phone",
+          "address_line_1",
+          "address_line_2",
+          "city",
+          "shipping_method",
+          "additional_notes",
+          "items",
+          "total",
+        ].join(","),
+      )
+      .eq("order_number", orderNumber)
+      .eq("email", email)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        { error: "Order could not be verified." },
+        { status: 404 },
+      );
+    }
+
+    const order = data as unknown as StoredOrder;
 
     if (!canSendEmail()) {
       return NextResponse.json({ ok: true });
     }
 
-    const itemsText = formatItems(payload.items ?? []);
+    const itemsText = formatItems(order.items ?? []);
+
     const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+
     const isPublicSiteUrl =
-      !!configuredSiteUrl && !/localhost|127\.0\.0\.1/i.test(configuredSiteUrl);
+      !!configuredSiteUrl &&
+      !/localhost|127\.0\.0\.1/i.test(configuredSiteUrl);
+
     const siteUrl = isPublicSiteUrl
       ? configuredSiteUrl
       : "https://www.hmshoponline.com";
-    const trackUrl = `${siteUrl.replace(/\/$/, "")}/track-order`;
-    const customerSubject = `Order ${payload.orderNumber} placed successfully`;
+
+    const trackUrl =
+      `${siteUrl.replace(/\/$/, "")}/track-order?order=` +
+      encodeURIComponent(order.order_number);
+
+    const customerSubject =
+      `Order confirmed - ${order.order_number} | HM Shop Online`;
+
     const customerText =
-      `Hi ${payload.fullName},\n\n` +
-      `Your order ${payload.orderNumber} has been placed successfully.\n` +
-      `Our team will contact you shortly.\n\n` +
-      `You can track your order using your Order ID, email or phone number here:\n${trackUrl}\n\n` +
-      `Please check your spam folder too for order details.\n\n` +
-      `Order summary:\n${itemsText}\n\n` +
-      `Total: AED ${payload.total}\n\n` +
-      `Thanks for shopping with us.`;
+      `Hi ${order.full_name},\n\n` +
+      `Thank you for shopping with HM Shop Online.\n\n` +
+      `Your order has been successfully placed.\n\n` +
+      `ORDER NUMBER\n` +
+      `${order.order_number}\n\n` +
+      `PAYMENT\n` +
+      `Cash on Delivery\n` +
+      `No online payment is required. Please pay when your order arrives.\n\n` +
+      `ORDER SUMMARY\n` +
+      `${itemsText}\n\n` +
+      `Order Total: AED ${order.total}\n\n` +
+      `WHAT HAPPENS NEXT?\n` +
+      `Our team will prepare your order and arrange delivery to your UAE address.\n\n` +
+      `TRACK YOUR ORDER\n` +
+      `${trackUrl}\n\n` +
+      `For your privacy, you will also need to enter the email address or mobile number used when placing the order.\n\n` +
+      `Please keep your order number until your order has been delivered.\n\n` +
+      `Need help? Contact HM Shop Online support.\n\n` +
+      `Thank you,\n` +
+      `HM Shop Online\n` +
+      `hmshoponline.com`;
 
     await sendMail({
-      to: payload.email,
+      to: order.email,
       subject: customerSubject,
       text: customerText,
     });
 
     const owner = getOwnerEmail();
+
     if (owner) {
       const ownerText =
         `New order received\n\n` +
-        `Order: ${payload.orderNumber}\n` +
-        `Customer: ${payload.fullName}\n` +
-        `Email: ${payload.email}\n` +
-        `Phone: ${payload.phone}\n` +
-        `Address: ${payload.addressLine1}, ${payload.addressLine2}, ${payload.city}\n\n` +
+        `Order: ${order.order_number}\n` +
+        `Customer: ${order.full_name}\n` +
+        `Email: ${order.email}\n` +
+        `Phone: ${order.phone}\n` +
+        `Address: ${order.address_line_1}, ${order.address_line_2 ?? ""}, ${order.city}\n\n` +
+        `Payment: Cash on Delivery\n\n` +
         `Items:\n${itemsText}\n\n` +
-        `Total: AED ${payload.total}`;
+        `Total: AED ${order.total}`;
 
       await sendMail({
         to: owner,
-        subject: `New order: ${payload.orderNumber}`,
+        subject: `New order: ${order.order_number}`,
         text: ownerText,
       });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : "Unknown error";
+    const detail =
+      error instanceof Error ? error.message : "Unknown error";
+
     console.error("Order notify email error:", error);
+
     return NextResponse.json(
       {
         error: "Unable to send order emails.",

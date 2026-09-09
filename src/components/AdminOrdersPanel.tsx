@@ -10,6 +10,7 @@ import {
   updateSupabaseOrderStatus,
 } from "@/lib/supabase-orders";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
+import { supabase } from "@/lib/supabase";
 
 const statuses: OrderStatus[] = [
   "pending",
@@ -71,16 +72,25 @@ export function AdminOrdersPanel() {
       const order = orders.find((item) => item.id === id);
       await updateSupabaseOrderStatus(id, status);
       if (order) {
-        await fetch("/api/orders/status-notify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderNumber: order.orderNumber,
-            fullName: order.fullName,
-            email: order.email,
-            status,
-          }),
-        }).catch(() => null);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session?.access_token) {
+          await fetch("/api/orders/status-notify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              orderNumber: order.orderNumber,
+              fullName: order.fullName,
+              email: order.email,
+              status,
+            }),
+          }).catch(() => null);
+        }
       }
       await loadOrders();
       setMessage("Order status updated.");
@@ -172,7 +182,8 @@ export function AdminOrdersPanel() {
   const visibleOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     let filtered = orders.filter((order) => {
-      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || order.status === statusFilter;
       if (!matchesStatus) {
         return false;
       }
@@ -208,7 +219,9 @@ export function AdminOrdersPanel() {
         <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
           Orders
         </p>
-        <h2 className="mt-3 text-3xl font-bold text-zinc-950">Customer orders</h2>
+        <h2 className="mt-3 text-3xl font-bold text-zinc-950">
+          Customer orders
+        </h2>
         {message ? (
           <p className="mt-4 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-700">
             {message}
@@ -225,7 +238,10 @@ export function AdminOrdersPanel() {
               <input
                 value={editForm.fullName}
                 onChange={(event) =>
-                  setEditForm((current) => ({ ...current, fullName: event.target.value }))
+                  setEditForm((current) => ({
+                    ...current,
+                    fullName: event.target.value,
+                  }))
                 }
                 required
               />
@@ -236,7 +252,10 @@ export function AdminOrdersPanel() {
                 type="email"
                 value={editForm.email}
                 onChange={(event) =>
-                  setEditForm((current) => ({ ...current, email: event.target.value }))
+                  setEditForm((current) => ({
+                    ...current,
+                    email: event.target.value,
+                  }))
                 }
                 required
               />
@@ -263,7 +282,10 @@ export function AdminOrdersPanel() {
                 step="0.01"
                 value={editForm.total}
                 onChange={(event) =>
-                  setEditForm((current) => ({ ...current, total: event.target.value }))
+                  setEditForm((current) => ({
+                    ...current,
+                    total: event.target.value,
+                  }))
                 }
                 required
               />
@@ -298,7 +320,10 @@ export function AdminOrdersPanel() {
               <input
                 value={editForm.city}
                 onChange={(event) =>
-                  setEditForm((current) => ({ ...current, city: event.target.value }))
+                  setEditForm((current) => ({
+                    ...current,
+                    city: event.target.value,
+                  }))
                 }
                 required
               />
@@ -386,7 +411,9 @@ export function AdminOrdersPanel() {
             Quick list
             <select
               value={latestOnly ? "latest10" : "all"}
-              onChange={(event) => setLatestOnly(event.target.value === "latest10")}
+              onChange={(event) =>
+                setLatestOnly(event.target.value === "latest10")
+              }
             >
               <option value="all">All matching orders</option>
               <option value="latest10">Latest 10 orders</option>
@@ -433,7 +460,10 @@ export function AdminOrdersPanel() {
                     <select
                       value={order.status}
                       onChange={(event) =>
-                        updateStatus(order.id, event.target.value as OrderStatus)
+                        updateStatus(
+                          order.id,
+                          event.target.value as OrderStatus,
+                        )
                       }
                     >
                       {statuses.map((status) => (
@@ -467,7 +497,9 @@ export function AdminOrdersPanel() {
                     key={item.product.slug}
                     className="rounded-xl border border-zinc-200 p-3 text-sm"
                   >
-                    <p className="font-bold text-zinc-950">{item.product.name}</p>
+                    <p className="font-bold text-zinc-950">
+                      {item.product.name}
+                    </p>
                     <p className="text-zinc-600">Qty: {item.quantity}</p>
                     <p className="text-zinc-600">AED {item.product.price}</p>
                   </div>

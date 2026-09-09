@@ -181,16 +181,7 @@ export function CheckoutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderNumber,
-          fullName,
           email,
-          phone,
-          addressLine1,
-          addressLine2,
-          city,
-          shippingMethod,
-          additionalNotes,
-          items,
-          total: grandTotal,
         }),
       }).catch(() => null);
       saveCartItems([]);
