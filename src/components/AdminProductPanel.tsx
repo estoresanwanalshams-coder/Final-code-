@@ -26,6 +26,11 @@ import { QuickPricingModal } from "@/components/QuickPricingModal";
 const emptyForm = {
   name: "",
   categorySlug: "home-and-kitchen" as CategorySlug,
+  sku: "",
+  brand: "",
+  status: "active",
+  stockStatus: "in_stock",
+  searchKeywords: "",
   actualPrice: "",
   price: "",
   freeShipping: false,
@@ -50,15 +55,25 @@ type ManagedImage = {
 export function AdminProductPanel() {
   const [adminProducts, setAdminProducts] = useState<Product[]>([]);
   const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [productStatusFilter, setProductStatusFilter] = useState<
+    "all" | "active" | "draft"
+  >("all");
+
+  const [stockStatusFilter, setStockStatusFilter] = useState<
+    "all" | "in_stock" | "out_of_stock"
+  >("all");
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [categoryItems, setCategoryItems] = useState<Category[]>(fallbackCategories);
+  const [categoryItems, setCategoryItems] =
+    useState<Category[]>(fallbackCategories);
   const [managedImages, setManagedImages] = useState<ManagedImage[]>([]);
   const [urlInput, setUrlInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [editChoiceProduct, setEditChoiceProduct] = useState<Product | null>(null);
+  const [editChoiceProduct, setEditChoiceProduct] = useState<Product | null>(
+    null,
+  );
   const [pricingProduct, setPricingProduct] = useState<Product | null>(null);
   const [isSavingPrice, setIsSavingPrice] = useState(false);
   const dragImageIndexRef = useRef<number | null>(null);
@@ -94,7 +109,9 @@ export function AdminProductPanel() {
         ]);
         setAdminProducts(nextProducts);
       } catch {
-        setMessage("Create the Supabase products table before using admin CRUD.");
+        setMessage(
+          "Create the Supabase products table before using admin CRUD.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -110,33 +127,62 @@ export function AdminProductPanel() {
       void loadCategoryOptions();
     }
 
-    window.addEventListener(adminCategoriesUpdatedEvent, handleCategoriesUpdated);
+    window.addEventListener(
+      adminCategoriesUpdatedEvent,
+      handleCategoriesUpdated,
+    );
 
     return () => {
-      window.removeEventListener(adminCategoriesUpdatedEvent, handleCategoriesUpdated);
+      window.removeEventListener(
+        adminCategoriesUpdatedEvent,
+        handleCategoriesUpdated,
+      );
     };
   }, []);
 
   const allProducts = useMemo(() => adminProducts, [adminProducts]);
   const visibleProducts = useMemo(() => {
     const query = productSearchQuery.trim().toLowerCase();
-    if (!query) {
-      return allProducts;
-    }
 
     return allProducts.filter((product) => {
       const categoryName =
-        categoryItems.find((item) => item.slug === product.categorySlug)?.name ?? "";
-      return (
+        categoryItems.find((item) => item.slug === product.categorySlug)
+          ?.name ?? "";
+
+      const matchesSearch =
+        !query ||
         product.name.toLowerCase().includes(query) ||
         product.slug.toLowerCase().includes(query) ||
         product.categorySlug.toLowerCase().includes(query) ||
-        categoryName.toLowerCase().includes(query)
-      );
-    });
-  }, [allProducts, productSearchQuery, categoryItems]);
+        categoryName.toLowerCase().includes(query) ||
+        (product.sku ?? "").toLowerCase().includes(query) ||
+        (product.brand ?? "").toLowerCase().includes(query) ||
+        (product.searchKeywords ?? []).some((keyword) =>
+          keyword.toLowerCase().includes(query),
+        );
 
-  function updateForm(field: Exclude<keyof ProductForm, "freeShipping">, value: string) {
+      const matchesProductStatus =
+        productStatusFilter === "all" ||
+        (product.status ?? "active") === productStatusFilter;
+
+      const matchesStockStatus =
+        stockStatusFilter === "all" ||
+        (product.stockStatus ?? "in_stock") === stockStatusFilter;
+
+      return matchesSearch && matchesProductStatus && matchesStockStatus;
+    });
+  }, [
+    allProducts,
+    productSearchQuery,
+    categoryItems,
+    productStatusFilter,
+    stockStatusFilter,
+  ]);
+
+  function updateForm(
+    field: Exclude<keyof ProductForm, "freeShipping">,
+    value: string,
+  ) {
     setForm((currentForm) => ({
       ...currentForm,
       [field]: value,
@@ -230,7 +276,12 @@ export function AdminProductPanel() {
     const nextImages = Array.from(fileList)
       .filter((file) => file.type.startsWith("image/"))
       .map((file) =>
-        createManagedImage(crypto.randomUUID(), URL.createObjectURL(file), "new", file),
+        createManagedImage(
+          crypto.randomUUID(),
+          URL.createObjectURL(file),
+          "new",
+          file,
+        ),
       );
 
     if (nextImages.length === 0) {
@@ -300,9 +351,7 @@ export function AdminProductPanel() {
     ]);
     const csvContent = [headers, ...rows]
       .map((row) =>
-        row
-          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-          .join(","),
+        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
       )
       .join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -422,12 +471,16 @@ export function AdminProductPanel() {
       }
 
       const normalizedOrderedUrls = normalizeImageUrls(
-        managedImages.map((image) => uploadedUrlById.get(image.id) ?? image.url),
+        managedImages.map(
+          (image) => uploadedUrlById.get(image.id) ?? image.url,
+        ),
       );
       const selectedMain =
         uploadedUrlById.get(
           managedImages.find((image) => image.isMain)?.id ?? "",
-        ) ?? normalizedOrderedUrls[0] ?? "";
+        ) ??
+        normalizedOrderedUrls[0] ??
+        "";
       const mainImageUrl = normalizeImageUrl(selectedMain);
       const imageUrls = [
         mainImageUrl,
@@ -438,6 +491,15 @@ export function AdminProductPanel() {
         name: form.name,
         slug,
         categorySlug: form.categorySlug,
+        sku: form.sku.trim() || undefined,
+        brand: form.brand.trim() || undefined,
+        status: form.status === "draft" ? "draft" : "active",
+        stockStatus:
+          form.stockStatus === "out_of_stock" ? "out_of_stock" : "in_stock",
+        searchKeywords: form.searchKeywords
+          .split(",")
+          .map((keyword) => keyword.trim())
+          .filter(Boolean),
         actualPrice: parsedActualPrice,
         price: parsedPrice,
         freeShipping: form.freeShipping,
@@ -480,12 +542,19 @@ export function AdminProductPanel() {
   }
 
   function editProduct(product: Product) {
-    const initialUrls = normalizeImageUrls(product.imageUrls ?? [product.imageUrl]);
+    const initialUrls = normalizeImageUrls(
+      product.imageUrls ?? [product.imageUrl],
+    );
     setEditChoiceProduct(null);
     setEditingSlug(product.slug);
     setForm({
       name: product.name,
       categorySlug: product.categorySlug,
+      sku: product.sku ?? "",
+      brand: product.brand ?? "",
+      status: product.status ?? "active",
+      stockStatus: product.stockStatus ?? "in_stock",
+      searchKeywords: (product.searchKeywords ?? []).join(", "),
       actualPrice: product.actualPrice ? String(product.actualPrice) : "",
       price: String(product.price),
       freeShipping: Boolean(product.freeShipping),
@@ -551,7 +620,9 @@ export function AdminProductPanel() {
       setAdminProducts(await fetchSupabaseProducts());
       setMessage("Product deleted.");
     } catch {
-      setMessage("Unable to delete product. Check Supabase table and policies.");
+      setMessage(
+        "Unable to delete product. Check Supabase table and policies.",
+      );
     }
   }
 
@@ -596,13 +667,75 @@ export function AdminProductPanel() {
               </select>
             </label>
 
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="form-field">
+                SKU / Product Code
+                <input
+                  value={form.sku}
+                  onChange={(event) => updateForm("sku", event.target.value)}
+                  placeholder="Example: HM-KIT-001"
+                />
+              </label>
+
+              <label className="form-field">
+                Brand
+                <input
+                  value={form.brand}
+                  onChange={(event) => updateForm("brand", event.target.value)}
+                  placeholder="Optional brand"
+                />
+              </label>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="form-field">
+                Product Status
+                <select
+                  value={form.status}
+                  onChange={(event) => updateForm("status", event.target.value)}
+                >
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </label>
+
+              <label className="form-field">
+                Stock Status
+                <select
+                  value={form.stockStatus}
+                  onChange={(event) =>
+                    updateForm("stockStatus", event.target.value)
+                  }
+                >
+                  <option value="in_stock">In Stock</option>
+                  <option value="out_of_stock">Out of Stock</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="form-field">
+              Search Keywords
+              <input
+                value={form.searchKeywords}
+                onChange={(event) =>
+                  updateForm("searchKeywords", event.target.value)
+                }
+                placeholder="air cooler, portable cooler, summer gadget"
+              />
+              <span className="text-xs font-normal text-zinc-400">
+                Separate keywords with commas. Customers will not see these.
+              </span>
+            </label>
+
             <label className="form-field">
               Actual price
               <input
                 type="number"
                 min="0"
                 value={form.actualPrice}
-                onChange={(event) => updateForm("actualPrice", event.target.value)}
+                onChange={(event) =>
+                  updateForm("actualPrice", event.target.value)
+                }
                 placeholder="AED actual price"
               />
             </label>
@@ -661,7 +794,9 @@ export function AdminProductPanel() {
                   accept="image/*"
                   multiple
                   className="hidden"
-                  onChange={(event) => void handleIncomingFiles(event.target.files)}
+                  onChange={(event) =>
+                    void handleIncomingFiles(event.target.files)
+                  }
                 />
               </div>
 
@@ -781,15 +916,47 @@ export function AdminProductPanel() {
               {message}
             </p>
           ) : null}
-          <div className="mt-4 max-w-xl">
+          <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_190px_190px]">
             <label className="light-form-field">
               Search products
               <input
                 type="text"
                 value={productSearchQuery}
                 onChange={(event) => setProductSearchQuery(event.target.value)}
-                placeholder="Search by name, slug, or category"
+                placeholder="Name, SKU, brand, keyword or category"
               />
+            </label>
+
+            <label className="light-form-field">
+              Product status
+              <select
+                value={productStatusFilter}
+                onChange={(event) =>
+                  setProductStatusFilter(
+                    event.target.value as "all" | "active" | "draft",
+                  )
+                }
+              >
+                <option value="all">All products</option>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+              </select>
+            </label>
+
+            <label className="light-form-field">
+              Stock status
+              <select
+                value={stockStatusFilter}
+                onChange={(event) =>
+                  setStockStatusFilter(
+                    event.target.value as "all" | "in_stock" | "out_of_stock",
+                  )
+                }
+              >
+                <option value="all">All stock</option>
+                <option value="in_stock">In Stock</option>
+                <option value="out_of_stock">Out of Stock</option>
+              </select>
             </label>
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -836,11 +1003,53 @@ export function AdminProductPanel() {
                     <p className="text-lg font-bold text-zinc-950">
                       {product.name}
                     </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      {product.sku ? (
+                        <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
+                          SKU: {product.sku}
+                        </span>
+                      ) : null}
+
+                      {product.brand ? (
+                        <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
+                          {product.brand}
+                        </span>
+                      ) : null}
+
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                          (product.status ?? "active") === "active"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        {(product.status ?? "active") === "active"
+                          ? "Active"
+                          : "Draft"}
+                      </span>
+
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                          (product.stockStatus ?? "in_stock") === "in_stock"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-red-50 text-red-700"
+                        }`}
+                      >
+                        {(product.stockStatus ?? "in_stock") === "in_stock"
+                          ? "In Stock"
+                          : "Out of Stock"}
+                      </span>
+                    </div>
                     <p className="mt-1 text-sm text-zinc-600">
-                      {product.actualPrice && product.actualPrice > product.price ? (
+                      {product.actualPrice &&
+                      product.actualPrice > product.price ? (
                         <>
-                          <span className="line-through">AED {product.actualPrice}</span>{" "}
-                          <span className="font-semibold text-emerald-700">AED {product.price}</span>
+                          <span className="line-through">
+                            AED {product.actualPrice}
+                          </span>{" "}
+                          <span className="font-semibold text-emerald-700">
+                            AED {product.price}
+                          </span>
                         </>
                       ) : (
                         <>AED {product.price}</>

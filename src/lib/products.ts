@@ -1,10 +1,19 @@
 import type { CategorySlug } from "@/lib/categories";
 
+export type ProductStatus = "active" | "draft";
+
+export type ProductStockStatus = "in_stock" | "out_of_stock";
+
 export type Product = {
   id?: string;
   name: string;
   slug: string;
   categorySlug: CategorySlug;
+  sku?: string;
+  brand?: string;
+  status?: ProductStatus;
+  stockStatus?: ProductStockStatus;
+  searchKeywords?: string[];
   actualPrice?: number;
   price: number;
   summary: string;
