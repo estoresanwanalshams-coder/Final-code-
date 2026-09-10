@@ -1061,3 +1061,482 @@ a {
 .checkout-form select {
   color: #18181b;
 }
+
+/* =========================================================
+   HM Header Search V2
+   ========================================================= */
+
+.header-search-leading-icon {
+  align-items: center;
+  color: #71717a;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  margin-left: 1rem;
+  transition: color 180ms ease;
+}
+
+.header-search:focus-within .header-search-leading-icon {
+  color: #fa710c;
+}
+
+.header-search input {
+  padding-left: 0.65rem;
+}
+
+.header-search-clear {
+  align-items: center !important;
+  background: transparent !important;
+  border-radius: 9999px;
+  color: #a1a1aa !important;
+  display: flex !important;
+  flex-shrink: 0;
+  height: 2rem !important;
+  justify-content: center;
+  transition:
+    background 160ms ease,
+    color 160ms ease !important;
+  width: 2rem !important;
+}
+
+.header-search-clear:hover {
+  background: #f4f4f5 !important;
+  color: #3f3f46 !important;
+}
+
+.header-search-submit {
+  align-items: center !important;
+  background: #fa710c !important;
+  border-radius: 9999px;
+  color: #ffffff !important;
+  display: flex !important;
+  flex-shrink: 0;
+  height: 2.35rem !important;
+  justify-content: center;
+  margin-right: 0.3rem;
+  transition:
+    background 160ms ease,
+    transform 160ms ease !important;
+  width: 2.35rem !important;
+}
+
+.header-search-submit:hover {
+  background: #e66000 !important;
+  color: #ffffff !important;
+  transform: scale(1.04);
+}
+
+.search-suggestions {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 1rem;
+  box-shadow:
+    0 20px 50px rgba(24, 24, 27, 0.12),
+    0 4px 12px rgba(24, 24, 27, 0.05);
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.55rem);
+  z-index: 80;
+}
+
+.search-suggestions-heading {
+  align-items: center;
+  background: #fafafa;
+  border-bottom: 1px solid #f4f4f5;
+  color: #71717a;
+  display: flex;
+  font-size: 0.68rem;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: 0.11em;
+  padding: 0.7rem 0.9rem;
+  text-transform: uppercase;
+}
+
+.search-suggestions-status {
+  color: #fa710c;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.search-suggestion-item {
+  align-items: center;
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  transition:
+    background 160ms ease,
+    padding-left 160ms ease;
+}
+
+.search-suggestion-item:hover {
+  background: #fff8f3;
+  padding-left: 0.95rem;
+}
+
+.search-view-all {
+  align-items: center !important;
+  background: #fff8f3 !important;
+  border-radius: 0 !important;
+  border-top: 1px solid #ffeddc;
+  color: #c84d06 !important;
+  display: flex !important;
+  font-size: 0.8rem;
+  font-weight: 700;
+  height: auto !important;
+  justify-content: space-between !important;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  width: 100% !important;
+}
+
+.search-view-all:hover {
+  background: #fff1e6 !important;
+  color: #a83e03 !important;
+}
+
+.icon-action:focus-visible,
+.header-search button:focus-visible,
+.search-suggestion-item:focus-visible,
+.search-view-all:focus-visible {
+  outline: 3px solid rgba(250, 113, 12, 0.22);
+  outline-offset: 2px;
+}
+
+.cart-badge {
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.28);
+}
+
+@media (max-width: 767px) {
+  .header-search-leading-icon {
+    margin-left: 0.8rem;
+  }
+
+  .header-search input {
+    font-size: 0.9rem;
+  }
+
+  .header-search-submit {
+    height: 2.2rem !important;
+    width: 2.2rem !important;
+  }
+
+  .search-suggestions {
+    border-radius: 0.85rem;
+    max-height: min(22rem, 60vh);
+    overflow-y: auto;
+  }
+}
+
+/* =========================================================
+   HM Search Suggestions - Final Visual Override
+   ========================================================= */
+
+.site-header .search-suggestions {
+  position: absolute !important;
+  top: calc(100% + 0.6rem) !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 100 !important;
+
+  overflow: hidden !important;
+  border: 1px solid #e4e4e7 !important;
+  border-radius: 16px !important;
+  background: #ffffff !important;
+
+  box-shadow:
+    0 24px 60px rgba(24, 24, 27, 0.14),
+    0 5px 18px rgba(24, 24, 27, 0.06) !important;
+}
+
+.site-header .search-suggestions-heading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  padding: 10px 14px !important;
+  border-bottom: 1px solid #f4f4f5 !important;
+  background: #fafafa !important;
+
+  color: #71717a !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+.site-header .search-suggestions-status {
+  color: #fa710c !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.site-header .search-suggestion-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+
+  min-height: 68px !important;
+  padding: 9px 12px !important;
+
+  border-bottom: 1px solid #f4f4f5 !important;
+  background: #ffffff !important;
+
+  text-decoration: none !important;
+
+  transition:
+    background-color 160ms ease,
+    padding-left 160ms ease !important;
+}
+
+.site-header .search-suggestion-item:hover {
+  padding-left: 16px !important;
+  background: #fff8f3 !important;
+}
+
+.site-header .search-suggestion-item > span:first-child {
+  position: relative !important;
+  display: block !important;
+
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  flex: 0 0 52px !important;
+
+  overflow: hidden !important;
+  border: 1px solid #eeeeee !important;
+  border-radius: 11px !important;
+  background: #fafafa !important;
+}
+
+.site-header .search-suggestion-item > span:first-child img {
+  object-fit: contain !important;
+  padding: 4px !important;
+}
+
+.site-header .search-suggestion-item > span:nth-child(2) {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.site-header .search-suggestion-item > svg {
+  width: 16px !important;
+  height: 16px !important;
+  flex: 0 0 16px !important;
+  color: #a1a1aa !important;
+}
+
+.site-header .search-suggestion-item:hover > svg {
+  color: #fa710c !important;
+}
+
+.site-header .search-view-all {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  width: 100% !important;
+  height: auto !important;
+
+  padding: 12px 15px !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: #fff7ed !important;
+  color: #c2410c !important;
+
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: left !important;
+}
+
+.site-header .search-view-all:hover {
+  background: #ffedd5 !important;
+  color: #9a3412 !important;
+}
+
+@media (max-width: 767px) {
+  .site-header .search-suggestions {
+    max-height: min(420px, 60vh) !important;
+    overflow-y: auto !important;
+    border-radius: 14px !important;
+  }
+
+  .site-header .search-suggestion-item {
+    min-height: 64px !important;
+    padding: 8px 10px !important;
+  }
+
+  .site-header .search-suggestion-item > span:first-child {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    flex-basis: 48px !important;
+  }
+}
+
+/* Homepage curated shelves */
+
+.home-product-track-compact {
+  overflow-x: visible;
+  padding-right: 0;
+}
+
+.home-product-track-compact .home-product-item {
+  flex-basis: min(18rem, 100%);
+}
+
+@media (min-width: 640px) {
+  .home-product-track-compact {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 18rem));
+    justify-content: start;
+  }
+
+  .home-product-track-compact .home-product-item {
+    width: auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .home-product-track-compact {
+    overflow-x: auto;
+    padding-right: 3rem;
+  }
+}
+
+/* =========================================================
+   HM Mobile Storefront Polish
+   ========================================================= */
+
+@media (max-width: 767px) {
+  /* Give the homepage campaign more presence on mobile */
+  .banner-carousel,
+  .banner-carousel-slide {
+    min-height: 245px;
+  }
+
+  /* Mobile users swipe the product carousels */
+  .home-product-section .slider-arrow {
+    display: none;
+  }
+
+  /* Slightly cleaner horizontal product browsing */
+  .home-product-track {
+    gap: 0.8rem;
+    padding-right: 2.75rem;
+    scrollbar-width: none;
+  }
+
+  .home-product-track::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* =========================================================
+   HM Mobile Header Search Layout Fix
+   ========================================================= */
+
+@media (max-width: 1023px) {
+  /* Never show the desktop search inside the mobile top row */
+  .site-header .header-search-wrap {
+    display: none !important;
+  }
+
+  /* Mobile search opens as its own full-width row */
+  .site-header .header-search-panel-mobile {
+    display: block !important;
+    width: 100%;
+    padding: 0.65rem 1rem 0.75rem;
+    background: #ffffff;
+    border-top: 1px solid #f4f4f5;
+  }
+
+  .site-header .header-search-panel-mobile > div {
+    width: 100%;
+    max-width: none;
+  }
+
+  .site-header .header-search-panel-mobile .header-search {
+    width: 100%;
+    height: 2.8rem;
+  }
+
+  .site-header .header-search-panel-mobile .search-suggestions {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .site-header .header-search-panel-mobile {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* =========================================================
+   HM Mobile Trust Section
+   ========================================================= */
+
+@media (max-width: 767px) {
+  .home-trust-section {
+    margin-top: 1.5rem;
+    padding: 1rem 0.75rem;
+    border: 1px solid #e4e4e7;
+    border-radius: 1rem;
+    background: #ffffff;
+  }
+
+  .home-trust-section-heading {
+    margin-bottom: 0.75rem;
+  }
+
+  .home-trust-section-heading p {
+    font-size: 0.65rem;
+    letter-spacing: 0.16em;
+  }
+
+  .home-trust-section-heading h2 {
+    margin-top: 0.2rem;
+    font-size: 1rem;
+    line-height: 1.35rem;
+  }
+
+  .home-trust-section .feature-highlights {
+    gap: 0;
+  }
+
+  .home-trust-section .feature-highlight-item {
+    border-radius: 0;
+    background: transparent;
+    padding: 0.65rem 0.35rem;
+  }
+
+  .home-trust-section .feature-highlight-icon {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    box-shadow: none;
+    background: #fff7ed;
+  }
+
+  .home-trust-section .feature-highlight-title {
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    line-height: 1rem;
+  }
+
+  .home-trust-section .feature-highlight-description {
+    margin-top: 0.15rem;
+    font-size: 0.62rem;
+    line-height: 0.9rem;
+  }
+}

@@ -56,9 +56,9 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="border-t border-zinc-200 bg-zinc-950 text-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-10 sm:grid-cols-2 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-5 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-8 sm:grid-cols-2 sm:gap-10 sm:px-6 sm:py-12 lg:grid-cols-5 lg:px-8">
         {/* Brand */}
-        <div>
+        <div className="col-span-2 sm:col-span-2 lg:col-span-1">
           <Link href="/" className="brand-text inline-flex items-center">
             <Image
               src="/hm-shoponline-logo-footer1.png"
@@ -69,7 +69,7 @@ export function Footer() {
             />
           </Link>
 
-          <p className="mt-4 max-w-md text-sm leading-6 text-zinc-300">
+          <p className="mt-3 max-w-md text-sm leading-6 text-zinc-300">
             HM Shop Online is your UAE destination for trending products, useful
             everyday essentials, gadgets, home & kitchen finds, beauty products,
             toys, and more — bringing great value and convenient shopping
@@ -116,7 +116,7 @@ export function Footer() {
         </div>
 
         {/* Contact */}
-        <div>
+        <div className="col-span-2 lg:col-span-1">
           <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Contact
           </h2>
@@ -136,18 +136,18 @@ export function Footer() {
           </div>
         </div>
 
-        <div>
+        <div className="col-span-2 lg:col-span-1">
           <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-zinc-400">
             Follow us
           </h2>
-          <nav className="mt-4 flex flex-col gap-3">
+          <nav className="mt-4 flex flex-wrap gap-3">
             {socialLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-fit items-center gap-2 text-sm text-zinc-300 transition hover:text-white"
+                className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 px-3 py-2 text-sm text-zinc-300 transition hover:border-zinc-500 hover:text-white"
               >
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-600">
                   {link.icon}
@@ -160,7 +160,7 @@ export function Footer() {
       </div>
 
       {/* Bottom */}
-      <div className="border-t border-white/10 px-4 py-5 text-center text-sm text-zinc-400">
+      <div className="border-t border-white/10 px-4 py-4 text-center text-xs leading-5 text-zinc-400 sm:py-5 sm:text-sm">
         <p>&copy; 2026 HM Shop Online. All rights reserved.</p>
 
         <p className="mt-2">

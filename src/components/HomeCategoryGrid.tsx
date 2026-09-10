@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryVisual } from "@/components/CategoryVisual";
 
 type HomeCategory = {
   name: string;
@@ -8,22 +9,6 @@ type HomeCategory = {
 type HomeCategoryGridProps = {
   categories: HomeCategory[];
 };
-
-const categoryIcons: Record<string, string> = {
-  "home-and-kitchen": "🏠",
-  "electronic-gadgets": "🎧",
-  "baby-toys": "🧸",
-  automative: "🚗",
-  automotive: "🚗",
-  "health-beauty": "✨",
-  "health-and-beauty": "✨",
-  "tools-home-improvement": "🛠️",
-  "tools-and-home-improvement": "🛠️",
-};
-
-function getCategoryIcon(slug: string) {
-  return categoryIcons[slug] ?? "🛍️";
-}
 
 export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
   if (categories.length === 0) {
@@ -38,20 +23,22 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
             Explore HM
           </p>
 
-          <h2 className="mt-1 text-2xl font-bold text-zinc-950 sm:text-3xl">
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-zinc-950 sm:text-3xl">
             Shop by Category
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-            Find useful everyday products across our most popular collections.
+            Discover useful products for home, family, lifestyle and everyday
+            needs.
           </p>
         </div>
 
         <Link
           href="/categories"
-          className="hidden text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:inline"
+          className="hidden items-center gap-1 text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:inline-flex"
         >
-          View All →
+          View All
+          <span aria-hidden="true">→</span>
         </Link>
       </div>
 
@@ -60,28 +47,38 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
           <Link
             key={category.slug}
             href={`/categories/${category.slug}`}
-            className="group rounded-2xl border border-zinc-200 bg-white p-4 text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:border-orange-200 hover:shadow-md sm:p-5"
+            className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-lg"
           >
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-orange-50 text-2xl transition group-hover:bg-orange-100 sm:h-16 sm:w-16 sm:text-3xl">
-              {getCategoryIcon(category.slug)}
+            <CategoryVisual
+              slug={category.slug}
+              className="aspect-[4/3] w-full"
+            />
+
+            <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4">
+              <h3 className="line-clamp-2 text-sm font-bold leading-5 text-zinc-950 transition group-hover:text-orange-700">
+                {category.name}
+              </h3>
+
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-orange-600">
+                Shop now
+                <span
+                  aria-hidden="true"
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  →
+                </span>
+              </span>
             </div>
-
-            <h3 className="mt-3 text-sm font-bold leading-5 text-zinc-900">
-              {category.name}
-            </h3>
-
-            <span className="mt-2 inline-block text-xs font-semibold text-orange-600">
-              Shop Now
-            </span>
           </Link>
         ))}
       </div>
 
       <Link
         href="/categories"
-        className="mt-4 inline-flex text-sm font-bold text-orange-600 sm:hidden"
+        className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-orange-600 sm:hidden"
       >
-        View All Categories →
+        View All Categories
+        <span aria-hidden="true">→</span>
       </Link>
     </section>
   );

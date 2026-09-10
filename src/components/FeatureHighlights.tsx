@@ -32,24 +32,24 @@ export function FeatureHighlights({
     <div
       className={
         compact
-          ? "grid grid-cols-2 gap-3 sm:grid-cols-4"
-          : "mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4"
+          ? "feature-highlights grid grid-cols-2 gap-3 sm:grid-cols-4"
+          : "feature-highlights mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4"
       }
     >
       {featureItems.map((item) => (
         <div
           key={item.title}
-          className="group rounded-xl bg-zinc-50 p-3 text-center transition duration-200 hover:bg-orange-50"
+          className="feature-highlight-item group rounded-xl bg-zinc-50 p-3 text-center transition duration-200 hover:bg-orange-50"
         >
-          <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg shadow-sm">
+          <div className="feature-highlight-icon mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg shadow-sm">
             {item.icon}
           </div>
 
-          <p className="mt-2 text-sm font-semibold text-zinc-900">
+          <p className="feature-highlight-title mt-2 text-sm font-semibold text-zinc-900">
             {item.title}
           </p>
 
-          <p className="mt-1 text-xs leading-5 text-zinc-600">
+          <p className="feature-highlight-description mt-1 text-xs leading-5 text-zinc-600">
             {item.description}
           </p>
         </div>

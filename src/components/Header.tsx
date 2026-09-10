@@ -77,8 +77,8 @@ export function Header() {
   }
 
   return (
-    <header className="site-header sticky top-0 z-50 border-b border-zinc-200 !bg-white backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:gap-3 sm:px-6 sm:py-3 lg:px-8 lg:py-4">
+    <header className="site-header sticky top-0 z-50 border-b border-zinc-200/80 bg-white/95 shadow-[0_1px_0_rgba(0,0,0,0.02)] backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 sm:px-6 lg:gap-5 lg:px-8 lg:py-3">
         <Link
           href="/"
           className="brand-text shrink-0"
@@ -90,7 +90,7 @@ export function Header() {
             width={160}
             height={64}
             priority
-            className="h-10 w-auto object-contain sm:h-12 lg:h-16"
+            className="h-10 w-auto object-contain sm:h-12 lg:h-14"
           />
         </Link>
 
@@ -148,16 +148,33 @@ export function Header() {
         </div>
       ) : null}
 
-      <div className="border-t border-zinc-100">
-        <div className="mx-auto hidden max-w-7xl items-center gap-8 px-4 py-3.5 sm:px-6 lg:flex lg:px-8">
+      <div className="border-t border-zinc-100 bg-white">
+        <div className="mx-auto hidden max-w-7xl items-center gap-9 px-4 py-2.5 sm:px-6 lg:flex lg:px-8">
           <Link href="/" className="nav-link">
             Home
           </Link>
           <div className="group relative py-2">
-            <Link href="/categories" className="nav-link flex items-center">
+            <Link
+              href="/categories"
+              className="nav-link flex items-center gap-1.5"
+            >
               Categories
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                fill="none"
+                className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180"
+              >
+                <path
+                  d="m6 8 4 4 4-4"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </Link>
-            <div className="dropdown-panel invisible absolute left-0 top-full w-64 border border-zinc-200 bg-white p-3 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100">
+            <div className="dropdown-panel invisible absolute left-0 top-full z-50 w-72 translate-y-1 rounded-2xl border border-zinc-200 bg-white p-3 opacity-0 shadow-[0_18px_45px_rgba(0,0,0,0.12)] transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
               <div className="flex flex-col">
                 <DynamicCategoryLinks />
               </div>
