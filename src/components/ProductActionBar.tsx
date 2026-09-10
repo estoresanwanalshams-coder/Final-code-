@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/AddToCartButton";
-import { upsertCartProductQuantity } from "@/lib/cart";
+import {
+  isProductAvailableForPurchase,
+  upsertCartProductQuantity,
+} from "@/lib/cart";
 import type { Product } from "@/lib/products";
 
 type ProductActionBarProps = {
@@ -15,8 +18,13 @@ const whatsappNumber = "971562300750";
 export function ProductActionBar({ product }: ProductActionBarProps) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
+  const isAvailable = isProductAvailableForPurchase(product);
 
   function handleBuyNow() {
+    if (!isAvailable) {
+      return;
+    }
+
     upsertCartProductQuantity(product, quantity);
     router.push(`/inquiry/${product.slug}?qty=${quantity}`);
   }
@@ -50,14 +58,15 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
     <div className="mt-6 border-t border-zinc-100 pt-6">
       <div>
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-zinc-500">
-  Quantity
-</p>
+          Quantity
+        </p>
 
         <div className="inline-flex items-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm">
           <button
+            disabled={!isAvailable}
             type="button"
             onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-            className="flex h-11 w-11 items-center justify-center border-r border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50"
+            className="flex h-11 w-11 items-center justify-center border-r border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Decrease quantity"
           >
             −
@@ -68,9 +77,10 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
           </span>
 
           <button
+            disabled={!isAvailable}
             type="button"
             onClick={() => setQuantity((current) => current + 1)}
-            className="flex h-11 w-11 items-center justify-center border-l border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50"
+            className="flex h-11 w-11 items-center justify-center border-l border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Increase quantity"
           >
             +
@@ -88,9 +98,14 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
         <button
           type="button"
           onClick={handleBuyNow}
-          className="flex min-h-12 items-center justify-center rounded-xl bg-[#fa710c] px-3 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#e66000] active:scale-[0.98] sm:px-5"
+          disabled={!isAvailable}
+          className={`flex min-h-12 items-center justify-center rounded-xl px-3 py-3 text-sm font-bold transition sm:px-5 ${
+            isAvailable
+              ? "bg-[#fa710c] text-white shadow-sm hover:bg-[#e66000] active:scale-[0.98]"
+              : "cursor-not-allowed bg-zinc-100 text-zinc-500"
+          }`}
         >
-          Buy Now
+          {isAvailable ? "Buy Now" : "Out of Stock"}
         </button>
       </div>
 

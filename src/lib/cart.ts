@@ -7,6 +7,13 @@ export type CartItem = {
 
 export const cartStorageKey = "storefront-cart";
 
+export function isProductAvailableForPurchase(product: Product) {
+  const isActive = (product.status ?? "active") === "active";
+  const isInStock = (product.stockStatus ?? "in_stock") === "in_stock";
+
+  return isActive && isInStock;
+}
+
 export function getCartItems() {
   if (typeof window === "undefined") {
     return [];
@@ -58,6 +65,9 @@ export function saveCartItems(items: CartItem[]) {
 }
 
 export function addProductToCart(product: Product) {
+  if (!isProductAvailableForPurchase(product)) {
+  return;
+}
   const items = getCartItems();
   const existingItem = items.find((item) => item.product.slug === product.slug);
 
@@ -71,6 +81,9 @@ export function addProductToCart(product: Product) {
 }
 
 export function addProductToCartWithQuantity(product: Product, quantity: number) {
+  if (!isProductAvailableForPurchase(product)) {
+    return;
+  }
   const safeQuantity = Math.max(1, Math.floor(quantity));
   const items = getCartItems();
   const existingItem = items.find((item) => item.product.slug === product.slug);
@@ -101,6 +114,9 @@ export function getApplicableShippingCharge(
 }
 
 export function upsertCartProductQuantity(product: Product, quantity: number) {
+  if (!isProductAvailableForPurchase(product)) {
+    return;
+  }
   const safeQuantity = Math.max(1, Math.floor(quantity));
   const items = getCartItems();
   const existingIndex = items.findIndex((item) => item.product.slug === product.slug);

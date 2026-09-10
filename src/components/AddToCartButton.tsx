@@ -1,7 +1,10 @@
 "use client";
 
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { addProductToCartWithQuantity } from "@/lib/cart";
+import {
+  addProductToCartWithQuantity,
+  isProductAvailableForPurchase,
+} from "@/lib/cart";
 import type { Product } from "@/lib/products";
 
 type AddToCartButtonProps = {
@@ -19,8 +22,12 @@ export const AddToCartButton = memo(function AddToCartButton({
 }: AddToCartButtonProps) {
   const [added, setAdded] = useState(false);
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isAvailable = isProductAvailableForPurchase(product);
 
   const handleAddToCart = useCallback(() => {
+    if (!isAvailable) {
+      return;
+    }
     addProductToCartWithQuantity(product, quantity);
 
     setAdded(true);
@@ -33,7 +40,7 @@ export const AddToCartButton = memo(function AddToCartButton({
       setAdded(false);
       resetTimer.current = null;
     }, 1400);
-  }, [product, quantity]);
+  }, [isAvailable, product, quantity]);
 
   useEffect(() => {
     return () => {
@@ -47,8 +54,13 @@ export const AddToCartButton = memo(function AddToCartButton({
     <button
       type="button"
       onClick={handleAddToCart}
+      disabled={!isAvailable}
       className={`${className} ${
-        added ? "!bg-emerald-600 hover:!bg-emerald-600" : ""
+        !isAvailable
+          ? "!cursor-not-allowed !border-zinc-200 !bg-zinc-100 !text-zinc-500 !shadow-none hover:!translate-y-0 hover:!bg-zinc-100"
+          : added
+            ? "!bg-emerald-600 hover:!bg-emerald-600"
+            : ""
       }`}
       aria-live="polite"
     >
@@ -57,7 +69,9 @@ export const AddToCartButton = memo(function AddToCartButton({
           added ? "scale-105" : "scale-100"
         }`}
       >
-        {added ? (
+        {!isAvailable ? (
+          <span>Out of Stock</span>
+        ) : added ? (
           <>
             <svg
               viewBox="0 0 24 24"
