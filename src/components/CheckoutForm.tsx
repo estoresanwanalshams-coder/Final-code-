@@ -227,9 +227,9 @@ export function CheckoutForm({
     <>
       <form
         onSubmit={handleSubmit}
-        className="checkout-form checkout-form-panel grid gap-5 p-6 sm:p-8 lg:p-10 md:grid-cols-2"
+        className="checkout-form checkout-form-panel grid gap-x-5 gap-y-5 p-5 sm:p-8 lg:p-10 md:grid-cols-2"
       >
-        <div className="md:col-span-2">
+        <div className="border-b border-zinc-100 pb-3 md:col-span-2">
           <p className="text-base font-bold text-zinc-950">
             Contact Information
           </p>
@@ -348,10 +348,23 @@ export function CheckoutForm({
             placeholder="e.g. Near metro, mall, mosque"
           />
         </label>
-        <div className="md:col-span-2 overflow-hidden rounded-xl border border-orange-200 bg-orange-50/50">
-          <div className="flex items-start gap-3 p-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-lg">
-              ✓
+        <div className="overflow-hidden rounded-2xl border border-orange-200 bg-orange-50/60 md:col-span-2">
+          <div className="flex items-start gap-3 p-4 sm:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[#fa710c]">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="h-5 w-5"
+                aria-hidden="true"
+              >
+                <path
+                  d="m6 12 4 4 8-8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
 
             <div className="min-w-0 flex-1">
@@ -380,7 +393,7 @@ export function CheckoutForm({
         </div>
 
         <label className="form-field md:col-span-2">
-          Additional Notes
+          Additional Notes (Optional)
           <textarea
             value={additionalNotes}
             onChange={(event) => setAdditionalNotes(event.target.value)}
@@ -406,12 +419,12 @@ export function CheckoutForm({
 
             <div className="min-w-0">
               <p className="text-sm font-bold text-zinc-950">
-                Confirm your order with confidence
+                Ready to place your order?
               </p>
 
               <p className="mt-1 text-xs leading-5 text-zinc-600">
-                No online payment is required. Your order will be placed as Cash
-                on Delivery.
+                Please review your contact and delivery details before placing
+                the order.
               </p>
             </div>
           </div>
@@ -423,7 +436,7 @@ export function CheckoutForm({
         >
           {isSubmitting
             ? "Placing Order..."
-            : `Place Order • AED ${grandTotal}`}
+            : `Place Order | AED ${grandTotal}`}
         </button>
         <p className="mt-3 text-center text-xs leading-5 text-zinc-500 md:col-span-2">
           By placing your order, you confirm that your contact and delivery

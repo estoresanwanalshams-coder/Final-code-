@@ -47,11 +47,13 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
   }
 
   return (
-    <div className="mt-7">
+    <div className="mt-6 border-t border-zinc-100 pt-6">
       <div>
-        <p className="mb-2 text-sm font-semibold text-zinc-800">Quantity</p>
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-zinc-500">
+  Quantity
+</p>
 
-        <div className="inline-flex items-center overflow-hidden rounded-xl border border-zinc-300 bg-white">
+        <div className="inline-flex items-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm">
           <button
             type="button"
             onClick={() => setQuantity((current) => Math.max(1, current - 1))}
@@ -76,17 +78,17 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-5 grid grid-cols-2 gap-3">
         <AddToCartButton
           product={product}
           quantity={quantity}
-          className="flex min-h-12 items-center justify-center rounded-xl border-2 border-[#FF6B00] bg-white px-5 py-3 text-sm font-bold text-[#FF6B00] transition hover:bg-orange-50"
+          className="flex min-h-12 items-center justify-center rounded-xl border-2 border-[#fa710c] bg-white px-3 py-3 text-center text-sm font-bold text-[#fa710c] transition hover:bg-orange-50 active:scale-[0.98] sm:px-5"
         />
 
         <button
           type="button"
           onClick={handleBuyNow}
-          className="flex min-h-12 items-center justify-center rounded-xl bg-[#FF6B00] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#e85f00]"
+          className="flex min-h-12 items-center justify-center rounded-xl bg-[#fa710c] px-3 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#e66000] active:scale-[0.98] sm:px-5"
         >
           Buy Now
         </button>
@@ -95,7 +97,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
       <button
         type="button"
         onClick={handleWhatsAppOrder}
-        className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-600 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100"
+        className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 active:scale-[0.99]"
       >
         <svg
           aria-hidden="true"

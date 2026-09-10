@@ -32,7 +32,9 @@ export function InquiryOrderSummary({
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
-      const settings = await fetchSiteSettings().catch(() => defaultSiteSettings);
+      const settings = await fetchSiteSettings().catch(
+        () => defaultSiteSettings,
+      );
       setBaseShippingCharge(settings.shippingCharge);
     }, 0);
 
@@ -75,14 +77,14 @@ export function InquiryOrderSummary({
             key={item.product.slug}
             className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-2"
           >
-            <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-white">
               <Image
                 src={item.product.imageUrl}
                 alt={item.product.name}
                 fill
-                sizes="56px"
+                sizes="64px"
                 loading="lazy"
-                className="object-cover"
+                className="object-contain p-1"
               />
             </span>
             <span className="min-w-0 flex-1 text-sm font-semibold text-zinc-900">
@@ -102,14 +104,14 @@ export function InquiryOrderSummary({
         </div>
         <div className="flex justify-between">
           <span>Shipping</span>
-          <span>
-            {shippingCharge === 0 ? "Free" : `AED ${shippingCharge}`}
-          </span>
+          <span>{shippingCharge === 0 ? "Free" : `AED ${shippingCharge}`}</span>
         </div>
       </div>
-      <div className="mt-2 flex justify-between text-lg font-bold text-zinc-950">
-        <span>Total</span>
-        <span>AED {total}</span>
+      <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4 text-zinc-950">
+        <span className="font-bold">Total</span>
+        <span className="text-2xl font-extrabold tracking-tight">
+          AED {total}
+        </span>
       </div>
     </div>
   );

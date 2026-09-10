@@ -67,22 +67,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <section className="page-shell bg-zinc-50">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1fr]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div className="grid items-start gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:gap-10">
           <ProductMediaGallery
             images={product.imageUrls ?? [product.imageUrl]}
             videoUrl={product.videoUrl}
           />
 
           <div className="flex flex-col">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
+            <div className="rounded-[24px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 lg:p-7">
               {category?.name ? (
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
                   {category.name}
                 </p>
               ) : null}
 
-              <h1 className="mt-3 text-2xl font-bold leading-tight text-zinc-950 sm:text-3xl">
+              <h1 className="mt-3 text-2xl font-bold leading-[1.2] tracking-tight text-zinc-950 sm:text-3xl lg:text-[2rem]">
                 {product.name}
               </h1>
 
@@ -106,7 +106,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </div>
                 ) : null}
 
-                <p className="text-3xl font-bold tracking-tight text-zinc-950">
+                <p className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-[2rem]">
                   AED {product.price}
                 </p>
 
@@ -123,7 +123,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
 
-        <div className="mt-10 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+        <div className="mt-8 overflow-hidden rounded-[24px] border border-zinc-200 bg-white shadow-sm sm:mt-10">
           <div className="border-b border-zinc-100 px-5 py-5 sm:px-7">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
               About this product
@@ -140,7 +140,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
           </div>
 
-          <div className="grid border-t border-zinc-100 sm:grid-cols-3">
+          <div className="grid border-t border-zinc-100 bg-zinc-50/60 sm:grid-cols-3">
             <div className="border-b border-zinc-100 px-5 py-4 sm:border-b-0 sm:border-r sm:px-7">
               <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
                 Delivery
@@ -171,10 +171,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {relatedProducts.length > 0 ? (
-          <div className="mt-14">
-            <h2 className="text-2xl font-bold text-zinc-950">
-              Related Products
-            </h2>
+          <div className="mt-12 sm:mt-14">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">
+              You may also like
+            </p>
+
+            <div className="mt-1 flex items-end justify-between gap-4">
+              <h2 className="text-2xl font-bold tracking-tight text-zinc-950 sm:text-3xl">
+                Related Products
+              </h2>
+            </div>
             <div className="mt-7 grid grid-cols-2 gap-4 lg:grid-cols-4">
               {relatedProducts.map((relatedProduct, index) => (
                 <ProductCard

@@ -105,7 +105,7 @@ export function CartView() {
 
   return (
     <section className="page-shell">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <div className="content-reveal">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
             Your cart
@@ -129,17 +129,17 @@ export function CartView() {
           </div>
         </div>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-6 grid items-start gap-6 sm:mt-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
           <div className="content-reveal space-y-4">
             {items.map((item) => (
               <article
                 key={item.product.slug}
-                className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5"
+                className="rounded-[20px] border border-zinc-200 bg-white p-3 shadow-sm transition hover:border-zinc-300 sm:p-5"
               >
                 <div className="flex gap-4">
                   <Link
                     href={`/products/${item.product.slug}`}
-                    className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-zinc-100 sm:h-28 sm:w-28"
+                    className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50 sm:h-28 sm:w-28"
                   >
                     <Image
                       src={item.product.imageUrl}
@@ -147,7 +147,7 @@ export function CartView() {
                       fill
                       sizes="112px"
                       loading="lazy"
-                      className="object-cover"
+                      className="object-contain p-1"
                     />
                   </Link>
 
@@ -170,7 +170,7 @@ export function CartView() {
                     ) : null}
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-                      <div className="inline-flex items-center rounded-xl border border-zinc-200 bg-zinc-50">
+                      <div className="inline-flex items-center overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shadow-sm">
                         <button
                           type="button"
                           onClick={() =>
@@ -215,7 +215,7 @@ export function CartView() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.product.slug)}
-                      className="mt-4 text-sm font-bold text-red-600 transition hover:text-red-700"
+                      className="mt-3 inline-flex text-xs font-bold text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition hover:text-red-600"
                     >
                       Remove
                     </button>
@@ -225,8 +225,15 @@ export function CartView() {
             ))}
           </div>
 
-          <aside className="content-reveal h-fit rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm lg:sticky lg:top-28">
-            <h2 className="text-xl font-bold text-zinc-950">Order Summary</h2>
+          <aside className="content-reveal h-fit rounded-[24px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-28">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+                Your order
+              </p>
+              <h2 className="mt-1 text-xl font-bold tracking-tight text-zinc-950">
+                Order Summary
+              </h2>
+            </div>
 
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex justify-between text-zinc-600">
@@ -249,15 +256,15 @@ export function CartView() {
               </div>
             </div>
 
-            <div className="mt-5 border-t border-zinc-200 pt-5">
+            <div className="mt-5 border-y border-zinc-100 py-5">
               <div className="flex items-center justify-between">
                 <span className="text-base font-bold text-zinc-950">Total</span>
-                <span className="text-2xl font-bold text-zinc-950">
+                <span className="text-2xl font-extrabold tracking-tight text-zinc-950">
                   AED {grandTotal}
                 </span>
               </div>
             </div>
-            <div className="mb-4 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
+            <div className="mt-5 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
               <div className="flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#fa710c] shadow-sm">
                   <svg
@@ -288,9 +295,13 @@ export function CartView() {
             </div>
             <Link
               href={`/inquiry/${items[0]?.product.slug ?? ""}`}
-              className="mt-5 flex w-full items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3.5 text-sm font-bold text-white transition hover:bg-[#e66000]"
+              className="mt-5 flex min-h-13 w-full items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e66000] active:scale-[0.99]"
             >
-              Proceed to Checkout • AED {grandTotal}
+              Proceed to Checkout
+              <span className="mx-2 text-orange-200" aria-hidden="true">
+                |
+              </span>
+              AED {grandTotal}
             </Link>
 
             <Link
@@ -301,7 +312,7 @@ export function CartView() {
             </Link>
 
             <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
-              UAE delivery • Cash on Delivery • Easy returns
+              UAE delivery | Cash on Delivery | Easy returns
             </p>
           </aside>
         </div>
