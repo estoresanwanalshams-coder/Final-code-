@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/products";
 import {
   deleteSupabaseProduct,
@@ -20,6 +20,31 @@ export function AdminProductsManager({
   initialProducts: Product[];
 }) {
   const [products, setProducts] = useState(initialProducts);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAdminProducts() {
+      try {
+        const nextProducts = await fetchSupabaseProducts();
+
+        if (active) {
+          setProducts(nextProducts);
+        }
+      } finally {
+        if (active) {
+          setIsLoadingProducts(false);
+        }
+      }
+    }
+
+    void loadAdminProducts();
+
+    return () => {
+      active = false;
+    };
+  }, []);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
@@ -217,7 +242,11 @@ export function AdminProductsManager({
             </select>
           </div>
         </div>
-
+{isLoadingProducts ? (
+  <p className="mt-5 text-sm font-semibold text-zinc-500">
+    Loading complete admin catalog...
+  </p>
+) : null}
         <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="hidden grid-cols-[minmax(340px,2fr)_140px_180px_120px_160px_120px] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3 text-xs font-bold uppercase tracking-wider text-zinc-400 xl:grid">
             <div>Product</div>
@@ -447,10 +476,7 @@ function formatCategory(value: string) {
     categoryNames[value] ??
     value
       .split("-")
-      .map(
-        (part) =>
-          part.charAt(0).toUpperCase() + part.slice(1),
-      )
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ")
   );
 }
