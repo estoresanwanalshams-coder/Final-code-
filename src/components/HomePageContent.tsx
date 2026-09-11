@@ -13,22 +13,10 @@ function pickProducts(sourceProducts: Product[], selectedSlugs: string[]) {
     return [];
   }
 
-  const selectedProducts = selectedSlugs
+  return selectedSlugs
     .map((slug) => sourceProducts.find((product) => product.slug === slug))
-    .filter(Boolean) as Product[];
-
-  return selectedProducts.length > 0
-    ? selectedProducts.slice(0, 8)
-    : sourceProducts.slice(0, 8);
-}
-
-function getAutoNewArrivalSlugs(
-  sourceProducts: Product[],
-  selectedSlugs: string[],
-) {
-  const latestSlugs = sourceProducts.slice(0, 4).map((product) => product.slug);
-
-  return Array.from(new Set([...latestSlugs, ...selectedSlugs])).slice(0, 8);
+    .filter(Boolean)
+    .slice(0, 8) as Product[];
 }
 
 export async function HomePageContent() {
@@ -50,10 +38,7 @@ export async function HomePageContent() {
 
   const productSource = productsPage.products;
 
-  const newArrivals = pickProducts(
-    productSource,
-    getAutoNewArrivalSlugs(productSource, settings.newArrivalSlugs),
-  );
+  const newArrivals = productSource.slice(0, 8);
 
   const bestSellers = pickProducts(productSource, settings.bestSellerSlugs);
 
@@ -76,7 +61,7 @@ export async function HomePageContent() {
   return (
     <section className="page-shell">
       <div className="mx-auto max-w-7xl px-4 pb-8 pt-2 sm:px-6 sm:pb-8 sm:pt-3 lg:px-8">
-        <HomeBannerCarousel extraBannerUrl={settings.bannerImageUrl} />
+        <HomeBannerCarousel banners={settings.bannerSlides} />
 
         <HomeCategoryGrid categories={homepageCategories} />
 

@@ -1,41 +1,26 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { homeBannerSlides } from "@/lib/banners";
+import { useEffect, useState } from "react";
+import type { HomepageBanner } from "@/lib/site-settings";
+import Link from "next/link";
 
 type HomeBannerCarouselProps = {
-  extraBannerUrl?: string;
+  banners: HomepageBanner[];
 };
 
-export function HomeBannerCarousel({
-  extraBannerUrl,
-}: HomeBannerCarouselProps) {
-  const slides = useMemo(() => {
-    const urls = [...homeBannerSlides];
-
-    if (
-      extraBannerUrl &&
-      extraBannerUrl.startsWith("/") &&
-      !urls.includes(extraBannerUrl)
-    ) {
-      urls.unshift(extraBannerUrl);
-    }
-
-    return urls;
-  }, [extraBannerUrl]);
+export function HomeBannerCarousel({ banners }: HomeBannerCarouselProps) {
+  const slides = banners
+    .filter((banner) => banner.isActive && banner.imageUrl.trim())
+    .sort((a, b) => a.displayOrder - b.displayOrder);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  function goToPrevious() {
-    setActiveIndex((current) =>
-      current === 0 ? slides.length - 1 : current - 1,
-    );
-  }
-
-  function goToNext() {
-    setActiveIndex((current) => (current + 1) % slides.length);
-  }
+  useEffect(() => {
+    if (activeIndex >= slides.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, slides.length]);
 
   useEffect(() => {
     if (slides.length <= 1) {
@@ -49,6 +34,20 @@ export function HomeBannerCarousel({
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
+  if (slides.length === 0) {
+    return null;
+  }
+
+  function goToPrevious() {
+    setActiveIndex((current) =>
+      current === 0 ? slides.length - 1 : current - 1,
+    );
+  }
+
+  function goToNext() {
+    setActiveIndex((current) => (current + 1) % slides.length);
+  }
+
   return (
     <section className="banner-carousel content-reveal">
       <div
@@ -57,20 +56,41 @@ export function HomeBannerCarousel({
           transform: `translateX(-${activeIndex * 100}%)`,
         }}
       >
-        {slides.map((slide) => (
-          <div key={slide} className="banner-carousel-slide">
-            <Image
-              src={slide}
-              alt="HM Shop Online featured products"
-              fill
-              loading={slide === slides[0] ? "eager" : "lazy"}
-              priority={slide === slides[0]}
-              sizes="100vw"
-              className="object-cover"
-            />
+        {slides.map((slide, index) => (
+          <div key={slide.id} className="banner-carousel-slide">
+            {slide.linkUrl ? (
+              <Link
+                href={slide.linkUrl}
+                className="absolute inset-0 z-[1] block cursor-pointer"
+                aria-label={`Open banner ${index + 1}`}
+              >
+                <Image
+                  src={slide.imageUrl}
+                  alt={`HM Shop Online banner ${index + 1}`}
+                  fill
+                  unoptimized
+                  loading={index === 0 ? "eager" : "lazy"}
+                  priority={index === 0}
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </Link>
+            ) : (
+              <Image
+                src={slide.imageUrl}
+                alt={`HM Shop Online banner ${index + 1}`}
+                fill
+                unoptimized
+                loading={index === 0 ? "eager" : "lazy"}
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            )}
           </div>
         ))}
       </div>
+
       {slides.length > 1 ? (
         <>
           <button
@@ -94,7 +114,7 @@ export function HomeBannerCarousel({
           <div className="banner-carousel-dots">
             {slides.map((slide, index) => (
               <button
-                key={slide}
+                key={slide.id}
                 type="button"
                 aria-label={`Show banner ${index + 1}`}
                 className={index === activeIndex ? "is-active" : ""}
