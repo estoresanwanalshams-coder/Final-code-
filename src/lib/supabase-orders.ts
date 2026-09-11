@@ -104,7 +104,37 @@ export async function fetchSupabaseOrders() {
 
   return (data ?? []).map((row) => mapOrderRow(row as OrderRow));
 }
+export async function fetchSupabaseOrderByNumber(
+  orderNumber: string,
+) {
+  const normalizedOrderNumber =
+    orderNumber.trim();
 
+  if (!normalizedOrderNumber) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq(
+      "order_number",
+      normalizedOrderNumber,
+    )
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapOrderRow(
+    data as OrderRow,
+  );
+}
 export async function fetchSupabaseOrdersByEmail(email: string) {
   const normalizedEmail = email.trim().toLowerCase();
   const { data, error } = await supabase

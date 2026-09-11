@@ -1,16 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
-  deleteSupabaseOrder,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
   fetchSupabaseOrders,
   type OrderRecord,
   type OrderStatus,
-  updateSupabaseOrder,
-  updateSupabaseOrderStatus,
 } from "@/lib/supabase-orders";
-import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
-import { supabase } from "@/lib/supabase";
 
 const statuses: OrderStatus[] = [
   "pending",
@@ -20,498 +21,521 @@ const statuses: OrderStatus[] = [
   "cancelled",
 ];
 
-const emptyEditForm = {
-  fullName: "",
-  email: "",
-  phone: "",
-  addressLine1: "",
-  addressLine2: "",
-  city: "",
-  shippingMethod: "Standard Shipping",
-  additionalNotes: "",
-  total: "",
-  status: "pending" as OrderStatus,
+const statusLabels: Record<
+  OrderStatus,
+  string
+> = {
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
 };
 
-export function AdminOrdersPanel() {
-  const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [message, setMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
-  const [sortOrder, setSortOrder] = useState<"latest" | "oldest">("latest");
-  const [latestOnly, setLatestOnly] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState(emptyEditForm);
+const statusClasses: Record<
+  OrderStatus,
+  string
+> = {
+  pending:
+    "bg-amber-50 text-amber-700 ring-amber-600/10",
+  processing:
+    "bg-blue-50 text-blue-700 ring-blue-600/10",
+  shipped:
+    "bg-violet-50 text-violet-700 ring-violet-600/10",
+  delivered:
+    "bg-emerald-50 text-emerald-700 ring-emerald-600/10",
+  cancelled:
+    "bg-red-50 text-red-700 ring-red-600/10",
+};
 
-  const loadOrders = useCallback(async () => {
-    try {
-      setOrders(await fetchSupabaseOrders());
-      setMessage("");
-    } catch (error) {
-      const detail =
-        error && typeof error === "object" && "message" in error
-          ? String(error.message)
-          : "Unknown error";
-      setMessage(
-        `Unable to load orders. Run supabase/fix-admin-access.sql. ${detail}`,
-      );
-      setOrders([]);
-    }
-  }, []);
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("en-AE", {
+    style: "currency",
+    currency: "AED",
+    minimumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-AE",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  ).format(date);
+}
+
+export function AdminOrdersPanel() {
+  const [orders, setOrders] =
+    useState<OrderRecord[]>([]);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [searchQuery, setSearchQuery] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState<"all" | OrderStatus>(
+      "all",
+    );
+
+  const [sortOrder, setSortOrder] =
+    useState<"latest" | "oldest">(
+      "latest",
+    );
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const loadOrders =
+    useCallback(async () => {
+      setIsLoading(true);
+
+      try {
+        const data =
+          await fetchSupabaseOrders();
+
+        setOrders(data);
+        setMessage("");
+      } catch (error) {
+        const detail =
+          error &&
+          typeof error === "object" &&
+          "message" in error
+            ? String(error.message)
+            : "Unknown error";
+
+        setOrders([]);
+
+        setMessage(
+          `Unable to load orders. ${detail}`,
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadOrders();
-    }, 0);
+    const timer =
+      window.setTimeout(() => {
+        void loadOrders();
+      }, 0);
 
-    return () => window.clearTimeout(timer);
+    return () =>
+      window.clearTimeout(timer);
   }, [loadOrders]);
 
-  async function updateStatus(id: string, status: OrderStatus) {
-    try {
-      const order = orders.find((item) => item.id === id);
-      await updateSupabaseOrderStatus(id, status);
-      if (order) {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+  const stats = useMemo(
+    () => ({
+      total: orders.length,
 
-        if (session?.access_token) {
-          await fetch("/api/orders/status-notify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              orderNumber: order.orderNumber,
-              fullName: order.fullName,
-              email: order.email,
-              status,
-            }),
-          }).catch(() => null);
-        }
-      }
-      await loadOrders();
-      setMessage("Order status updated.");
-    } catch {
-      setMessage("Unable to update order status.");
-    }
-  }
+      pending: orders.filter(
+        (order) =>
+          order.status === "pending",
+      ).length,
 
-  function startEdit(order: OrderRecord) {
-    setEditingId(order.id);
-    setEditForm({
-      fullName: order.fullName,
-      email: order.email,
-      phone: order.phone,
-      addressLine1: order.addressLine1,
-      addressLine2: order.addressLine2,
-      city: order.city,
-      shippingMethod: order.shippingMethod ?? "Standard Shipping",
-      additionalNotes: order.additionalNotes ?? "",
-      total: String(order.total),
-      status: order.status,
-    });
-  }
+      processing: orders.filter(
+        (order) =>
+          order.status ===
+          "processing",
+      ).length,
 
-  function cancelEdit() {
-    setEditingId(null);
-    setEditForm(emptyEditForm);
-  }
+      delivered: orders.filter(
+        (order) =>
+          order.status ===
+          "delivered",
+      ).length,
+    }),
+    [orders],
+  );
 
-  async function saveEdit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!editingId) {
-      return;
-    }
+  const visibleOrders =
+    useMemo(() => {
+      const query =
+        searchQuery
+          .trim()
+          .toLowerCase();
 
-    if (!isValidPhoneNumber(editForm.phone)) {
-      setMessage("Please enter a valid phone number (7 to 15 digits).");
-      return;
-    }
+      return [...orders]
+        .filter((order) => {
+          if (
+            statusFilter !== "all" &&
+            order.status !==
+              statusFilter
+          ) {
+            return false;
+          }
 
-    const total = Number(editForm.total);
-    if (!Number.isFinite(total) || total < 0) {
-      setMessage("Please enter a valid order total.");
-      return;
-    }
+          if (!query) {
+            return true;
+          }
 
-    try {
-      await updateSupabaseOrder(editingId, {
-        fullName: editForm.fullName,
-        email: editForm.email,
-        phone: editForm.phone,
-        addressLine1: editForm.addressLine1,
-        addressLine2: editForm.addressLine2,
-        city: editForm.city,
-        shippingMethod: editForm.shippingMethod,
-        additionalNotes: editForm.additionalNotes,
-        total,
-        status: editForm.status,
-      });
-      cancelEdit();
-      await loadOrders();
-      setMessage("Order updated.");
-    } catch (error) {
-      const detail =
-        error && typeof error === "object" && "message" in error
-          ? String(error.message)
-          : "Unknown error";
-      setMessage(`Unable to update order: ${detail}`);
-    }
-  }
+          return (
+            order.orderNumber
+              .toLowerCase()
+              .includes(query) ||
+            order.fullName
+              .toLowerCase()
+              .includes(query) ||
+            order.email
+              .toLowerCase()
+              .includes(query) ||
+            order.phone
+              .toLowerCase()
+              .includes(query)
+          );
+        })
+        .sort((a, b) => {
+          const aTime =
+            new Date(
+              a.createdAt,
+            ).getTime();
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Delete this order permanently?")) {
-      return;
-    }
+          const bTime =
+            new Date(
+              b.createdAt,
+            ).getTime();
 
-    try {
-      await deleteSupabaseOrder(id);
-      if (editingId === id) {
-        cancelEdit();
-      }
-      await loadOrders();
-      setMessage("Order deleted.");
-    } catch {
-      setMessage("Unable to delete order.");
-    }
-  }
-
-  const visibleOrders = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    let filtered = orders.filter((order) => {
-      const matchesStatus =
-        statusFilter === "all" || order.status === statusFilter;
-      if (!matchesStatus) {
-        return false;
-      }
-
-      if (!query) {
-        return true;
-      }
-
-      return (
-        order.orderNumber.toLowerCase().includes(query) ||
-        order.fullName.toLowerCase().includes(query) ||
-        order.email.toLowerCase().includes(query) ||
-        order.phone.toLowerCase().includes(query)
-      );
-    });
-
-    filtered = [...filtered].sort((a, b) => {
-      const aTime = new Date(a.createdAt).getTime();
-      const bTime = new Date(b.createdAt).getTime();
-      return sortOrder === "latest" ? bTime - aTime : aTime - bTime;
-    });
-
-    if (latestOnly) {
-      filtered = filtered.slice(0, 10);
-    }
-
-    return filtered;
-  }, [latestOnly, orders, searchQuery, sortOrder, statusFilter]);
+          return sortOrder ===
+            "latest"
+            ? bTime - aTime
+            : aTime - bTime;
+        });
+    }, [
+      orders,
+      searchQuery,
+      sortOrder,
+      statusFilter,
+    ]);
 
   return (
-    <section className="page-shell border-t border-zinc-200">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
-          Orders
-        </p>
-        <h2 className="mt-3 text-3xl font-bold text-zinc-950">
-          Customer orders
-        </h2>
-        {message ? (
-          <p className="mt-4 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-700">
-            {message}
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-500">
+            Orders
           </p>
-        ) : null}
 
-        {editingId ? (
-          <form
-            onSubmit={saveEdit}
-            className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-5 md:grid-cols-2"
-          >
-            <label className="light-form-field">
-              Full name
-              <input
-                value={editForm.fullName}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    fullName: event.target.value,
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field">
-              Email
-              <input
-                type="email"
-                value={editForm.email}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    email: event.target.value,
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field">
-              Phone
-              <input
-                type="tel"
-                value={editForm.phone}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    phone: normalizePhoneInput(event.target.value),
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field">
-              Total (AED)
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={editForm.total}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    total: event.target.value,
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field md:col-span-2">
-              Address line 1
-              <input
-                value={editForm.addressLine1}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    addressLine1: event.target.value,
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field">
-              Address line 2
-              <input
-                value={editForm.addressLine2}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    addressLine2: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <label className="light-form-field">
-              City
-              <input
-                value={editForm.city}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    city: event.target.value,
-                  }))
-                }
-                required
-              />
-            </label>
-            <label className="light-form-field">
-              Status
-              <select
-                value={editForm.status}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    status: event.target.value as OrderStatus,
-                  }))
-                }
-              >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="light-form-field md:col-span-2">
-              Additional notes
-              <textarea
-                rows={2}
-                value={editForm.additionalNotes}
-                onChange={(event) =>
-                  setEditForm((current) => ({
-                    ...current,
-                    additionalNotes: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <div className="flex gap-2 md:col-span-2">
-              <button type="submit" className="btn-soft">
-                Save order
-              </button>
-              <button type="button" onClick={cancelEdit} className="btn-soft">
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : null}
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">
+            Customer Orders
+          </h1>
 
-        <div className="admin-filter-grid mt-5 grid gap-3 md:grid-cols-4">
-          <label className="light-form-field">
-            Search order/customer
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Order ID, name, email, phone"
-            />
-          </label>
-          <label className="light-form-field">
-            Status filter
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as "all" | OrderStatus)
-              }
-            >
-              <option value="all">All statuses</option>
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="light-form-field">
-            Sort by date
-            <select
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(event.target.value as "latest" | "oldest")
-              }
-            >
-              <option value="latest">Latest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </label>
-          <label className="light-form-field">
-            Quick list
-            <select
-              value={latestOnly ? "latest10" : "all"}
-              onChange={(event) =>
-                setLatestOnly(event.target.value === "latest10")
-              }
-            >
-              <option value="all">All matching orders</option>
-              <option value="latest10">Latest 10 orders</option>
-            </select>
-          </label>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
+            Review, manage and fulfil HM
+            Shop Online customer orders.
+          </p>
         </div>
-        <div className="mt-7 space-y-4">
-          {visibleOrders.length === 0 ? (
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-zinc-600">
-              No orders found for the selected filters.
-            </div>
-          ) : null}
-          {visibleOrders.map((order) => (
-            <article
-              key={order.id}
-              className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex flex-col justify-between gap-4 md:flex-row">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-wider text-zinc-500">
-                    {order.orderNumber}
-                  </p>
-                  <h3 className="mt-2 text-xl font-bold text-zinc-950">
-                    {order.fullName}
-                  </h3>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {order.phone} | {order.email}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {order.addressLine1} {order.addressLine2} {order.city}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    Shipping: {order.shippingMethod}
-                  </p>
-                  {order.additionalNotes ? (
-                    <p className="mt-1 text-sm text-zinc-600">
-                      Notes: {order.additionalNotes}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="light-form-field min-w-52">
-                    Status
-                    <select
-                      value={order.status}
-                      onChange={(event) =>
-                        updateStatus(
-                          order.id,
-                          event.target.value as OrderStatus,
-                        )
-                      }
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => startEdit(order)}
-                      className="rounded border border-zinc-300 px-3 py-2 text-xs font-semibold"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void handleDelete(order.id)}
-                      className="rounded border border-red-300 px-3 py-2 text-xs font-semibold text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {order.items.map((item) => (
-                  <div
-                    key={item.product.slug}
-                    className="rounded-xl border border-zinc-200 p-3 text-sm"
-                  >
-                    <p className="font-bold text-zinc-950">
-                      {item.product.name}
-                    </p>
-                    <p className="text-zinc-600">Qty: {item.quantity}</p>
-                    <p className="text-zinc-600">AED {item.product.price}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-5 text-lg font-bold text-zinc-950">
-                Total: AED {order.total}
-              </p>
-            </article>
-          ))}
+
+        <button
+          type="button"
+          onClick={() =>
+            void loadOrders()
+          }
+          disabled={isLoading}
+          className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading
+            ? "Refreshing..."
+            : "Refresh Orders"}
+        </button>
+      </div>
+
+      {message ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+          {message}
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Total Orders"
+          value={stats.total}
+        />
+
+        <StatCard
+          label="Pending"
+          value={stats.pending}
+        />
+
+        <StatCard
+          label="Processing"
+          value={stats.processing}
+        />
+
+        <StatCard
+          label="Delivered"
+          value={stats.delivered}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px_190px]">
+          <input
+            value={searchQuery}
+            onChange={(event) =>
+              setSearchQuery(
+                event.target.value,
+              )
+            }
+            placeholder="Search order number, customer, email or phone..."
+            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-medium text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(
+                event.target.value as
+                  | "all"
+                  | OrderStatus,
+              )
+            }
+            className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold text-zinc-700 outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+          >
+            <option value="all">
+              All statuses
+            </option>
+
+            {statuses.map(
+              (status) => (
+                <option
+                  key={status}
+                  value={status}
+                >
+                  {
+                    statusLabels[
+                      status
+                    ]
+                  }
+                </option>
+              ),
+            )}
+          </select>
+
+          <select
+            value={sortOrder}
+            onChange={(event) =>
+              setSortOrder(
+                event.target.value as
+                  | "latest"
+                  | "oldest",
+              )
+            }
+            className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold text-zinc-700 outline-none focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+          >
+            <option value="latest">
+              Latest first
+            </option>
+
+            <option value="oldest">
+              Oldest first
+            </option>
+          </select>
         </div>
       </div>
-    </section>
+
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="border-b border-zinc-200 bg-zinc-50">
+              <tr>
+                <TableHeading>
+                  Order
+                </TableHeading>
+
+                <TableHeading>
+                  Customer
+                </TableHeading>
+
+                <TableHeading>
+                  Items
+                </TableHeading>
+
+                <TableHeading>
+                  Total
+                </TableHeading>
+
+                <TableHeading>
+                  Date
+                </TableHeading>
+
+                <TableHeading>
+                  Status
+                </TableHeading>
+
+                <TableHeading>
+                  Action
+                </TableHeading>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-zinc-100">
+              {visibleOrders.map(
+                (order) => (
+                  <tr
+                    key={order.id}
+                    className="transition hover:bg-zinc-50/80"
+                  >
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <Link
+                        href={`/admin/orders/${encodeURIComponent(
+                          order.orderNumber,
+                        )}`}
+                        className="text-sm font-black text-zinc-950 transition hover:text-orange-600"
+                      >
+                        {
+                          order.orderNumber
+                        }
+                      </Link>
+                    </td>
+
+                    <td className="px-5 py-4">
+                      <p className="text-sm font-bold text-zinc-900">
+                        {
+                          order.fullName
+                        }
+                      </p>
+
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {order.phone}
+                      </p>
+
+                      <p className="mt-0.5 max-w-[240px] truncate text-xs text-zinc-400">
+                        {order.email}
+                      </p>
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-zinc-600">
+                      {order.items.reduce(
+                        (
+                          total,
+                          item,
+                        ) =>
+                          total +
+                          item.quantity,
+                        0,
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-zinc-900">
+                      {formatMoney(
+                        order.total,
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-4 text-xs font-semibold text-zinc-500">
+                      {formatDate(
+                        order.createdAt,
+                      )}
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${
+                          statusClasses[
+                            order
+                              .status
+                          ]
+                        }`}
+                      >
+                        {
+                          statusLabels[
+                            order
+                              .status
+                          ]
+                        }
+                      </span>
+                    </td>
+
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <Link
+                        href={`/admin/orders/${encodeURIComponent(
+                          order.orderNumber,
+                        )}`}
+                        className="inline-flex rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700"
+                      >
+                        View / Manage
+                      </Link>
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {!isLoading &&
+        visibleOrders.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-sm font-bold text-zinc-500">
+              No orders found.
+            </p>
+
+            <p className="mt-1 text-xs text-zinc-400">
+              Try changing your search
+              or filters.
+            </p>
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="px-6 py-12 text-center text-sm font-semibold text-zinc-400">
+            Loading orders...
+          </div>
+        ) : null}
+
+        {!isLoading &&
+        visibleOrders.length > 0 ? (
+          <div className="border-t border-zinc-100 bg-zinc-50 px-5 py-3 text-xs font-semibold text-zinc-500">
+            Showing{" "}
+            {visibleOrders.length} of{" "}
+            {orders.length} orders
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
+        {label}
+      </p>
+
+      <p className="mt-3 text-3xl font-black tracking-tight text-zinc-950">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function TableHeading({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <th className="whitespace-nowrap px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-zinc-400">
+      {children}
+    </th>
   );
 }
