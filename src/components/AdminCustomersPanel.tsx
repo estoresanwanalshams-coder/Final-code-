@@ -1,332 +1,778 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
 import {
   backfillCustomersFromAuth,
-  createSupabaseCustomer,
-  deleteSupabaseCustomer,
   fetchSupabaseCustomers,
-  updateSupabaseCustomer,
   type CustomerRecord,
 } from "@/lib/supabase-customers";
-import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
 
-const emptyForm = {
-  fullName: "",
-  email: "",
-  phone: "",
+import {
+  fetchSupabaseOrders,
+  type OrderRecord,
+} from "@/lib/supabase-orders";
+
+type CustomerMetrics = {
+  orders: OrderRecord[];
+  orderCount: number;
+  totalSpent: number;
+  lastOrder: OrderRecord | null;
 };
 
-export function AdminCustomersPanel() {
-  const [customers, setCustomers] = useState<CustomerRecord[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOrder, setSortOrder] = useState<"latest" | "oldest">("latest");
-  const [latestOnly, setLatestOnly] = useState(false);
-  const [message, setMessage] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [isSyncing, setIsSyncing] = useState(false);
+function normalizeEmail(
+  email: string,
+) {
+  return email
+    .trim()
+    .toLowerCase();
+}
 
-  const loadCustomers = useCallback(async () => {
-    try {
-      const rows = await fetchSupabaseCustomers();
-      setCustomers(rows);
-      setMessage("");
-    } catch (error) {
-      const detail =
-        error && typeof error === "object" && "message" in error
-          ? String(error.message)
-          : "Unknown error";
-      setMessage(
-        `Unable to load customers. Run supabase/fix-admin-access.sql in Supabase SQL Editor, then click "Sync Auth Users". Error: ${detail}`,
-      );
-      setCustomers([]);
-    }
-  }, []);
+function formatMoney(
+  value: number,
+) {
+  return new Intl.NumberFormat(
+    "en-AE",
+    {
+      style: "currency",
+      currency: "AED",
+      minimumFractionDigits: 2,
+    },
+  ).format(value);
+}
+
+function formatDate(
+  value: string,
+) {
+  const date = new Date(value);
+
+  if (
+    Number.isNaN(date.getTime())
+  ) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "en-AE",
+    {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    },
+  ).format(date);
+}
+
+export function AdminCustomersPanel() {
+  const [customers, setCustomers] =
+    useState<CustomerRecord[]>([]);
+
+  const [orders, setOrders] =
+    useState<OrderRecord[]>([]);
+
+  const [searchQuery, setSearchQuery] =
+    useState("");
+
+  const [sortOrder, setSortOrder] =
+    useState<
+      | "latest"
+      | "oldest"
+      | "orders"
+      | "spent"
+    >("latest");
+
+  const [message, setMessage] =
+    useState("");
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const [isSyncing, setIsSyncing] =
+    useState(false);
+
+  const loadData =
+    useCallback(async () => {
+      setIsLoading(true);
+
+      try {
+        const [
+          customerRows,
+          orderRows,
+        ] = await Promise.all([
+          fetchSupabaseCustomers(),
+          fetchSupabaseOrders(),
+        ]);
+
+        setCustomers(
+          customerRows,
+        );
+
+        setOrders(orderRows);
+
+        setMessage("");
+      } catch (error) {
+        const detail =
+          error &&
+          typeof error ===
+            "object" &&
+          "message" in error
+            ? String(
+                error.message,
+              )
+            : "Unknown error";
+
+        setCustomers([]);
+        setOrders([]);
+
+        setMessage(
+          `Unable to load customers. ${detail}`,
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadCustomers();
-    }, 0);
+    const timer =
+      window.setTimeout(() => {
+        void loadData();
+      }, 0);
 
-    return () => window.clearTimeout(timer);
-  }, [loadCustomers]);
-
-  const visibleCustomers = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    let filtered = customers.filter((customer) => {
-      if (!query) {
-        return true;
-      }
-
-      return (
-        customer.fullName.toLowerCase().includes(query) ||
-        customer.email.toLowerCase().includes(query) ||
-        (customer.phone ?? "").toLowerCase().includes(query)
+    return () =>
+      window.clearTimeout(
+        timer,
       );
-    });
+  }, [loadData]);
 
-    filtered = [...filtered].sort((a, b) => {
-      const aTime = new Date(a.createdAt).getTime();
-      const bTime = new Date(b.createdAt).getTime();
-      return sortOrder === "latest" ? bTime - aTime : aTime - bTime;
-    });
+  const ordersByEmail =
+    useMemo(() => {
+      const map = new Map<
+        string,
+        OrderRecord[]
+      >();
 
-    if (latestOnly) {
-      filtered = filtered.slice(0, 10);
-    }
+      orders.forEach((order) => {
+        const email =
+          normalizeEmail(
+            order.email,
+          );
 
-    return filtered;
-  }, [customers, latestOnly, searchQuery, sortOrder]);
+        const existing =
+          map.get(email) ?? [];
 
-  function resetForm() {
-    setEditingId(null);
-    setForm(emptyForm);
-  }
+        existing.push(order);
 
-  function startEdit(customer: CustomerRecord) {
-    setEditingId(customer.id);
-    setForm({
-      fullName: customer.fullName,
-      email: customer.email,
-      phone: customer.phone,
-    });
-  }
+        map.set(
+          email,
+          existing,
+        );
+      });
 
-  async function handleSave(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+      return map;
+    }, [orders]);
 
-    if (!form.fullName.trim() || !form.email.trim()) {
-      setMessage("Name and email are required.");
-      return;
-    }
+  const customerMetrics =
+    useMemo(() => {
+      const map = new Map<
+        string,
+        CustomerMetrics
+      >();
 
-    if (!isValidPhoneNumber(form.phone)) {
-      setMessage("Please enter a valid phone number (7 to 15 digits).");
-      return;
-    }
+      customers.forEach(
+        (customer) => {
+          const matchedOrders =
+            [
+              ...(
+                ordersByEmail.get(
+                  normalizeEmail(
+                    customer.email,
+                  ),
+                ) ?? []
+              ),
+            ].sort(
+              (a, b) =>
+                new Date(
+                  b.createdAt,
+                ).getTime() -
+                new Date(
+                  a.createdAt,
+                ).getTime(),
+            );
 
-    try {
-      if (editingId) {
-        await updateSupabaseCustomer(editingId, form);
-        setMessage("Customer updated.");
-      } else {
-        await createSupabaseCustomer(form);
-        setMessage("Customer created.");
-      }
+          map.set(
+            customer.id,
+            {
+              orders:
+                matchedOrders,
 
-      resetForm();
-      await loadCustomers();
-    } catch (error) {
-      const detail =
-        error && typeof error === "object" && "message" in error
-          ? String(error.message)
-          : "Unknown error";
-      setMessage(`Unable to save customer: ${detail}`);
-    }
-  }
+              orderCount:
+                matchedOrders.length,
 
-  async function handleSyncFromAuth() {
+              totalSpent:
+                matchedOrders.reduce(
+                  (
+                    total,
+                    order,
+                  ) =>
+                    total +
+                    order.total,
+                  0,
+                ),
+
+              lastOrder:
+                matchedOrders[0] ??
+                null,
+            },
+          );
+        },
+      );
+
+      return map;
+    }, [
+      customers,
+      ordersByEmail,
+    ]);
+
+  const registeredCustomers =
+    useMemo(
+      () =>
+        customers.filter(
+          (customer) =>
+            Boolean(
+              customer.authUserId,
+            ),
+        ).length,
+      [customers],
+    );
+
+  const customersWithOrders =
+    useMemo(
+      () =>
+        customers.filter(
+          (customer) =>
+            (
+              customerMetrics.get(
+                customer.id,
+              )?.orderCount ??
+              0
+            ) > 0,
+        ).length,
+      [
+        customers,
+        customerMetrics,
+      ],
+    );
+
+  const registeredOrderCount =
+    useMemo(
+      () =>
+        customers.reduce(
+          (total, customer) =>
+            total +
+            (
+              customerMetrics.get(
+                customer.id,
+              )?.orderCount ??
+              0
+            ),
+          0,
+        ),
+      [
+        customers,
+        customerMetrics,
+      ],
+    );
+
+  const registeredRevenue =
+    useMemo(
+      () =>
+        customers.reduce(
+          (total, customer) =>
+            total +
+            (
+              customerMetrics.get(
+                customer.id,
+              )?.totalSpent ??
+              0
+            ),
+          0,
+        ),
+      [
+        customers,
+        customerMetrics,
+      ],
+    );
+
+  const visibleCustomers =
+    useMemo(() => {
+      const query =
+        searchQuery
+          .trim()
+          .toLowerCase();
+
+      return [...customers]
+        .filter((customer) => {
+          if (!query) {
+            return true;
+          }
+
+          return (
+            customer.fullName
+              .toLowerCase()
+              .includes(query) ||
+            customer.email
+              .toLowerCase()
+              .includes(query) ||
+            customer.phone
+              .toLowerCase()
+              .includes(query)
+          );
+        })
+        .sort((a, b) => {
+          const aMetrics =
+            customerMetrics.get(
+              a.id,
+            );
+
+          const bMetrics =
+            customerMetrics.get(
+              b.id,
+            );
+
+          if (
+            sortOrder ===
+            "orders"
+          ) {
+            return (
+              (bMetrics?.orderCount ??
+                0) -
+              (aMetrics?.orderCount ??
+                0)
+            );
+          }
+
+          if (
+            sortOrder === "spent"
+          ) {
+            return (
+              (bMetrics?.totalSpent ??
+                0) -
+              (aMetrics?.totalSpent ??
+                0)
+            );
+          }
+
+          const aTime =
+            new Date(
+              a.createdAt,
+            ).getTime();
+
+          const bTime =
+            new Date(
+              b.createdAt,
+            ).getTime();
+
+          return sortOrder ===
+            "latest"
+            ? bTime - aTime
+            : aTime - bTime;
+        });
+    }, [
+      customers,
+      customerMetrics,
+      searchQuery,
+      sortOrder,
+    ]);
+
+  async function handleSync() {
     setIsSyncing(true);
+    setMessage("");
+
     try {
-      const count = await backfillCustomersFromAuth();
-      await loadCustomers();
-      setMessage(`Synced ${count} customer record(s) from registered auth users.`);
+      const count =
+        await backfillCustomersFromAuth();
+
+      await loadData();
+
+      setMessage(
+        `Synced ${count} customer record(s) from registered auth users.`,
+      );
     } catch (error) {
       const detail =
-        error && typeof error === "object" && "message" in error
-          ? String(error.message)
+        error &&
+        typeof error ===
+          "object" &&
+        "message" in error
+          ? String(
+              error.message,
+            )
           : "Unknown error";
+
       setMessage(
-        `Unable to sync customers. Run supabase/fix-admin-access.sql first. ${detail}`,
+        `Unable to sync customers. ${detail}`,
       );
     } finally {
       setIsSyncing(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!window.confirm("Delete this customer record?")) {
-      return;
-    }
-
-    try {
-      await deleteSupabaseCustomer(id);
-      if (editingId === id) {
-        resetForm();
-      }
-      await loadCustomers();
-      setMessage("Customer deleted.");
-    } catch {
-      setMessage("Unable to delete customer.");
-    }
-  }
-
   return (
-    <section className="page-shell border-t border-zinc-200">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
-          Customers
-        </p>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-3xl font-bold text-zinc-950">Registered users</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-500">
+            Customers
+          </p>
+
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-zinc-950">
+            Customer Management
+          </h1>
+
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">
+            Understand registered
+            customers and their HM Shop
+            Online order activity.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
-            onClick={() => void handleSyncFromAuth()}
-            disabled={isSyncing}
-            className="btn-soft disabled:opacity-60"
+            onClick={() =>
+              void loadData()
+            }
+            disabled={isLoading}
+            className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:opacity-60"
           >
-            {isSyncing ? "Syncing..." : "Sync Auth Users"}
+            {isLoading
+              ? "Refreshing..."
+              : "Refresh"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              void handleSync()
+            }
+            disabled={isSyncing}
+            className="rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:opacity-60"
+          >
+            {isSyncing
+              ? "Syncing..."
+              : "Sync Auth Users"}
           </button>
         </div>
-        <p className="mt-2 text-sm text-zinc-600">
-          Total customers loaded: {customers.length}
-        </p>
+      </div>
 
-        {message ? (
-          <p className="mt-4 rounded-xl border border-zinc-200 bg-white p-4 text-sm font-semibold text-zinc-700">
-            {message}
-          </p>
-        ) : null}
-
-        <form
-          onSubmit={handleSave}
-          className="mt-6 grid gap-3 rounded-xl border border-zinc-200 bg-white p-5 md:grid-cols-3"
-        >
-          <label className="light-form-field">
-            Full name
-            <input
-              value={form.fullName}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, fullName: event.target.value }))
-              }
-              required
-            />
-          </label>
-          <label className="light-form-field">
-            Email
-            <input
-              type="email"
-              value={form.email}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, email: event.target.value }))
-              }
-              required
-            />
-          </label>
-          <label className="light-form-field">
-            Phone
-            <input
-              type="tel"
-              value={form.phone}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  phone: normalizePhoneInput(event.target.value),
-                }))
-              }
-              required
-            />
-          </label>
-          <div className="flex flex-wrap gap-2 md:col-span-3">
-            <button type="submit" className="btn-soft">
-              {editingId ? "Update customer" : "Add customer"}
-            </button>
-            {editingId ? (
-              <button type="button" onClick={resetForm} className="btn-soft">
-                Cancel edit
-              </button>
-            ) : null}
-          </div>
-        </form>
-
-        <div className="admin-filter-grid mt-5 grid gap-3 md:grid-cols-3">
-          <label className="light-form-field">
-            Search customer
-            <input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Name, email, phone"
-            />
-          </label>
-          <label className="light-form-field">
-            Sort by date
-            <select
-              value={sortOrder}
-              onChange={(event) =>
-                setSortOrder(event.target.value as "latest" | "oldest")
-              }
-            >
-              <option value="latest">Latest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </label>
-          <label className="light-form-field">
-            Quick list
-            <select
-              value={latestOnly ? "latest10" : "all"}
-              onChange={(event) => setLatestOnly(event.target.value === "latest10")}
-            >
-              <option value="all">All matching customers</option>
-              <option value="latest10">Latest 10 customers</option>
-            </select>
-          </label>
+      {message ? (
+        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-700 shadow-sm">
+          {message}
         </div>
+      ) : null}
 
-        <div className="mt-7 overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
-          <table className="min-w-[640px] w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-600">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Registered Customers"
+          value={registeredCustomers}
+        />
+
+        <StatCard
+          label="Customers With Orders"
+          value={customersWithOrders}
+        />
+
+        <StatCard
+          label="Registered Orders"
+          value={registeredOrderCount}
+        />
+
+        <StatCard
+          label="Registered Revenue"
+          value={formatMoney(
+            registeredRevenue,
+          )}
+        />
+      </div>
+
+      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_240px]">
+          <input
+            value={searchQuery}
+            onChange={(event) =>
+              setSearchQuery(
+                event.target.value,
+              )
+            }
+            placeholder="Search name, email or phone..."
+            className="admin-order-input"
+          />
+
+          <select
+            value={sortOrder}
+            onChange={(event) =>
+              setSortOrder(
+                event.target.value as
+                  | "latest"
+                  | "oldest"
+                  | "orders"
+                  | "spent",
+              )
+            }
+            className="admin-order-input"
+          >
+            <option value="latest">
+              Latest customers
+            </option>
+
+            <option value="oldest">
+              Oldest customers
+            </option>
+
+            <option value="orders">
+              Most orders
+            </option>
+
+            <option value="spent">
+              Highest spend
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-[900px] w-full">
+            <thead className="border-b border-zinc-200 bg-zinc-50">
               <tr>
-                <th className="px-4 py-3 font-semibold">Name</th>
-                <th className="px-4 py-3 font-semibold">Email</th>
-                <th className="px-4 py-3 font-semibold">Phone</th>
-                <th className="px-4 py-3 font-semibold">Created</th>
-                <th className="px-4 py-3 font-semibold">Actions</th>
+                <TableHeading>
+                  Customer
+                </TableHeading>
+
+                <TableHeading>
+                  Type
+                </TableHeading>
+
+                <TableHeading>
+                  Orders
+                </TableHeading>
+
+                <TableHeading>
+                  Total Spent
+                </TableHeading>
+
+                <TableHeading>
+                  Last Order
+                </TableHeading>
+
+                <TableHeading>
+                  Customer Since
+                </TableHeading>
+
+                <TableHeading>
+                  Action
+                </TableHeading>
               </tr>
             </thead>
-            <tbody>
-              {visibleCustomers.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-4 text-zinc-500" colSpan={5}>
-                    No customers found. Add customers from register or use Add customer
-                    above.
-                  </td>
-                </tr>
-              ) : null}
-              {visibleCustomers.map((customer) => (
-                <tr key={customer.id} className="border-t border-zinc-100">
-                  <td className="px-4 py-3 font-medium text-zinc-900">
-                    {customer.fullName}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-700">{customer.email}</td>
-                  <td className="px-4 py-3 text-zinc-700">{customer.phone || "-"}</td>
-                  <td className="px-4 py-3 text-zinc-500">
-                    {new Date(customer.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(customer)}
-                        className="rounded border border-zinc-300 px-3 py-1 text-xs font-semibold"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(customer.id)}
-                        className="rounded border border-red-300 px-3 py-1 text-xs font-semibold text-red-700"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+
+            <tbody className="divide-y divide-zinc-100">
+              {visibleCustomers.map(
+                (customer) => {
+                  const metrics =
+                    customerMetrics.get(
+                      customer.id,
+                    );
+
+                  return (
+                    <tr
+                      key={
+                        customer.id
+                      }
+                      className="transition hover:bg-zinc-50/80"
+                    >
+                      <td className="px-5 py-4">
+                        <p className="text-sm font-black text-zinc-950">
+                          {
+                            customer.fullName
+                          }
+                        </p>
+
+                        <p className="mt-1 text-xs text-zinc-500">
+                          {
+                            customer.email
+                          }
+                        </p>
+
+                        <p className="mt-0.5 text-xs text-zinc-400">
+                          {customer.phone ||
+                            "No phone"}
+                        </p>
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <span
+                          className={
+                            customer.authUserId
+                              ? "inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-600/10"
+                              : "inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-bold text-zinc-600 ring-1 ring-inset ring-zinc-500/10"
+                          }
+                        >
+                          {customer.authUserId
+                            ? "Registered"
+                            : "Manual"}
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-zinc-900">
+                        {metrics?.orderCount ??
+                          0}
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-zinc-900">
+                        {formatMoney(
+                          metrics?.totalSpent ??
+                            0,
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        {metrics?.lastOrder ? (
+                          <>
+                            <Link
+                              href={`/admin/orders/${encodeURIComponent(
+                                metrics
+                                  .lastOrder
+                                  .orderNumber,
+                              )}`}
+                              className="text-sm font-bold text-zinc-900 transition hover:text-orange-600"
+                            >
+                              {
+                                metrics
+                                  .lastOrder
+                                  .orderNumber
+                              }
+                            </Link>
+
+                            <p className="mt-1 text-xs capitalize text-zinc-500">
+                              {
+                                metrics
+                                  .lastOrder
+                                  .status
+                              }
+                            </p>
+                          </>
+                        ) : (
+                          <span className="text-sm text-zinc-400">
+                            No orders
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4 text-xs font-semibold text-zinc-500">
+                        {formatDate(
+                          customer.createdAt,
+                        )}
+                      </td>
+
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <Link
+                          href={`/admin/customers/${encodeURIComponent(
+                            customer.id,
+                          )}`}
+                          className="inline-flex rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-zinc-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700"
+                        >
+                          View / Manage
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                },
+              )}
             </tbody>
           </table>
         </div>
+
+        {isLoading ? (
+          <div className="px-6 py-12 text-center text-sm font-semibold text-zinc-400">
+            Loading customers...
+          </div>
+        ) : null}
+
+        {!isLoading &&
+        visibleCustomers.length ===
+          0 ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-sm font-bold text-zinc-500">
+              No customers found.
+            </p>
+
+            <p className="mt-1 text-xs text-zinc-400">
+              Try changing your search.
+            </p>
+          </div>
+        ) : null}
+
+        {!isLoading &&
+        visibleCustomers.length >
+          0 ? (
+          <div className="border-t border-zinc-100 bg-zinc-50 px-5 py-3 text-xs font-semibold text-zinc-500">
+            Showing{" "}
+            {
+              visibleCustomers.length
+            }{" "}
+            of {customers.length}{" "}
+            customer profiles
+          </div>
+        ) : null}
       </div>
-    </section>
+
+      <div className="rounded-2xl border border-orange-100 bg-orange-50/60 p-4 text-xs leading-5 text-zinc-600">
+        <strong className="text-zinc-900">
+          About these figures:
+        </strong>{" "}
+        Order activity is matched to
+        customer profiles using the
+        normalized email address.
+        Guest COD buyers who never
+        registered are not counted as
+        registered customers here.
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
+        {label}
+      </p>
+
+      <p className="mt-3 text-3xl font-black tracking-tight text-zinc-950">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function TableHeading({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <th className="whitespace-nowrap px-5 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-zinc-400">
+      {children}
+    </th>
   );
 }
