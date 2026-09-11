@@ -73,11 +73,7 @@ const navigationGroups: {
   },
 ];
 
-export function AdminShell({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -175,9 +171,7 @@ export function AdminShell({
 
                             <span
                               className={`mt-0.5 block truncate text-xs ${
-                                active
-                                  ? "text-orange-600/70"
-                                  : "text-zinc-400"
+                                active ? "text-orange-600/70" : "text-zinc-400"
                               }`}
                             >
                               {item.description}
@@ -264,7 +258,9 @@ export function AdminShell({
           </div>
         </aside>
 
-        <main className="min-w-0">{children}</main>
+        <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
       </div>
 
       {mobileMenuOpen ? (
@@ -294,9 +290,7 @@ export function AdminShell({
               </button>
             </div>
 
-            <div className="h-[calc(100%-64px)]">
-              {renderSidebar(true)}
-            </div>
+            <div className="h-[calc(100%-64px)]">{renderSidebar(true)}</div>
           </aside>
         </div>
       ) : null}
