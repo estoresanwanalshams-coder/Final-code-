@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
@@ -344,12 +344,13 @@ export default function TrackOrderPage() {
                       className="flex gap-4 py-4 first:pt-0 last:pb-0"
                     >
                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-zinc-100">
-                        <Image
+                        <SafeProductImage
                           src={item.product.imageUrl}
                           alt={item.product.name}
                           fill
                           sizes="64px"
-                          className="object-cover"
+                          className="object-contain p-1"
+                          unoptimized
                         />
                       </div>
 

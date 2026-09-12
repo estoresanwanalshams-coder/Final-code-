@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Product } from "@/lib/products";
+import type { Category } from "@/lib/categories";
+import { fetchMergedCategories } from "@/lib/supabase-categories";
 import {
   fetchSupabaseProducts,
   uploadProductImage,
@@ -26,10 +28,17 @@ type MerchandisingSelectorProps = {
   onChange: (slugs: string[]) => void;
 };
 
+type CategorySelectorProps = {
+  selectedSlugs: string[];
+  categories: Category[];
+  maxSelect: number;
+  onChange: (slugs: string[]) => void;
+};
 export function AdminSiteSettingsPanel() {
   const [settings, setSettings] = useState<SiteSettings>(defaultSiteSettings);
 
   const [products, setProducts] = useState<Product[]>([]);
+  const [categoryItems, setCategoryItems] = useState<Category[]>([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,9 +55,10 @@ export function AdminSiteSettingsPanel() {
 
     async function loadSettings() {
       try {
-        const [nextSettings, nextProducts] = await Promise.all([
+        const [nextSettings, nextProducts, nextCategories] = await Promise.all([
           fetchSiteSettings().catch(() => defaultSiteSettings),
           fetchSupabaseProducts().catch(() => []),
+          fetchMergedCategories().catch(() => []),
         ]);
 
         if (!active) {
@@ -57,6 +67,7 @@ export function AdminSiteSettingsPanel() {
 
         setSettings(nextSettings);
         setProducts(nextProducts);
+        setCategoryItems(nextCategories);
       } finally {
         if (active) {
           setIsLoading(false);
@@ -75,6 +86,14 @@ export function AdminSiteSettingsPanel() {
     () =>
       products.filter((product) => (product.status ?? "active") === "active"),
     [products],
+  );
+
+  const activeCategories = useMemo(
+    () =>
+      categoryItems
+        .filter((category) => category.isActive ?? true)
+        .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0)),
+    [categoryItems],
   );
 
   const newArrivals = useMemo(
@@ -547,7 +566,12 @@ export function AdminSiteSettingsPanel() {
 
             <ProductPreviewGrid products={newArrivals} />
           </SettingsCard>
-
+          <CategorySelector
+            selectedSlugs={settings.homepageCategorySlugs}
+            categories={activeCategories}
+            maxSelect={6}
+            onChange={(slugs) => updateField("homepageCategorySlugs", slugs)}
+          />
           <div className="grid gap-6 2xl:grid-cols-2">
             <MerchandisingSelector
               title="Best Sellers"
@@ -578,6 +602,186 @@ export function AdminSiteSettingsPanel() {
             </button>
           </div>
         </form>
+      </div>
+    </section>
+  );
+}
+
+function CategorySelector({
+  selectedSlugs,
+  categories,
+  maxSelect,
+  onChange,
+}: CategorySelectorProps) {
+  const selectedCategories = useMemo(
+    () =>
+      selectedSlugs
+        .map((slug) => categories.find((category) => category.slug === slug))
+        .filter(Boolean) as Category[],
+    [categories, selectedSlugs],
+  );
+
+  const availableCategories = useMemo(
+    () =>
+      categories.filter((category) => !selectedSlugs.includes(category.slug)),
+    [categories, selectedSlugs],
+  );
+
+  function addCategory(slug: string) {
+    if (selectedSlugs.includes(slug) || selectedSlugs.length >= maxSelect) {
+      return;
+    }
+
+    onChange([...selectedSlugs, slug]);
+  }
+
+  function removeCategory(slug: string) {
+    onChange(selectedSlugs.filter((selectedSlug) => selectedSlug !== slug));
+  }
+
+  function moveCategory(slug: string, direction: -1 | 1) {
+    const currentIndex = selectedSlugs.indexOf(slug);
+
+    if (currentIndex < 0) {
+      return;
+    }
+
+    const nextIndex = currentIndex + direction;
+
+    if (nextIndex < 0 || nextIndex >= selectedSlugs.length) {
+      return;
+    }
+
+    const next = [...selectedSlugs];
+    const [moved] = next.splice(currentIndex, 1);
+
+    next.splice(nextIndex, 0, moved);
+
+    onChange(next);
+  }
+
+  return (
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-100 pb-4">
+        <div className="max-w-2xl">
+          <h2 className="text-lg font-bold text-zinc-950">
+            Homepage Categories
+          </h2>
+
+          <p className="mt-1 text-sm leading-6 text-zinc-500">
+            Choose up to 6 categories to feature prominently on the storefront.
+            Their order here controls their homepage order.
+          </p>
+        </div>
+
+        <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-bold text-zinc-600">
+          {selectedSlugs.length}/{maxSelect} selected
+        </span>
+      </div>
+
+      <div className="pt-5">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
+          Selected Categories
+        </p>
+
+        {selectedCategories.length ? (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {selectedCategories.map((category, index) => (
+              <div
+                key={category.slug}
+                className="rounded-xl border border-orange-100 bg-orange-50/40 p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-black text-orange-600 shadow-sm">
+                    {index + 1}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-zinc-900">
+                      {category.name}
+                    </p>
+
+                    <p className="mt-1 truncate text-xs text-zinc-500">
+                      /categories/{category.slug}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={index === 0}
+                    onClick={() => moveCategory(category.slug, -1)}
+                    className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-600 transition hover:border-orange-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={index === selectedCategories.length - 1}
+                    onClick={() => moveCategory(category.slug, 1)}
+                    className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-600 transition hover:border-orange-200 hover:text-orange-600 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(category.slug)}
+                    className="ml-auto rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-600 transition hover:border-red-200 hover:text-red-600"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-3 rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-6 text-center">
+            <p className="text-sm font-bold text-zinc-500">
+              No categories selected yet.
+            </p>
+
+            <p className="mt-1 text-xs text-zinc-400">
+              Choose categories below to feature them on the homepage.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6 border-t border-zinc-100 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
+            Available Categories
+          </p>
+
+          {selectedSlugs.length >= maxSelect ? (
+            <span className="text-xs font-semibold text-orange-600">
+              Maximum {maxSelect} selected
+            </span>
+          ) : null}
+        </div>
+
+        {availableCategories.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {availableCategories.map((category) => (
+              <button
+                key={category.slug}
+                type="button"
+                disabled={selectedSlugs.length >= maxSelect}
+                onClick={() => addCategory(category.slug)}
+                className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-orange-700 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                + {category.name}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 text-sm text-zinc-400">
+            All active categories are already selected.
+          </p>
+        )}
       </div>
     </section>
   );

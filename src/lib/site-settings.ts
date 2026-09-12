@@ -23,6 +23,7 @@ export type SiteSettings = {
   newArrivalSlugs: string[];
   bestSellerSlugs: string[];
   featuredSlugs: string[];
+  homepageCategorySlugs: string[];
 };
 
 type SiteSettingsRow = {
@@ -34,6 +35,7 @@ type SiteSettingsRow = {
   new_arrival_slugs: string[] | null;
   best_seller_slugs: string[] | null;
   featured_slugs: string[] | null;
+  homepage_category_slugs: string[] | null;
 };
 
 export const defaultHomepageBanners: HomepageBanner[] = [
@@ -72,6 +74,7 @@ export const defaultSiteSettings: SiteSettings = {
   newArrivalSlugs: [],
   bestSellerSlugs: [],
   featuredSlugs: [],
+  homepageCategorySlugs: [],
 };
 
 function normalizeBannerSlides(
@@ -167,6 +170,9 @@ function mapSettingsRow(
 
     featuredSlugs:
       row.featured_slugs ?? [],
+
+    homepageCategorySlugs:
+      row.homepage_category_slugs ?? [],
   };
 }
 
@@ -198,6 +204,9 @@ function mapSettingsToRow(
 
     featured_slugs:
       settings.featuredSlugs,
+
+    homepage_category_slugs:
+      settings.homepageCategorySlugs,
   };
 }
 
@@ -205,7 +214,7 @@ export async function fetchSiteSettings() {
   const primaryQuery = await supabase
     .from("site_settings")
     .select(
-      "id, offer_text, banner_image_url, banner_slides, shipping_charge, new_arrival_slugs, best_seller_slugs, featured_slugs",
+      "id, offer_text, banner_image_url, banner_slides, shipping_charge, new_arrival_slugs, best_seller_slugs, featured_slugs, homepage_category_slugs",
     )
     .eq("id", "main")
     .maybeSingle();
@@ -238,7 +247,7 @@ export async function fetchSiteSettings() {
     fallbackQuery.data as
     | Omit<
       SiteSettingsRow,
-      "shipping_charge" | "banner_slides"
+      "shipping_charge" | "banner_slides" | "homepage_category_slugs"
     >
     | null;
 
@@ -269,6 +278,8 @@ export async function fetchSiteSettings() {
 
     featuredSlugs:
       fallbackData.featured_slugs ?? [],
+
+    homepageCategorySlugs: [],
   };
 }
 

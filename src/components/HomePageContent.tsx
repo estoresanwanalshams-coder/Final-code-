@@ -5,7 +5,7 @@ import { HomeTrustSection } from "@/components/HomeTrustSection";
 import { categories } from "@/lib/categories";
 import type { Product } from "@/lib/products";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
-import { fetchSupabaseProductsPage } from "@/lib/supabase-products";
+import { fetchSupabaseProducts } from "@/lib/supabase-products";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 
 function pickProducts(sourceProducts: Product[], selectedSlugs: string[]) {
@@ -20,23 +20,13 @@ function pickProducts(sourceProducts: Product[], selectedSlugs: string[]) {
 }
 
 export async function HomePageContent() {
-  const [settings, productsPage, categoryItems] = await Promise.all([
+  const [settings, productSource, categoryItems] = await Promise.all([
     fetchSiteSettings().catch(() => defaultSiteSettings),
 
-    fetchSupabaseProductsPage({
-      page: 1,
-      pageSize: 60,
-    }).catch(() => ({
-      products: [],
-      hasNextPage: false,
-      totalPages: 1,
-      currentPage: 1,
-    })),
+    fetchSupabaseProducts().catch(() => []),
 
     fetchMergedCategories().catch(() => categories),
   ]);
-
-  const productSource = productsPage.products;
 
   const newArrivals = productSource.slice(0, 8);
 
@@ -44,19 +34,33 @@ export async function HomePageContent() {
 
   const featuredProducts = pickProducts(productSource, settings.featuredSlugs);
 
-  const homepageCategories = categoryItems.filter((category) =>
+  const eligibleCategories = categoryItems.filter((category) =>
     productSource.some((product) => product.categorySlug === category.slug),
   );
 
+  const selectedHomepageCategories =
+    settings.homepageCategorySlugs.length > 0
+      ? settings.homepageCategorySlugs
+          .map((slug) =>
+            eligibleCategories.find((category) => category.slug === slug),
+          )
+          .filter(
+            (category): category is (typeof eligibleCategories)[number] =>
+              category !== undefined,
+          )
+      : eligibleCategories;
+
+  const homepageCategories = selectedHomepageCategories.slice(0, 6);
+
   const featuredCategorySections = homepageCategories
+    .slice(0, 3)
     .map((category) => ({
       category,
       products: productSource
         .filter((product) => product.categorySlug === category.slug)
         .slice(0, 8),
     }))
-    .filter((section) => section.products.length > 0)
-    .slice(0, 3);
+    .filter((section) => section.products.length > 0);
 
   return (
     <section className="page-shell">
