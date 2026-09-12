@@ -58,28 +58,58 @@ for select
 to authenticated
 using (lower(email) = lower(auth.jwt() ->> 'email'));
 
--- Guest order tracking: a security-definer function so guests (anon role)
--- can look up ONLY orders they already know the identifier for, without
--- exposing a blanket SELECT on the orders table.
-create or replace function public.track_order(p_identifier text)
-returns setof public.orders
+-- Secure guest order tracking.
+-- Requires the order number plus matching email address or phone number.
+-- Returns only fields required by the public tracking page.
+
+drop function if exists public.track_order(text);
+
+create or replace function public.track_order(
+  p_order_number text,
+  p_identifier text
+)
+returns table (
+  order_number text,
+  items jsonb,
+  total numeric,
+  status text,
+  created_at timestamptz,
+  shipping_method text
+)
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  v_id text := trim(coalesce(p_identifier, ''));
+  v_order_number text := trim(coalesce(p_order_number, ''));
+  v_identifier text := trim(coalesce(p_identifier, ''));
   v_digits text := regexp_replace(coalesce(p_identifier, ''), '\D', '', 'g');
 begin
+  if v_order_number = '' or v_identifier = '' then
+    return;
+  end if;
+
   return query
-  select *
+  select
+    o.order_number::text,
+    o.items::jsonb,
+    o.total::numeric,
+    o.status::text,
+    o.created_at::timestamptz,
+    coalesce(o.shipping_method, 'Standard Shipping')::text
   from public.orders o
-  where lower(o.email) = lower(v_id)
-     or o.order_number = v_id
-     or (length(v_digits) >= 6 and regexp_replace(o.phone, '\D', '', 'g') = v_digits)
+  where lower(o.order_number) = lower(v_order_number)
+    and (
+      lower(o.email) = lower(v_identifier)
+      or (
+        length(v_digits) >= 6
+        and regexp_replace(o.phone, '\D', '', 'g') = v_digits
+      )
+    )
   order by o.created_at desc
-  limit 20;
+  limit 1;
 end;
 $$;
 
-grant execute on function public.track_order(text) to anon, authenticated;
+revoke all on function public.track_order(text, text) from public;
+grant execute on function public.track_order(text, text) to anon, authenticated;

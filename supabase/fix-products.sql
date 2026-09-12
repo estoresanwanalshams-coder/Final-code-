@@ -34,6 +34,61 @@ add column if not exists created_at timestamptz not null default now();
 alter table public.products
 add column if not exists updated_at timestamptz not null default now();
 
+alter table public.products
+add column if not exists sku text;
+
+alter table public.products
+add column if not exists brand text;
+
+alter table public.products
+add column if not exists status text not null default 'active';
+
+alter table public.products
+add column if not exists stock_status text not null default 'in_stock';
+
+alter table public.products
+add column if not exists search_keywords text[] not null default '{}';
+
+-- Keep product publishing states predictable.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'products_status_check'
+      and conrelid = 'public.products'::regclass
+  ) then
+    alter table public.products
+      add constraint products_status_check
+      check (status in ('active', 'draft'));
+  end if;
+end $$;
+
+-- Customer-facing availability only.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'products_stock_status_check'
+      and conrelid = 'public.products'::regclass
+  ) then
+    alter table public.products
+      add constraint products_stock_status_check
+      check (stock_status in ('in_stock', 'out_of_stock'));
+  end if;
+end $$;
+
+create unique index if not exists idx_products_sku_unique
+  on public.products (lower(btrim(sku)))
+  where sku is not null and btrim(sku) <> '';
+
+create index if not exists idx_products_status_created_at
+  on public.products (status, created_at desc);
+
+create index if not exists idx_products_stock_status
+  on public.products (stock_status);
+
 create table if not exists public.product_images (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references public.products(id) on delete cascade,
@@ -67,10 +122,29 @@ alter table public.products enable row level security;
 alter table public.product_images enable row level security;
 
 drop policy if exists "Public can read products" on public.products;
-create policy "Public can read products"
+drop policy if exists "Public can read active products" on public.products;
+drop policy if exists "Authenticated customers can read active products" on public.products;
+drop policy if exists "Admin can read all products" on public.products;
+
+create policy "Public can read active products"
 on public.products
 for select
-using (true);
+to anon
+using (status = 'active');
+
+create policy "Authenticated customers can read active products"
+on public.products
+for select
+to authenticated
+using (status = 'active');
+
+create policy "Admin can read all products"
+on public.products
+for select
+to authenticated
+using (
+  (auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local'
+);
 
 drop policy if exists "Only admin can insert products" on public.products;
 create policy "Only admin can insert products"

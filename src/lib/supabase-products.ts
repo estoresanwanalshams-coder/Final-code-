@@ -1,13 +1,23 @@
 import { supabase } from "@/lib/supabase";
 import type { CategorySlug } from "@/lib/categories";
 import { normalizeImageUrl, normalizeImageUrls } from "@/lib/image-url";
-import type { Product } from "@/lib/products";
+import type {
+  Product,
+  ProductStatus,
+  ProductStockStatus,
+} from "@/lib/products";
+import { rankProductsForSearch } from "@/lib/product-search";
 
 type ProductRow = {
   id?: string;
   name: string;
   slug: string;
   category_slug: string;
+  sku?: string | null;
+  brand?: string | null;
+  status?: ProductStatus | null;
+  stock_status?: ProductStockStatus | null;
+  search_keywords?: string[] | null;
   actual_price?: number | string | null;
   price: number | string;
   summary: string | null;
@@ -19,11 +29,11 @@ type ProductRow = {
 };
 
 const PRODUCT_LIST_COLUMNS =
-  "id, name, slug, category_slug, actual_price, price, summary, details, image_url, image_urls, video_url, free_shipping";
+  "id, name, slug, category_slug, sku, brand, status, stock_status, search_keywords, actual_price, price, summary, details, image_url, image_urls, video_url, free_shipping";
 
 const PRODUCT_CARD_COLUMNS =
-  "id, name, slug, category_slug, actual_price, price, image_url, image_urls, free_shipping";
-
+  "id, name, slug, category_slug, sku, brand, status, stock_status, search_keywords, actual_price, price, image_url, image_urls, free_shipping";
+  
 type ProductImageRow = {
   product_id: string;
   image_url: string;
@@ -48,6 +58,11 @@ function mapProductRow(row: ProductRow): Product {
     name: row.name,
     slug: row.slug,
     categorySlug: row.category_slug as CategorySlug,
+    sku: row.sku?.trim() || undefined,
+    brand: row.brand?.trim() || undefined,
+    status: row.status ?? "active",
+    stockStatus: row.stock_status ?? "in_stock",
+    searchKeywords: row.search_keywords ?? [],
     actualPrice:
       row.actual_price !== null && row.actual_price !== undefined
         ? Number(row.actual_price)
@@ -80,6 +95,11 @@ function mapProductRowWithImages(
     name: row.name,
     slug: row.slug,
     categorySlug: row.category_slug as CategorySlug,
+    sku: row.sku?.trim() || undefined,
+    brand: row.brand?.trim() || undefined,
+    status: row.status ?? "active",
+    stockStatus: row.stock_status ?? "in_stock",
+    searchKeywords: row.search_keywords ?? [],
     actualPrice:
       row.actual_price !== null && row.actual_price !== undefined
         ? Number(row.actual_price)
@@ -102,6 +122,11 @@ function mapProductToRow(product: Product): ProductRow {
     name: product.name,
     slug: product.slug,
     category_slug: product.categorySlug,
+    sku: product.sku?.trim() || null,
+    brand: product.brand?.trim() || null,
+    status: product.status ?? "active",
+    stock_status: product.stockStatus ?? "in_stock",
+    search_keywords: product.searchKeywords ?? [],
     actual_price: product.actualPrice ?? null,
     price: Number(product.price),
     summary: product.summary,
@@ -279,69 +304,114 @@ export async function fetchSupabaseSearchProducts(
   queryText: string,
   options: FetchSupabaseSearchProductsOptions = {},
 ): Promise<ProductListResult> {
-  const page = Math.max(1, options.page ?? 1);
-  const pageSize = Math.max(1, Math.min(60, options.pageSize ?? 24));
-  const sort = options.sort ?? "newest";
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-  const query = queryText.trim();
+  const page = Math.max(
+    1,
+    options.page ?? 1,
+  );
 
-  let builder = supabase
-    .from("products")
-    .select(PRODUCT_CARD_COLUMNS, {
-      count: "exact",
-    });
+  const pageSize = Math.max(
+    1,
+    Math.min(
+      60,
+      options.pageSize ?? 24,
+    ),
+  );
 
-  if (query) {
-    const likeQuery = `%${query}%`;
-    builder = builder.or(
-      `name.ilike.${likeQuery},summary.ilike.${likeQuery},details.ilike.${likeQuery}`,
-    );
-  }
+  const sort =
+    options.sort ?? "newest";
 
-  switch (sort) {
-    case "price-asc":
-      builder = builder
-        .order("price", { ascending: true })
-        .order("created_at", { ascending: false });
-      break;
+  const normalizedQuery =
+    queryText.trim();
 
-    case "price-desc":
-      builder = builder
-        .order("price", { ascending: false })
-        .order("created_at", { ascending: false });
-      break;
-
-    case "name-asc":
-      builder = builder
-        .order("name", { ascending: true })
-        .order("created_at", { ascending: false });
-      break;
-
-    case "newest":
-    default:
-      builder = builder.order("created_at", { ascending: false });
-      break;
-  }
-
-  builder = builder.range(from, to);
-
-  const { data, error, count } = await builder;
+  const { data, error } =
+    await supabase
+      .from("products")
+      .select(
+        PRODUCT_LIST_COLUMNS,
+      )
+      .order("created_at", {
+        ascending: false,
+      });
 
   if (error) {
     throw error;
   }
 
-  const rows = (data ?? []) as ProductRow[];
-  const totalCount = count ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const hasNextPage = page < totalPages;
+  const products = (
+    (data ?? []) as ProductRow[]
+  ).map((row) =>
+    mapProductRow(row),
+  );
+
+  let results =
+    normalizedQuery
+      ? rankProductsForSearch(
+          products,
+          normalizedQuery,
+        )
+      : products;
+
+  if (
+    sort === "price-asc"
+  ) {
+    results = [...results].sort(
+      (a, b) =>
+        a.price - b.price,
+    );
+  } else if (
+    sort === "price-desc"
+  ) {
+    results = [...results].sort(
+      (a, b) =>
+        b.price - a.price,
+    );
+  } else if (
+    sort === "name-asc"
+  ) {
+    results = [...results].sort(
+      (a, b) =>
+        a.name.localeCompare(
+          b.name,
+        ),
+    );
+  }
+
+  const totalCount =
+    results.length;
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      totalCount / pageSize,
+    ),
+  );
+
+  const safePage = Math.min(
+    page,
+    totalPages,
+  );
+
+  const from =
+    (safePage - 1) *
+    pageSize;
+
+  const paginatedProducts =
+    results.slice(
+      from,
+      from + pageSize,
+    );
 
   return {
-    products: rows.map((row) => mapProductRow(row)),
-    hasNextPage,
+    products:
+      paginatedProducts,
+
+    hasNextPage:
+      safePage < totalPages,
+
     totalPages,
-    currentPage: page,
+
+    currentPage: safePage,
+
     totalCount,
   };
 }

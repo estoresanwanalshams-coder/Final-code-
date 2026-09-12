@@ -6,6 +6,7 @@ import { isAdminEmail } from "@/lib/auth-role";
 import {
   getApplicableShippingCharge,
   getCartItems,
+  isProductAvailableForPurchase,
   saveCartItems,
   type CartItem,
 } from "@/lib/cart";
@@ -18,6 +19,7 @@ import { fetchCustomerProfileByAuthUserId } from "@/lib/supabase-customers";
 import { supabase } from "@/lib/supabase";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
+import { fetchSupabaseProductBySlug } from "@/lib/supabase-products";
 
 type CheckoutFormProps = {
   fallbackProduct: Product;
@@ -143,9 +145,37 @@ export function CheckoutForm({
       return;
     }
 
+    if (items.length === 0) {
+      setMessage("Your cart is empty.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setMessage("");
 
     try {
+      const latestProducts = await Promise.all(
+        items.map((item) => fetchSupabaseProductBySlug(item.product.slug)),
+      );
+
+      const unavailableItems = items.filter((item, index) => {
+        const latestProduct = latestProducts[index];
+
+        return !latestProduct || !isProductAvailableForPurchase(latestProduct);
+      });
+
+      if (unavailableItems.length > 0) {
+        const names = unavailableItems
+          .map((item) => item.product.name)
+          .join(", ");
+
+        setMessage(
+          `Some products are no longer available: ${names}. Please return to your cart before placing the order.`,
+        );
+
+        return;
+      }
+
       const addressLine1 = [
         building.trim(),
         unit.trim() ? `Unit: ${unit.trim()}` : "",

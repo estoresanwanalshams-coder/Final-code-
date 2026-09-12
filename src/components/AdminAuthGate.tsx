@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -75,20 +75,50 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
   if (isAuthenticated) {
     return (
       <>
-        <div className="border-b border-zinc-200 bg-white px-4 py-3">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-            <p className="text-sm font-semibold text-zinc-600">
-              Logged in as {adminUsername}
-            </p>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-bold text-zinc-950 transition hover:border-zinc-950"
-            >
-              Logout
-            </button>
+        <header className="border-b border-zinc-800 bg-zinc-950 text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-lg font-extrabold text-white">
+                HM
+              </div>
+
+              <div className="min-w-0">
+                <p className="truncate text-base font-bold">HM Shop Online</p>
+
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-400">
+                  Admin Panel
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="hidden text-right lg:block">
+                <p className="text-xs text-zinc-400">Logged in as</p>
+                <p className="text-sm font-semibold text-white">
+                  {adminUsername}
+                </p>
+              </div>
+
+              <Link
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-xs font-bold text-zinc-200 transition hover:border-orange-500 hover:text-orange-400 sm:px-4 sm:text-sm"
+              >
+                View Storefront
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-lg bg-orange-500 px-3 py-2 text-xs font-bold text-white transition hover:bg-orange-600 sm:px-4 sm:text-sm"
+              >
+                Logout
+              </button>
+            </div>
           </div>
-        </div>
+        </header>
+
         {children}
       </>
     );
@@ -126,7 +156,9 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
               />
             </label>
           </div>
-          {error ? <p className="mt-4 text-sm font-bold text-red-300">{error}</p> : null}
+          {error ? (
+            <p className="mt-4 text-sm font-bold text-red-300">{error}</p>
+          ) : null}
           <button className="animated-button inquiry-submit mt-6 w-full">
             Login
           </button>

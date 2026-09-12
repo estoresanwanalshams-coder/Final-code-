@@ -2,10 +2,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { SiteChrome } from "@/components/SiteChrome";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { ClientFloatingWidgets } from "@/components/ClientFloatingWidgets";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
 import { ScrollToTopOnNavigate } from "@/components/ScrollToTopOnNavigate";
 import "./globals.css";
 
@@ -85,10 +83,7 @@ export default function RootLayout({
           `}
         </Script>
         <ScrollToTopOnNavigate />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <ClientFloatingWidgets />
+        <SiteChrome>{children}</SiteChrome>
         <Analytics />
         <SpeedInsights />
       </body>
