@@ -380,7 +380,7 @@ export function CheckoutForm({
         </label>
         <div className="overflow-hidden rounded-2xl border border-orange-200 bg-orange-50/60 md:col-span-2">
           <div className="flex items-start gap-3 p-4 sm:p-5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[#fa710c]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-hm-orange">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -433,7 +433,7 @@ export function CheckoutForm({
         </label>
         <div className="mb-4 w-full rounded-xl border border-zinc-200 bg-zinc-50 p-4 md:col-span-2">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-[#fa710c]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-hm-orange">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
