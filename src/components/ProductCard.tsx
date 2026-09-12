@@ -95,7 +95,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
           <div className="absolute left-3 top-3 z-10 flex flex-col items-start gap-1.5">
             {hasDiscount ? (
-              <span className="rounded-lg bg-orange-600 px-2.5 py-1 text-[0.65rem] font-extrabold uppercase tracking-wide text-white shadow-sm">
+              <span className="rounded-lg bg-hm-orange px-2.5 py-1 text-[0.65rem] font-extrabold uppercase tracking-wide text-white shadow-sm">
                 {discountPercent}% Off
               </span>
             ) : null}
@@ -113,7 +113,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
 
       <div className="flex flex-1 flex-col p-4">
         <Link href={`/products/${product.slug}`} className="block flex-1">
-          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold leading-5 text-zinc-950 transition group-hover:text-orange-600 sm:text-[0.95rem]">
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-semibold leading-5 text-zinc-950 transition group-hover:text-hm-orange sm:text-[0.95rem]">
             {product.name}
           </h3>
         </Link>
