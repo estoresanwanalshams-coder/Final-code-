@@ -11,7 +11,6 @@ alter table public.products
   add column if not exists stock_status text not null default 'in_stock',
   add column if not exists search_keywords text[] not null default '{}';
 
-
 -- Keep product publishing states predictable.
 do $$
 begin
@@ -66,7 +65,10 @@ create index if not exists idx_products_stock_status
 
 -- Public storefront:
 -- customers should never receive draft products.
+-- Drop both legacy and V2 policies so this migration is safe to rerun.
 drop policy if exists "Public can read products" on public.products;
+drop policy if exists "Public can read active products" on public.products;
+drop policy if exists "Authenticated customers can read active products" on public.products;
 
 create policy "Public can read active products"
 on public.products

@@ -412,3 +412,240 @@ with check (
   bucket_id = 'product-images'
   and (auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local'
 );
+
+-- ============================================================
+-- HM SHOP ONLINE - ADMIN V2 SCHEMA RECONCILIATION
+-- Keep this section last so legacy bootstrap definitions above
+-- are upgraded to the current storefront/admin requirements.
+-- ============================================================
+
+
+-- ------------------------------------------------------------
+-- PRODUCTS V2
+-- ------------------------------------------------------------
+
+alter table public.products
+  add column if not exists sku text,
+  add column if not exists brand text,
+  add column if not exists status text not null default 'active',
+  add column if not exists stock_status text not null default 'in_stock',
+  add column if not exists search_keywords text[] not null default '{}';
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'products_status_check'
+      and conrelid = 'public.products'::regclass
+  ) then
+    alter table public.products
+      add constraint products_status_check
+      check (status in ('active', 'draft'));
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'products_stock_status_check'
+      and conrelid = 'public.products'::regclass
+  ) then
+    alter table public.products
+      add constraint products_stock_status_check
+      check (stock_status in ('in_stock', 'out_of_stock'));
+  end if;
+end $$;
+
+create unique index if not exists idx_products_sku_unique
+  on public.products (lower(btrim(sku)))
+  where sku is not null and btrim(sku) <> '';
+
+create index if not exists idx_products_status_created_at
+  on public.products (status, created_at desc);
+
+create index if not exists idx_products_stock_status
+  on public.products (stock_status);
+
+drop policy if exists "Public can read products" on public.products;
+drop policy if exists "Public can read active products" on public.products;
+drop policy if exists "Authenticated customers can read active products" on public.products;
+drop policy if exists "Admin can read all products" on public.products;
+
+create policy "Public can read active products"
+on public.products
+for select
+to anon
+using (status = 'active');
+
+create policy "Authenticated customers can read active products"
+on public.products
+for select
+to authenticated
+using (status = 'active');
+
+create policy "Admin can read all products"
+on public.products
+for select
+to authenticated
+using (
+  (auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local'
+);
+
+
+-- ------------------------------------------------------------
+-- CATEGORIES V2
+-- ------------------------------------------------------------
+
+alter table public.categories
+  add column if not exists image_url text,
+  add column if not exists is_active boolean not null default true,
+  add column if not exists display_order integer not null default 0;
+
+create index if not exists idx_categories_active_display_order
+  on public.categories (is_active, display_order, created_at);
+
+drop policy if exists "Public can read categories" on public.categories;
+drop policy if exists "Public can read active categories" on public.categories;
+drop policy if exists "Authenticated customers can read active categories" on public.categories;
+drop policy if exists "Admin can read all categories" on public.categories;
+
+create policy "Public can read active categories"
+on public.categories
+for select
+to anon
+using (is_active = true);
+
+create policy "Authenticated customers can read active categories"
+on public.categories
+for select
+to authenticated
+using (is_active = true);
+
+create policy "Admin can read all categories"
+on public.categories
+for select
+to authenticated
+using (
+  (auth.jwt() ->> 'email') = 'murtaza.sanwala@admin.local'
+);
+
+-- Keep the legacy slug for compatibility, but use the correct display name.
+update public.categories
+set name = 'Automotive'
+where slug = 'automative';
+
+insert into public.categories (name, slug, description)
+values (
+  'Tools & Home Improvement',
+  'tools-home-improvement',
+  'Tools, repair accessories, hardware, and practical home improvement products.'
+)
+on conflict (slug) do nothing;
+
+
+-- ------------------------------------------------------------
+-- HOMEPAGE V2
+-- ------------------------------------------------------------
+
+alter table public.site_settings
+  add column if not exists banner_slides jsonb;
+
+alter table public.site_settings
+  add column if not exists homepage_category_slugs text[] not null default '{}';
+
+update public.site_settings
+set banner_slides =
+  case
+    when banner_image_url is not null
+      and btrim(banner_image_url) <> ''
+      and banner_image_url not in (
+        '/banners/banner-1.png',
+        '/banners/banner-2.png',
+        '/banners/banner-3.png'
+      )
+    then jsonb_build_array(
+      jsonb_build_object(
+        'id', 'legacy-custom-banner',
+        'imageUrl', banner_image_url,
+        'isActive', true,
+        'displayOrder', 1
+      ),
+      jsonb_build_object(
+        'id', 'banner-1',
+        'imageUrl', '/banners/banner-1.png',
+        'isActive', true,
+        'displayOrder', 2
+      ),
+      jsonb_build_object(
+        'id', 'banner-2',
+        'imageUrl', '/banners/banner-2.png',
+        'isActive', true,
+        'displayOrder', 3
+      ),
+      jsonb_build_object(
+        'id', 'banner-3',
+        'imageUrl', '/banners/banner-3.png',
+        'isActive', true,
+        'displayOrder', 4
+      )
+    )
+    else jsonb_build_array(
+      jsonb_build_object(
+        'id', 'banner-1',
+        'imageUrl', '/banners/banner-1.png',
+        'isActive', true,
+        'displayOrder', 1
+      ),
+      jsonb_build_object(
+        'id', 'banner-2',
+        'imageUrl', '/banners/banner-2.png',
+        'isActive', true,
+        'displayOrder', 2
+      ),
+      jsonb_build_object(
+        'id', 'banner-3',
+        'imageUrl', '/banners/banner-3.png',
+        'isActive', true,
+        'displayOrder', 3
+      )
+    )
+  end
+where banner_slides is null;
+
+alter table public.site_settings
+  alter column banner_slides
+  set default '[
+    {
+      "id": "banner-1",
+      "imageUrl": "/banners/banner-1.png",
+      "isActive": true,
+      "displayOrder": 1
+    },
+    {
+      "id": "banner-2",
+      "imageUrl": "/banners/banner-2.png",
+      "isActive": true,
+      "displayOrder": 2
+    },
+    {
+      "id": "banner-3",
+      "imageUrl": "/banners/banner-3.png",
+      "isActive": true,
+      "displayOrder": 3
+    }
+  ]'::jsonb;
+
+alter table public.site_settings
+  alter column banner_slides set not null;
+
+
+-- ------------------------------------------------------------
+-- ORDER TRACKING SECURITY
+-- ------------------------------------------------------------
+
+-- Ensure an older one-argument tracking RPC can never remain available
+-- if this schema is run against an existing database.
+drop function if exists public.track_order(text);
