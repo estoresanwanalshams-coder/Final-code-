@@ -69,8 +69,6 @@ export async function HomePageContent() {
 
         <HomeCategoryGrid categories={homepageCategories} />
 
-        <HomeTrustSection />
-
         <HomeProductCarousel
           eyebrow="Just In"
           title="New Arrivals"
@@ -89,6 +87,8 @@ export async function HomePageContent() {
           products={bestSellers}
           tone="soft"
         />
+
+        <HomeTrustSection />
 
         <HomeProductCarousel
           eyebrow="HM Picks"
