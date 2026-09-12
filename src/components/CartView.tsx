@@ -93,7 +93,7 @@ export function CartView() {
             </p>
             <Link
               href="/categories"
-              className="animated-button mt-8 inline-flex bg-zinc-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
+              className="animated-button mt-8 inline-flex rounded-xl bg-hm-orange px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-hm-orange-hover active:scale-[0.99]"
             >
               Browse Products
             </Link>
@@ -179,7 +179,7 @@ export function CartView() {
                           className="flex h-10 w-10 items-center justify-center text-lg font-bold text-zinc-700 transition hover:bg-zinc-100"
                           aria-label={`Decrease quantity for ${item.product.name}`}
                         >
-                          −
+                           &minus;
                         </button>
 
                         <input
