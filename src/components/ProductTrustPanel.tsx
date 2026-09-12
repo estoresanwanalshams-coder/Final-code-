@@ -99,7 +99,7 @@ function TrustItem({
 }) {
   return (
     <div className="flex min-w-0 gap-3 p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-[#fa710c]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-hm-orange">
         {icon}
       </div>
 

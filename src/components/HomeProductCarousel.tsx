@@ -57,7 +57,7 @@ export function HomeProductCarousel({
     >
       <div className="mb-5 flex items-end justify-between gap-4 sm:mb-6">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-hm-orange">
             {eyebrow}
           </p>
 
@@ -74,7 +74,7 @@ export function HomeProductCarousel({
 
         <Link
           href={href}
-          className="hidden shrink-0 text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:inline-flex"
+          className="hidden shrink-0 text-sm font-bold text-hm-orange transition hover:text-hm-orange sm:inline-flex"
         >
           {linkLabel} →
         </Link>
@@ -101,7 +101,7 @@ export function HomeProductCarousel({
           <div className="mt-4 flex items-center justify-between">
             <Link
               href={href}
-              className="text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:hidden"
+              className="text-sm font-bold text-hm-orange transition hover:text-hm-orange sm:hidden"
             >
               {linkLabel} →
             </Link>
@@ -110,7 +110,7 @@ export function HomeProductCarousel({
               <button
                 type="button"
                 onClick={() => scrollByCards("left")}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg text-zinc-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg text-zinc-700 shadow-sm transition hover:border-hm-orange/40 hover:text-hm-orange"
                 aria-label={`Scroll ${title} left`}
               >
                 ←
@@ -119,7 +119,7 @@ export function HomeProductCarousel({
               <button
                 type="button"
                 onClick={() => scrollByCards("right")}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg text-zinc-700 shadow-sm transition hover:border-orange-300 hover:text-orange-600"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-lg text-zinc-700 shadow-sm transition hover:border-hm-orange/40 hover:text-hm-orange"
                 aria-label={`Scroll ${title} right`}
               >
                 →

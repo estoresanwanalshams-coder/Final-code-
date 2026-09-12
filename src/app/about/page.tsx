@@ -4,13 +4,13 @@ export default function AboutUsPage() {
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
     <div className="text-center mb-16">
-      <span className="inline-flex items-center px-4 py-2 rounded-full bg-[#FA710C]/10 text-[#FA710C] text-sm font-semibold">
+      <span className="inline-flex items-center px-4 py-2 rounded-full bg-hm-orange/10 text-hm-orange text-sm font-semibold">
         Welcome to HM Shop Online
       </span>
 
       <h1 className="mt-6 text-4xl md:text-6xl font-bold text-[#111111]">
         Discover Trending Products 
-        <span className="text-[#FA710C]"> At Amazing Prices</span>
+        <span className="text-hm-orange"> At Amazing Prices</span>
       </h1>
 
       <p className="mt-6 max-w-3xl mx-auto text-lg text-[#333333] leading-relaxed">
@@ -68,22 +68,22 @@ export default function AboutUsPage() {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 my-20">
 
       <div className="text-center">
-        <h3 className="text-4xl font-bold text-[#FA710C]">100%</h3>
+        <h3 className="text-4xl font-bold text-hm-orange">100%</h3>
         <p className="text-[#333333] mt-2">Secure Shopping</p>
       </div>
 
       <div className="text-center">
-        <h3 className="text-4xl font-bold text-[#FA710C]">24/7</h3>
+        <h3 className="text-4xl font-bold text-hm-orange">24/7</h3>
         <p className="text-[#333333] mt-2">Customer Support</p>
       </div>
 
       <div className="text-center">
-        <h3 className="text-4xl font-bold text-[#FA710C]">Fast</h3>
+        <h3 className="text-4xl font-bold text-hm-orange">Fast</h3>
         <p className="text-[#333333] mt-2">Order Processing</p>
       </div>
 
       <div className="text-center">
-        <h3 className="text-4xl font-bold text-[#FA710C]">New</h3>
+        <h3 className="text-4xl font-bold text-hm-orange">New</h3>
         <p className="text-[#333333] mt-2">Products Added Regularly</p>
       </div>
 
@@ -132,7 +132,7 @@ export default function AboutUsPage() {
 
     </div>
 
-    <div className="bg-[#FA710C] rounded-3xl text-white p-10 text-center">
+    <div className="bg-hm-orange rounded-3xl text-white p-10 text-center">
 
       <h2 className="text-3xl font-bold mb-4">
         Why Customers Trust HM Shop Online

@@ -117,7 +117,7 @@ function LoginForm() {
           </button>
           <p className="mt-4 text-sm text-zinc-600">
             New customer?{" "}
-            <Link href={registerHref} className="font-semibold text-[#FF6B00]">
+            <Link href={registerHref} className="font-semibold text-hm-orange">
               Create account
             </Link>
           </p>

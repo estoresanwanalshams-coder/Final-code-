@@ -7,7 +7,7 @@ export default function FaqPage() {
 
       <div className="space-y-8">
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             How do I place an order?
           </h2>
           <p className="text-[#333333]">
@@ -18,7 +18,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             What payment methods do you accept?
           </h2>
           <p className="text-[#333333]">
@@ -28,7 +28,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             How can I track my order?
           </h2>
           <p className="text-[#333333]">
@@ -38,7 +38,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             How long does delivery take?
           </h2>
           <p className="text-[#333333]">
@@ -49,7 +49,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             Can I cancel my order?
           </h2>
           <p className="text-[#333333]">
@@ -60,7 +60,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             What if I receive a damaged item?
           </h2>
           <p className="text-[#333333]">
@@ -71,7 +71,7 @@ export default function FaqPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 text-xl font-semibold text-[#FA710C]">
+          <h2 className="mb-2 text-xl font-semibold text-hm-orange">
             How can I contact HM Shop Online?
           </h2>
           <p className="text-[#333333]">

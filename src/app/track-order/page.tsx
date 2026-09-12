@@ -119,7 +119,7 @@ export default function TrackOrderPage() {
     <section className="page-shell">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
             Order Tracking
           </p>
 
@@ -166,7 +166,7 @@ export default function TrackOrderPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-4 flex w-full items-center justify-center rounded-xl bg-[#fa710c] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[#e66000] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-4 flex w-full items-center justify-center rounded-xl bg-hm-orange px-6 py-3.5 text-sm font-bold text-white transition hover:bg-hm-orange-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isLoading ? "Checking Order..." : "Track Order"}
           </button>
@@ -235,7 +235,7 @@ export default function TrackOrderPage() {
                       <div className="absolute left-[12.5%] right-[12.5%] top-5 h-1 bg-zinc-200" />
 
                       <div
-                        className="absolute left-[12.5%] top-5 h-1 bg-[#fa710c] transition-all"
+                        className="absolute left-[12.5%] top-5 h-1 bg-hm-orange transition-all"
                         style={{
                           width:
                             progressIndex <= 0
@@ -260,7 +260,7 @@ export default function TrackOrderPage() {
                               <div
                                 className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold ${
                                   completed
-                                    ? "border-[#fa710c] bg-[#fa710c] text-white"
+                                    ? "border-hm-orange bg-hm-orange text-white"
                                     : "border-zinc-300 bg-white text-zinc-400"
                                 }`}
                               >
@@ -297,7 +297,7 @@ export default function TrackOrderPage() {
                           <div
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${
                               completed
-                                ? "border-[#fa710c] bg-[#fa710c] text-white"
+                                ? "border-hm-orange bg-hm-orange text-white"
                                 : "border-zinc-300 bg-white text-zinc-400"
                             }`}
                           >

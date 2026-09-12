@@ -19,7 +19,7 @@ export default async function CategoriesPage() {
     <main className="min-h-screen bg-zinc-50">
       <section className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <div className="max-w-3xl">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
             Browse Departments
           </p>
 
@@ -46,7 +46,7 @@ export default async function CategoriesPage() {
               />
 
               <div className="flex flex-1 flex-col p-4 sm:p-5">
-                <h2 className="break-words text-lg font-bold leading-6 text-zinc-950 transition group-hover:text-orange-700">
+                <h2 className="break-words text-lg font-bold leading-6 text-zinc-950 transition group-hover:text-hm-orange">
                   {category.name}
                 </h2>
 
@@ -55,7 +55,7 @@ export default async function CategoriesPage() {
                 </p>
 
                 <div className="mt-auto pt-4">
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-orange-600">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-hm-orange">
                     Shop Now
                     <span
                       aria-hidden="true"
@@ -72,7 +72,7 @@ export default async function CategoriesPage() {
 
         <div className="mt-10 overflow-hidden rounded-3xl border border-orange-100 bg-gradient-to-r from-orange-50 via-white to-amber-50 p-6 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-7">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
               Everything in one place
             </p>
 
@@ -88,7 +88,7 @@ export default async function CategoriesPage() {
 
           <Link
             href="/products"
-            className="mt-5 inline-flex shrink-0 items-center justify-center rounded-xl bg-[#fa710c] px-6 py-3 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-[#e66000] hover:shadow-md sm:mt-0"
+            className="mt-5 inline-flex shrink-0 items-center justify-center rounded-xl bg-hm-orange px-6 py-3 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-hm-orange-hover hover:shadow-md sm:mt-0"
           >
             View All Products
           </Link>

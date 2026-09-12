@@ -77,7 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="flex flex-col">
             <div className="rounded-[24px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 lg:p-7">
               {category?.name ? (
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
                   {category.name}
                 </p>
               ) : null}
@@ -125,7 +125,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="mt-8 overflow-hidden rounded-[24px] border border-zinc-200 bg-white shadow-sm sm:mt-10">
           <div className="border-b border-zinc-100 px-5 py-5 sm:px-7">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
               About this product
             </p>
 
@@ -172,7 +172,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {relatedProducts.length > 0 ? (
           <div className="mt-12 sm:mt-14">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-hm-orange">
               You may also like
             </p>
 

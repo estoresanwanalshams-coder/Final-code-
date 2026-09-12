@@ -19,7 +19,7 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
     <section className="mt-10 sm:mt-12">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-hm-orange">
             Explore HM
           </p>
 
@@ -35,7 +35,7 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
 
         <Link
           href="/categories"
-          className="hidden items-center gap-1 text-sm font-bold text-orange-600 transition hover:text-orange-700 sm:inline-flex"
+          className="hidden items-center gap-1 text-sm font-bold text-hm-orange transition hover:text-hm-orange sm:inline-flex"
         >
           View All
           <span aria-hidden="true">→</span>
@@ -55,11 +55,11 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
             />
 
             <div className="flex flex-1 flex-col px-3.5 py-3.5 sm:px-4">
-              <h3 className="line-clamp-2 text-sm font-bold leading-5 text-zinc-950 transition group-hover:text-orange-700">
+              <h3 className="line-clamp-2 text-sm font-bold leading-5 text-zinc-950 transition group-hover:text-hm-orange">
                 {category.name}
               </h3>
 
-              <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-orange-600">
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-hm-orange">
                 Shop now
                 <span
                   aria-hidden="true"
@@ -75,7 +75,7 @@ export function HomeCategoryGrid({ categories }: HomeCategoryGridProps) {
 
       <Link
         href="/categories"
-        className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-orange-600 sm:hidden"
+        className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-hm-orange sm:hidden"
       >
         View All Categories
         <span aria-hidden="true">→</span>

@@ -143,7 +143,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
         <AddToCartButton
           product={product}
           label="Add to Cart"
-          className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-orange-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-orange-700 hover:shadow-md active:translate-y-0 active:scale-[0.99]"
+          className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-hm-orange px-4 py-3 text-sm font-bold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-hm-orange-hover hover:shadow-md active:translate-y-0 active:scale-[0.99]"
         />
       </div>
     </article>

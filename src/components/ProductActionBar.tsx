@@ -92,7 +92,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
         <AddToCartButton
           product={product}
           quantity={quantity}
-          className="flex min-h-12 items-center justify-center rounded-xl border-2 border-[#fa710c] bg-white px-3 py-3 text-center text-sm font-bold text-[#fa710c] transition hover:bg-orange-50 active:scale-[0.98] sm:px-5"
+          className="flex min-h-12 items-center justify-center rounded-xl border-2 border-hm-orange bg-white px-3 py-3 text-center text-sm font-bold text-hm-orange transition hover:bg-orange-50 active:scale-[0.98] sm:px-5"
         />
 
         <button
@@ -101,7 +101,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
           disabled={!isAvailable}
           className={`flex min-h-12 items-center justify-center rounded-xl px-3 py-3 text-sm font-bold transition sm:px-5 ${
             isAvailable
-              ? "bg-[#fa710c] text-white shadow-sm hover:bg-[#e66000] active:scale-[0.98]"
+              ? "bg-hm-orange text-white shadow-sm hover:bg-hm-orange-hover active:scale-[0.98]"
               : "cursor-not-allowed bg-zinc-100 text-zinc-500"
           }`}
         >

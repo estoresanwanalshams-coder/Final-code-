@@ -96,7 +96,7 @@ export async function ProductGrid({
 
         <Link
           href="/products"
-          className="mt-5 inline-flex rounded-xl bg-[#fa710c] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#e66000]"
+          className="mt-5 inline-flex rounded-xl bg-hm-orange px-5 py-3 text-sm font-bold text-white transition hover:bg-hm-orange-hover"
         >
           Browse All Products
         </Link>
@@ -124,7 +124,7 @@ export async function ProductGrid({
               href={createBrowseHref(basePath, 1, option.value)}
               className={`rounded-lg border px-3 py-2 text-xs font-bold transition ${
                 sort === option.value
-                  ? "border-[#fa710c] bg-orange-50 text-orange-700"
+                  ? "border-hm-orange bg-orange-50 text-orange-700"
                   : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
               }`}
             >

@@ -107,7 +107,7 @@ export function CartView() {
     <section className="page-shell">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <div className="content-reveal">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
             Your cart
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
@@ -154,7 +154,7 @@ export function CartView() {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/products/${item.product.slug}`}
-                      className="line-clamp-2 text-base font-bold leading-6 text-zinc-950 transition hover:text-orange-600 sm:text-lg"
+                      className="line-clamp-2 text-base font-bold leading-6 text-zinc-950 transition hover:text-hm-orange sm:text-lg"
                     >
                       {item.product.name}
                     </Link>
@@ -227,7 +227,7 @@ export function CartView() {
 
           <aside className="content-reveal h-fit rounded-[24px] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6 lg:sticky lg:top-28">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
                 Your order
               </p>
               <h2 className="mt-1 text-xl font-bold tracking-tight text-zinc-950">
@@ -266,7 +266,7 @@ export function CartView() {
             </div>
             <div className="mt-5 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#fa710c] shadow-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-hm-orange shadow-sm">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -295,7 +295,7 @@ export function CartView() {
             </div>
             <Link
               href={`/inquiry/${items[0]?.product.slug ?? ""}`}
-              className="mt-5 flex min-h-13 w-full items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e66000] active:scale-[0.99]"
+              className="mt-5 flex min-h-13 w-full items-center justify-center rounded-xl bg-hm-orange px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-hm-orange-hover active:scale-[0.99]"
             >
               Proceed to Checkout
               <span className="mx-2 text-orange-200" aria-hidden="true">

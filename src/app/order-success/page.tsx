@@ -149,7 +149,7 @@ function OrderSuccessContent() {
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
               <Link
                 href={trackOrderHref}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[#fa710c] px-5 py-3 text-sm font-bold text-white transition hover:bg-orange-700 active:scale-[0.99]"
+                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-hm-orange px-5 py-3 text-sm font-bold text-white transition hover:bg-hm-orange-hover active:scale-[0.99]"
               >
                 Track Order
               </Link>
@@ -218,7 +218,7 @@ function InfoItem({
 }) {
   return (
     <div className="flex gap-3 rounded-2xl bg-white p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-[#fa710c]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-hm-orange">
         {icon}
       </div>
 
@@ -241,7 +241,7 @@ function NextStep({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-sm font-extrabold text-[#fa710c]">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-sm font-extrabold text-hm-orange">
         {number}
       </div>
 

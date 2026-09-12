@@ -3,11 +3,18 @@
 :root {
   --background: #f5f5f5;
   --foreground: #111111;
+
+  --hm-orange: #fa700b;
+  --hm-orange-hover: #e66000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-hm-orange: var(--hm-orange);
+  --color-hm-orange-hover: var(--hm-orange-hover);
+
   --font-sans: Poppins, "Segoe UI", Arial, Helvetica, sans-serif;
   --font-mono: "Cascadia Code", "Courier New", Courier, monospace;
 }

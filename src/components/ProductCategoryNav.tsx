@@ -29,8 +29,8 @@ export function ProductCategoryNav({
             href="/products"
             className={`rounded-full border px-4 py-2.5 text-sm font-bold transition ${
               !activeSlug
-                ? "border-[#fa710c] bg-[#fa710c] text-white"
-                : "border-zinc-200 bg-white text-zinc-700 hover:border-[#fa710c] hover:text-orange-700"
+                ? "border-hm-orange bg-hm-orange text-white"
+                : "border-zinc-200 bg-white text-zinc-700 hover:border-hm-orange hover:text-hm-orange"
             }`}
           >
             All Products
@@ -45,8 +45,8 @@ export function ProductCategoryNav({
                 href={`/categories/${category.slug}`}
                 className={`rounded-full border px-4 py-2.5 text-sm font-bold transition ${
                   isActive
-                    ? "border-[#fa710c] bg-[#fa710c] text-white"
-                    : "border-zinc-200 bg-white text-zinc-700 hover:border-[#fa710c] hover:text-orange-700"
+                    ? "border-hm-orange bg-hm-orange text-white"
+                    : "border-zinc-200 bg-white text-zinc-700 hover:border-hm-orange hover:text-hm-orange"
                 }`}
               >
                 {category.name}

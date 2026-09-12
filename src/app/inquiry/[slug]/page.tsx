@@ -34,7 +34,7 @@ export default async function InquiryPage({
         <div className="content-reveal checkout-card">
           <div className="grid items-start gap-0 lg:grid-cols-[0.85fr_1.15fr]">
             <aside className="checkout-summary-panel p-6 sm:p-8 lg:p-10">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#fa710c]">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-hm-orange">
                 Secure Checkout
               </p>
               <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-950 sm:text-4xl">

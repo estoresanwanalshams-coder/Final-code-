@@ -177,7 +177,7 @@ function RegisterForm() {
           </button>
           <p className="mt-4 text-sm text-zinc-600">
             Already have an account?{" "}
-            <Link href={loginHref} className="font-semibold text-[#FF6B00]">
+            <Link href={loginHref} className="font-semibold text-hm-orange">
               Login
             </Link>
           </p>
