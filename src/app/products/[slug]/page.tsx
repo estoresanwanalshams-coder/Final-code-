@@ -143,17 +143,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="grid border-t border-zinc-100 bg-zinc-50/60 sm:grid-cols-3">
             <div className="border-b border-zinc-100 px-5 py-4 sm:border-b-0 sm:border-r sm:px-7">
               <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                Delivery
+                Delivery Area
               </p>
+
               <p className="mt-1 text-sm font-semibold text-zinc-900">
-                Available across the UAE
+                Across the UAE
               </p>
             </div>
 
             <div className="border-b border-zinc-100 px-5 py-4 sm:border-b-0 sm:border-r sm:px-7">
               <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                Payment
+                Payment Method
               </p>
+
               <p className="mt-1 text-sm font-semibold text-zinc-900">
                 Cash on Delivery
               </p>
@@ -161,10 +163,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div className="px-5 py-4 sm:px-7">
               <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-                Need Help?
+                Returns
               </p>
+
               <p className="mt-1 text-sm font-semibold text-zinc-900">
-                Contact us on WhatsApp
+                Subject to our return policy
               </p>
             </div>
           </div>

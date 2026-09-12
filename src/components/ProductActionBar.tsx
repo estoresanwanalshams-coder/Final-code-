@@ -69,7 +69,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
             className="flex h-11 w-11 items-center justify-center border-r border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Decrease quantity"
           >
-            −
+             &minus;
           </button>
 
           <span className="flex h-11 min-w-14 items-center justify-center text-sm font-bold text-zinc-950">
