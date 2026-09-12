@@ -29,11 +29,7 @@ export function SafeProductImage({
       <div
         aria-label={alt}
         className={`flex items-center justify-center bg-zinc-100 text-xs font-semibold text-zinc-400 ${className ?? ""}`}
-        style={
-          props.fill
-            ? { position: "absolute", inset: 0 }
-            : undefined
-        }
+        style={props.fill ? { position: "absolute", inset: 0 } : undefined}
       >
         No image
       </div>
@@ -46,6 +42,7 @@ export function SafeProductImage({
       src={currentSrc}
       alt={alt}
       className={className}
+      unoptimized
       onLoad={onLoad}
       onError={() => setFailed(true)}
     />

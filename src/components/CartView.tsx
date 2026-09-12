@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -141,7 +141,7 @@ export function CartView() {
                     href={`/products/${item.product.slug}`}
                     className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50 sm:h-28 sm:w-28"
                   >
-                    <Image
+                    <SafeProductImage
                       src={item.product.imageUrl}
                       alt={item.product.name}
                       fill

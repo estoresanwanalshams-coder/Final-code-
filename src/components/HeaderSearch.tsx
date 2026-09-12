@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -75,8 +75,7 @@ export function HeaderSearch({ onNavigate }: HeaderSearchProps) {
   }, [query]);
 
   const normalizedQuery = query.trim();
-  const visibleSuggestions =
-    normalizedQuery.length < 1 ? [] : suggestions;
+  const visibleSuggestions = normalizedQuery.length < 1 ? [] : suggestions;
 
   function clearSearch() {
     setSuggestions([]);
@@ -179,7 +178,7 @@ export function HeaderSearch({ onNavigate }: HeaderSearchProps) {
               className="search-suggestion-item"
             >
               <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-zinc-50">
-                <Image
+                <SafeProductImage
                   src={product.imageUrl}
                   alt={product.name}
                   fill

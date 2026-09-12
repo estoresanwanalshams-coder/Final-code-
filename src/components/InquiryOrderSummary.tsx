@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import { useEffect, useMemo, useState } from "react";
 import {
   type CartItem,
@@ -78,7 +78,7 @@ export function InquiryOrderSummary({
             className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-2"
           >
             <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-100 bg-white">
-              <Image
+              <SafeProductImage
                 src={item.product.imageUrl}
                 alt={item.product.name}
                 fill
