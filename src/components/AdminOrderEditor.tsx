@@ -177,6 +177,28 @@ function createWhatsAppUrl(
   );
 }
 
+function getAllowedStatuses(currentStatus: OrderStatus): OrderStatus[] {
+  switch (currentStatus) {
+    case "pending":
+      return ["pending", "processing", "cancelled"];
+
+    case "processing":
+      return ["processing", "shipped", "cancelled"];
+
+    case "shipped":
+      return ["shipped", "delivered"];
+
+    case "delivered":
+      return ["delivered"];
+
+    case "cancelled":
+      return ["cancelled"];
+
+    default:
+      return [currentStatus];
+  }
+}
+
 export function AdminOrderEditor({
   orderNumber,
 }: {
@@ -388,9 +410,13 @@ export function AdminOrderEditor({
     shippingCharge;
 
   const canEditItems =
-    form?.status === "pending" ||
-    form?.status ===
+    order?.status === "pending" ||
+    order?.status ===
       "processing";
+
+  const allowedStatuses = order
+    ? getAllowedStatuses(order.status)
+    : [];
 
   const availableProducts =
     useMemo(() => {
@@ -609,6 +635,20 @@ export function AdminOrderEditor({
     const statusChanged =
       form.status !==
       order.status;
+
+    const allowedSaveStatuses =
+      getAllowedStatuses(order.status);
+
+    if (
+      !allowedSaveStatuses.includes(
+        form.status,
+      )
+    ) {
+      setMessage(
+        `Order status cannot move from ${statusLabels[order.status]} to ${statusLabels[form.status]}.`,
+      );
+      return;
+    }
 
     const itemsChanged =
       JSON.stringify(items) !==
@@ -1386,7 +1426,7 @@ export function AdminOrderEditor({
             }
             className="admin-order-input mt-5"
           >
-            {statuses.map(
+            {allowedStatuses.map(
               (status) => (
                 <option
                   key={status}
