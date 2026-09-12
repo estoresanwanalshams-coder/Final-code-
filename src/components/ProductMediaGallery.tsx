@@ -6,6 +6,7 @@ import { SafeProductImage } from "@/components/SafeProductImage";
 type ProductMediaGalleryProps = {
   images: string[];
   videoUrl?: string;
+  productName?: string;
 };
 
 function getYouTubeEmbedUrl(url?: string) {
@@ -52,6 +53,7 @@ function getYouTubeEmbedUrl(url?: string) {
 export function ProductMediaGallery({
   images,
   videoUrl,
+  productName = "Product",
 }: ProductMediaGalleryProps) {
   const safeImages = useMemo(
     () => (images.length > 0 ? images.filter(Boolean) : []),
@@ -66,7 +68,7 @@ export function ProductMediaGallery({
         <SafeProductImage
           key={activeImage || "empty"}
           src={activeImage}
-          alt="Product image"
+          alt={productName}
           fill
           loading="eager"
           sizes="(max-width: 1024px) 90vw, 45vw"
@@ -74,22 +76,22 @@ export function ProductMediaGallery({
         />
       </div>
       {safeImages.length > 0 ? (
-        <div className="mt-4 grid grid-cols-5 gap-2">
+        <div className="mt-4 flex gap-3 overflow-x-auto px-0.5 py-0.5 pb-2">
           {safeImages.map((image, index) => (
             <button
               key={image}
               type="button"
               onClick={() => setActiveImage(image)}
-              className={`relative aspect-square overflow-hidden rounded-lg bg-zinc-50 transition ${
+              className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-zinc-50 transition sm:w-20 ${
                 activeImage === image
-                  ? "ring-2 ring-zinc-900"
-                  : "ring-1 ring-transparent"
+                  ? "border-hm-orange"
+                  : "border-zinc-200 hover:border-zinc-300"
               }`}
-              aria-label="Preview product image"
+              aria-label={`View product image ${index + 1}`}
             >
               <SafeProductImage
                 src={image}
-                alt="Product thumbnail"
+                alt={`${productName} thumbnail ${index + 1}`}
                 fill
                 loading={index === 0 ? "eager" : "lazy"}
                 sizes="120px"

@@ -72,6 +72,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductMediaGallery
             images={product.imageUrls ?? [product.imageUrl]}
             videoUrl={product.videoUrl}
+            productName={product.name}
           />
 
           <div className="flex flex-col">
