@@ -60,11 +60,11 @@ a {
 }
 
 .nav-link:hover {
-  color: #f35a0a;
+  color: var(--hm-orange-hover);
 }
 
 .nav-link::after {
-  background: #fa710c;
+  background: var(--hm-orange);
   bottom: -0.35rem;
   content: "";
   height: 2px;
@@ -112,9 +112,9 @@ a {
 
 .icon-action {
   align-items: center;
-  border: 1px solid #fa710c;
+  border: 1px solid var(--hm-orange);
   border-radius: 9999px;
-  color: #fa710c;
+  color: var(--hm-orange);
   display: inline-flex;
   height: 2.9rem;
   justify-content: center;
@@ -128,8 +128,8 @@ a {
 
 .icon-action:hover {
   background: #fff7f2;
-  border-color: #e66000;
-  color: #e66000;
+  border-color: var(--hm-orange-hover);
+  color: var(--hm-orange-hover);
   transform: translateY(-1px);
 }
 
@@ -177,8 +177,8 @@ a {
 
 .header-search:focus-within {
   background: #ffffff;
-  border-color: #fa710c;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.18);
+  border-color: var(--hm-orange);
+  box-shadow: 0 0 0 3px rgba(250, 112, 11, 0.18);
 }
 
 .header-search input {
@@ -226,7 +226,7 @@ a {
 }
 
 .header-search button:hover {
-  color: #fa710c;
+  color: var(--hm-orange);
 }
 
 .cart-badge {
@@ -1045,8 +1045,8 @@ a {
     min-height: 220px;
   }
     .icon-action {
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 2.75rem;
+    width: 2.75rem;
   }
 
   .header-actions {
