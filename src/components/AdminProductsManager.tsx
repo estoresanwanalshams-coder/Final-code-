@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/products";
 import {
@@ -242,11 +242,11 @@ export function AdminProductsManager({
             </select>
           </div>
         </div>
-{isLoadingProducts ? (
-  <p className="mt-5 text-sm font-semibold text-zinc-500">
-    Loading complete admin catalog...
-  </p>
-) : null}
+        {isLoadingProducts ? (
+          <p className="mt-5 text-sm font-semibold text-zinc-500">
+            Loading complete admin catalog...
+          </p>
+        ) : null}
         <div className="mt-5 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="hidden grid-cols-[minmax(340px,2fr)_140px_180px_120px_160px_120px] gap-4 border-b border-zinc-200 bg-zinc-50 px-5 py-3 text-xs font-bold uppercase tracking-wider text-zinc-400 xl:grid">
             <div>Product</div>
@@ -339,13 +339,12 @@ function ProductRow({
     <div className="grid gap-4 px-4 py-4 transition hover:bg-zinc-50 sm:px-5 xl:grid-cols-[minmax(260px,2fr)_110px_150px_100px_145px_110px] xl:items-center">
       <div className="flex min-w-0 items-center gap-4">
         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
-          <Image
+          <SafeProductImage
             src={product.imageUrl}
             alt={product.name}
             fill
             sizes="64px"
             className="object-contain p-1"
-            referrerPolicy="no-referrer"
           />
         </div>
 
