@@ -1,8 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-
-const whatsappNumber = "971562300750";
+import { buildWhatsAppUrl } from "@/lib/contact";
 
 export function FloatingWhatsApp() {
   const pathname = usePathname();
@@ -20,7 +19,7 @@ if (hideOnCategoryPages) {
 
   return (
     <a
-      href={`https://wa.me/${whatsappNumber}`}
+      href={buildWhatsAppUrl()}
       target="_blank"
       rel="noreferrer"
       aria-label="Chat on WhatsApp"

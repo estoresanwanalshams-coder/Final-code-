@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
-
-const contactNumber = "+971 56 230 0750";
+import { HM_PHONE_DISPLAY, HM_PHONE_NUMBER } from "@/lib/contact";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
@@ -36,7 +35,9 @@ export default function ContactPage() {
       return;
     }
 
-    setNotice("Message sent successfully. Our team will get back to you shortly.");
+    setNotice(
+      "Message sent successfully. Our team will get back to you shortly.",
+    );
     setName("");
     setEmail("");
     setPhone("");
@@ -116,8 +117,11 @@ export default function ContactPage() {
           <div className="mt-8 space-y-6 text-sm text-zinc-300">
             <div>
               <p className="font-bold text-white">Phone / WhatsApp</p>
-              <a href="tel:+971562300750" className="mt-2 block hover:text-white">
-                {contactNumber}
+              <a
+                href={`tel:${HM_PHONE_NUMBER}`}
+                className="mt-2 block hover:text-white"
+              >
+                {HM_PHONE_DISPLAY}
               </a>
             </div>
             <div>

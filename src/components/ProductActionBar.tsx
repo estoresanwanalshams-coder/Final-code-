@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { buildWhatsAppUrl } from "@/lib/contact";
 import {
   isProductAvailableForPurchase,
   upsertCartProductQuantity,
@@ -12,8 +13,6 @@ import type { Product } from "@/lib/products";
 type ProductActionBarProps = {
   product: Product;
 };
-
-const whatsappNumber = "971562300750";
 
 export function ProductActionBar({ product }: ProductActionBarProps) {
   const router = useRouter();
@@ -47,11 +46,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
       "Please confirm availability and delivery details.",
     ].join("\n");
 
-    window.open(
-      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.open(buildWhatsAppUrl(message), "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -69,7 +64,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
             className="flex h-11 w-11 items-center justify-center border-r border-zinc-200 text-xl font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Decrease quantity"
           >
-             &minus;
+            &minus;
           </button>
 
           <span className="flex h-11 min-w-14 items-center justify-center text-sm font-bold text-zinc-950">

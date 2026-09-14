@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { buildWhatsAppUrl } from "@/lib/contact";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
@@ -98,7 +99,7 @@ function OrderSuccessContent() {
                   </svg>
                 }
                 title="UAE Delivery"
-                description="We'll prepare your order for delivery."
+                description="Delivery arranged to your selected UAE address."
               />
 
               <InfoItem
@@ -168,13 +169,11 @@ function OrderSuccessContent() {
               </p>
 
               <a
-                href={
+                href={buildWhatsAppUrl(
                   orderNumber
-                    ? `https://wa.me/971562300750?text=${encodeURIComponent(
-                        `Hello HM Shop Online, I need help with order ${orderNumber}.`,
-                      )}`
-                    : "https://wa.me/971562300750"
-                }
+                    ? `Hello HM Shop Online, I need help with order ${orderNumber}.`
+                    : undefined,
+                )}
                 target="_blank"
                 rel="noreferrer"
                 className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition hover:text-emerald-800"

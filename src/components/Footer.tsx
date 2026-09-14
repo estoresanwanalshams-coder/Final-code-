@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { HM_PHONE_DISPLAY, HM_PHONE_NUMBER } from "@/lib/contact";
 
 const footerLinks = [
   { label: "Home", href: "/" },
@@ -17,7 +18,6 @@ const policyLinks = [
   { label: "Shipping Policy", href: "/shipping-policy" },
 ];
 
-const contactNumber = "+971 56 230 0750";
 const socialLinks = [
   {
     label: "Instagram",
@@ -125,10 +125,10 @@ export function Footer() {
             <p>info@hmshoponline.com</p>
 
             <a
-              href="tel:+971562300750"
+              href={`tel:${HM_PHONE_NUMBER}`}
               className="w-fit block transition hover:text-white"
             >
-              {contactNumber}
+              {HM_PHONE_DISPLAY}
             </a>
 
             <p>Mon to Sat, 10:00 AM - 7:00 PM</p>
