@@ -175,6 +175,38 @@ export function CheckoutForm({
 
         return;
       }
+      const refreshedItems: CartItem[] = items.map((item, index) => ({
+        product: latestProducts[index]!,
+        quantity: item.quantity,
+      }));
+
+      const refreshedSubtotal = refreshedItems.reduce(
+        (sum, item) => sum + item.product.price * item.quantity,
+        0,
+      );
+
+      const refreshedShippingCharge = getApplicableShippingCharge(
+        refreshedItems,
+        baseShippingCharge,
+      );
+
+      const refreshedGrandTotal = refreshedSubtotal + refreshedShippingCharge;
+
+      const refreshedShippingMethod =
+        refreshedShippingCharge === 0 && refreshedItems.length > 0
+          ? "Free Shipping"
+          : "Standard Shipping";
+
+      if (refreshedGrandTotal !== grandTotal) {
+        setItems(refreshedItems);
+        saveCartItems(refreshedItems);
+
+        setMessage(
+          "A product price or shipping charge has changed. We updated your order with the latest total. Please review it and place your order again.",
+        );
+
+        return;
+      }
 
       const addressLine1 = [
         building.trim(),
@@ -201,10 +233,10 @@ export function CheckoutForm({
         addressLine1,
         addressLine2,
         city,
-        shippingMethod,
+        shippingMethod: refreshedShippingMethod,
         additionalNotes,
-        items,
-        total: grandTotal,
+        items: refreshedItems,
+        total: refreshedGrandTotal,
       });
       await fetch("/api/orders/notify", {
         method: "POST",

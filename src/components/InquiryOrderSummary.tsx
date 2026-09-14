@@ -25,10 +25,21 @@ export function InquiryOrderSummary({
   );
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setCartItems(getCartItems()), 0);
+  function loadCart() {
+    setCartItems(getCartItems());
+  }
 
-    return () => window.clearTimeout(timer);
-  }, []);
+  const timer = window.setTimeout(loadCart, 0);
+
+  window.addEventListener("cart:updated", loadCart);
+  window.addEventListener("storage", loadCart);
+
+  return () => {
+    window.clearTimeout(timer);
+    window.removeEventListener("cart:updated", loadCart);
+    window.removeEventListener("storage", loadCart);
+  };
+}, []);
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -89,7 +100,7 @@ export function InquiryOrderSummary({
             </span>
             <span className="min-w-0 flex-1 text-sm font-semibold text-zinc-900">
               {item.product.name}
-              {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+              {item.quantity > 1 ? ` \u00D7 ${item.quantity}` : ""}
             </span>
             <span className="text-sm font-bold text-zinc-700">
               AED {item.product.price * item.quantity}
