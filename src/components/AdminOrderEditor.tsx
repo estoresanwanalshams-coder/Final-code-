@@ -574,15 +574,6 @@ export function AdminOrderEditor({
           body: JSON.stringify({
             orderNumber:
               updatedOrder.orderNumber,
-
-            fullName:
-              updatedOrder.fullName,
-
-            email:
-              updatedOrder.email,
-
-            status:
-              updatedOrder.status,
           }),
         },
       ).catch(() => null);
