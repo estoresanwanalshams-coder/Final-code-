@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { SafeProductImage } from "@/components/SafeProductImage";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProductSlug } from "@/lib/admin-products";
@@ -1153,8 +1153,6 @@ function ManagedImageCard({
   onDragStart,
   onDrop,
 }: ManagedImageCardProps) {
-  const isBlob =
-    image.previewUrl.startsWith("blob:");
 
   return (
     <div
@@ -1171,15 +1169,13 @@ function ManagedImageCard({
       }`}
     >
       <div className="relative aspect-square overflow-hidden rounded-xl bg-zinc-50">
-        <Image
+        <SafeProductImage
           src={image.previewUrl}
           alt={`Product image ${index + 1}`}
           fill
           sizes="240px"
           loading="lazy"
-          unoptimized={isBlob}
           className="object-contain p-2"
-          referrerPolicy="no-referrer"
         />
 
         {image.isMain ? (
