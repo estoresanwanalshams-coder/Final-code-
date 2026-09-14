@@ -23,6 +23,8 @@ function RegisterForm() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -117,6 +119,7 @@ function RegisterForm() {
               Full Name
               <input
                 value={fullName}
+                autoComplete="name"
                 onChange={(event) => setFullName(event.target.value)}
                 required
               />
@@ -126,6 +129,7 @@ function RegisterForm() {
               <input
                 type="email"
                 value={email}
+                autoComplete="email"
                 onChange={(event) => setEmail(event.target.value)}
                 required
               />
@@ -135,6 +139,7 @@ function RegisterForm() {
               <input
                 type="tel"
                 value={phone}
+                autoComplete="tel"
                 onChange={(event) =>
                   setPhone(normalizePhoneInput(event.target.value))
                 }
@@ -147,23 +152,50 @@ function RegisterForm() {
             </label>
             <label className="light-form-field">
               Password
-              <input
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                minLength={6}
-                required
-              />
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full pr-16"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute inset-y-0 right-4 flex items-center text-xs font-semibold text-zinc-500 hover:text-hm-orange"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </label>
             <label className="light-form-field">
               Confirm Password
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                minLength={6}
-                required
-              />
+              <div className="relative w-full">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="w-full pr-16"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  className="absolute inset-y-0 right-4 flex items-center text-xs font-semibold text-zinc-500 hover:text-hm-orange"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              <p className="text-xs text-zinc-500">
+                Use at least 6 characters.
+              </p>
             </label>
           </div>
           {message ? (
