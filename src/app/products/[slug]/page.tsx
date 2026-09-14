@@ -10,6 +10,7 @@ import {
   fetchSupabaseRelatedProducts,
 } from "@/lib/supabase-products";
 import { ProductTrustPanel } from "@/components/ProductTrustPanel";
+import { ProductViewTracker } from "@/components/ProductViewTracker";
 
 type ProductPageProps = {
   params: Promise<{
@@ -120,6 +121,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
               <ProductActionBar product={product} />
               <ProductTrustPanel />
+              <ProductViewTracker product={product} />
             </div>
           </div>
         </div>

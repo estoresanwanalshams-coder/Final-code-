@@ -20,6 +20,7 @@ import { supabase } from "@/lib/supabase";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 import { isValidPhoneNumber, normalizePhoneInput } from "@/lib/phone";
 import { fetchSupabaseProductBySlug } from "@/lib/supabase-products";
+import { trackPurchase } from "@/lib/analytics";
 
 type CheckoutFormProps = {
   fallbackProduct: Product;
@@ -238,6 +239,15 @@ export function CheckoutForm({
         items: refreshedItems,
         total: refreshedGrandTotal,
       });
+
+      trackPurchase(
+        orderNumber,
+        refreshedItems,
+        refreshedSubtotal,
+        refreshedShippingCharge,
+        refreshedGrandTotal,
+      );
+
       await fetch("/api/orders/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ import {
   isProductAvailableForPurchase,
 } from "@/lib/cart";
 import type { Product } from "@/lib/products";
+import { trackAddToCart } from "@/lib/analytics";
 
 type AddToCartButtonProps = {
   product: Product;
@@ -29,6 +30,7 @@ export const AddToCartButton = memo(function AddToCartButton({
       return;
     }
     addProductToCartWithQuantity(product, quantity);
+    trackAddToCart(product, quantity);
 
     setAdded(true);
 

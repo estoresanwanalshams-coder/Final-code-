@@ -9,6 +9,7 @@ import {
   upsertCartProductQuantity,
 } from "@/lib/cart";
 import type { Product } from "@/lib/products";
+import { trackBeginCheckout } from "@/lib/analytics";
 
 type ProductActionBarProps = {
   product: Product;
@@ -25,6 +26,7 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
     }
 
     upsertCartProductQuantity(product, quantity);
+    trackBeginCheckout([{ product, quantity }]);
     router.push(`/inquiry/${product.slug}?qty=${quantity}`);
   }
 

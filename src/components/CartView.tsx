@@ -10,6 +10,7 @@ import {
   saveCartItems,
 } from "@/lib/cart";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
+import { trackBeginCheckout } from "@/lib/analytics";
 
 export function CartView() {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -179,7 +180,7 @@ export function CartView() {
                           className="flex h-10 w-10 items-center justify-center text-lg font-bold text-zinc-700 transition hover:bg-zinc-100"
                           aria-label={`Decrease quantity for ${item.product.name}`}
                         >
-                           &minus;
+                          &minus;
                         </button>
 
                         <input
@@ -295,6 +296,7 @@ export function CartView() {
             </div>
             <Link
               href={`/inquiry/${items[0]?.product.slug ?? ""}`}
+              onClick={() => trackBeginCheckout(items)}
               className="mt-5 flex min-h-13 w-full items-center justify-center rounded-xl bg-hm-orange px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-hm-orange-hover active:scale-[0.99]"
             >
               Proceed to Checkout
