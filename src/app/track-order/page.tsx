@@ -264,7 +264,7 @@ export default function TrackOrderPage() {
                                     : "border-zinc-300 bg-white text-zinc-400"
                                 }`}
                               >
-                                {completed ? "✓" : index + 1}
+                                {completed ? <>&#10003;</> : index + 1}
                               </div>
 
                               <p
@@ -301,7 +301,7 @@ export default function TrackOrderPage() {
                                 : "border-zinc-300 bg-white text-zinc-400"
                             }`}
                           >
-                            {completed ? "✓" : index + 1}
+                            {completed ? <>&#10003;</> : index + 1}
                           </div>
 
                           <div>
@@ -360,7 +360,7 @@ export default function TrackOrderPage() {
                         </p>
 
                         <p className="mt-1 text-xs text-zinc-500">
-                          Qty: {item.quantity} × AED {item.product.price}
+                          Qty: {item.quantity} &times; AED {item.product.price}
                         </p>
                       </div>
 
