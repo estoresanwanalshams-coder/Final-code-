@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { ProductGrid } from "@/components/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ProductGridSkeleton";
 import { categories, getCategoryBySlug } from "@/lib/categories";
@@ -17,6 +18,38 @@ type CategoryPageProps = {
 };
 
 export const revalidate = 120;
+
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const allCategories = await fetchMergedCategories().catch(() => categories);
+  const category = getCategoryBySlug(slug, allCategories);
+
+  if (!category) {
+    return {
+      title: "Category",
+      robots: {
+        index: false,
+        follow: true,
+      },
+    };
+  }
+
+  return {
+    title: category.name,
+    description: category.description,
+    alternates: {
+      canonical: `/categories/${category.slug}`,
+    },
+    openGraph: {
+      title: category.name,
+      description: category.description,
+      url: `/categories/${category.slug}`,
+      type: "website",
+    },
+  };
+}
 
 function parsePage(page?: string) {
   const parsed = Number(page ?? "1");

@@ -35,9 +35,13 @@ export async function generateMetadata({
   return {
     title: product.name,
     description: product.summary || product.details?.slice(0, 160),
+    alternates: {
+      canonical: `/products/${product.slug}`,
+    },
     openGraph: {
       title: product.name,
       description: product.summary || product.details?.slice(0, 160),
+      url: `/products/${product.slug}`,
       images: [
         {
           url: product.imageUrl,
@@ -60,6 +64,39 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const category = getCategoryBySlug(product.categorySlug, allCategories);
+  const productUrl = `https://www.hmshoponline.com/products/${product.slug}`;
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.summary || product.details,
+    image:
+      product.imageUrls && product.imageUrls.length > 0
+        ? product.imageUrls
+        : [product.imageUrl],
+    url: productUrl,
+    ...(product.sku ? { sku: product.sku } : {}),
+    ...(product.brand
+      ? {
+          brand: {
+            "@type": "Brand",
+            name: product.brand,
+          },
+        }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "AED",
+      price: product.price,
+      availability:
+        product.stockStatus === "out_of_stock"
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
   const relatedProducts = await fetchSupabaseRelatedProducts(
     product.categorySlug,
     product.slug,
@@ -68,6 +105,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <section className="page-shell bg-zinc-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         <div className="grid items-start gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(380px,0.95fr)] lg:gap-10">
           <ProductMediaGallery

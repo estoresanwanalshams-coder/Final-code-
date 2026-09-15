@@ -16,8 +16,12 @@ type ProductsPageProps = {
 export const revalidate = 120;
 
 export const metadata = {
-  title: "All Products | HM shop online",
-  description: "Browse all products from HM shop online.",
+  title: "All Products",
+  description:
+    "Shop trending products, home and kitchen essentials, gadgets, beauty products, toys, automotive accessories and useful everyday products across the UAE.",
+  alternates: {
+    canonical: "/products",
+  },
 };
 
 function parsePage(page?: string) {

@@ -17,7 +17,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hmshoponline.com"),
+  metadataBase: new URL("https://www.hmshoponline.com"),
 
   title: {
     default: "HM Shop Online | Trending Products & Everyday Essentials UAE",

@@ -7,9 +7,12 @@ import { fetchMergedCategories } from "@/lib/supabase-categories";
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Shop by Category | HM Shop Online",
+  title: "Shop by Category",
   description:
     "Browse HM Shop Online by category including home and kitchen, gadgets, baby and toys, automotive, health and beauty, and more.",
+  alternates: {
+    canonical: "/categories",
+  },
 };
 
 export default async function CategoriesPage() {
