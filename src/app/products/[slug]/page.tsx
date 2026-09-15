@@ -95,6 +95,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ? "https://schema.org/OutOfStock"
           : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
+      ...(product.freeShipping
+        ? {
+            shippingDetails: {
+              "@type": "OfferShippingDetails",
+              shippingRate: {
+                "@type": "MonetaryAmount",
+                value: 0,
+                currency: "AED",
+              },
+              shippingDestination: {
+                "@type": "DefinedRegion",
+                addressCountry: "AE",
+              },
+            },
+          }
+        : {}),
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "AE",
+        returnPolicyCountry: "AE",
+        returnPolicyCategory:
+          "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        merchantReturnLink: "https://www.hmshoponline.com/return-policy",
+      },
     },
   };
   const relatedProducts = await fetchSupabaseRelatedProducts(
