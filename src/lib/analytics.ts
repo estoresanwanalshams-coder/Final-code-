@@ -9,9 +9,15 @@ type Gtag = (
   parameters?: Record<string, unknown>,
 ) => void;
 
+type Fbq = (
+  command: "track",
+  eventName: string,
+  parameters?: Record<string, unknown>,
+) => void;
 declare global {
   interface Window {
     gtag?: Gtag;
+    fbq?: Fbq;
   }
 }
 
@@ -24,6 +30,17 @@ function sendEvent(
   }
 
   window.gtag("event", eventName, parameters);
+}
+
+function sendMetaEvent(
+  eventName: string,
+  parameters: Record<string, unknown>,
+) {
+  if (typeof window === "undefined" || typeof window.fbq !== "function") {
+    return;
+  }
+
+  window.fbq("track", eventName, parameters);
 }
 
 function productToAnalyticsItem(product: Product, quantity = 1) {
@@ -42,6 +59,15 @@ export function trackViewItem(product: Product) {
     value: product.price,
     items: [productToAnalyticsItem(product)],
   });
+
+  sendMetaEvent("ViewContent", {
+    content_ids: [product.sku || product.slug],
+    content_name: product.name,
+    content_category: product.categorySlug,
+    content_type: "product",
+    currency: "AED",
+    value: product.price,
+  });
 }
 
 export function trackAddToCart(product: Product, quantity = 1) {
@@ -49,6 +75,21 @@ export function trackAddToCart(product: Product, quantity = 1) {
     currency: "AED",
     value: product.price * quantity,
     items: [productToAnalyticsItem(product, quantity)],
+  });
+
+  sendMetaEvent("AddToCart", {
+    content_ids: [product.sku || product.slug],
+    content_name: product.name,
+    content_type: "product",
+    currency: "AED",
+    value: product.price * quantity,
+    contents: [
+      {
+        id: product.sku || product.slug,
+        quantity,
+        item_price: product.price,
+      },
+    ],
   });
 }
 
@@ -64,6 +105,21 @@ export function trackBeginCheckout(items: CartItem[]) {
     items: items.map((item) =>
       productToAnalyticsItem(item.product, item.quantity),
     ),
+  });
+
+  sendMetaEvent("InitiateCheckout", {
+    content_ids: items.map(
+      (item) => item.product.sku || item.product.slug,
+    ),
+    content_type: "product",
+    currency: "AED",
+    value,
+    num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+    contents: items.map((item) => ({
+      id: item.product.sku || item.product.slug,
+      quantity: item.quantity,
+      item_price: item.product.price,
+    })),
   });
 }
 
@@ -83,5 +139,20 @@ export function trackPurchase(
       productToAnalyticsItem(item.product, item.quantity),
     ),
     ecommerce_subtotal: subtotal,
+  });
+
+  sendMetaEvent("Purchase", {
+    content_ids: items.map(
+      (item) => item.product.sku || item.product.slug,
+    ),
+    content_type: "product",
+    currency: "AED",
+    value: total,
+    num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+    contents: items.map((item) => ({
+      id: item.product.sku || item.product.slug,
+      quantity: item.quantity,
+      item_price: item.product.price,
+    })),
   });
 }
