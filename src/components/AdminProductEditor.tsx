@@ -456,9 +456,23 @@ export function AdminProductEditor({
             ),
           );
 
+          const imageNumber =
+            managedImages.findIndex(
+              (item) => item.id === image.id,
+            ) + 1;
+
+          const seoProductName =
+            createProductSlug(form.name).slice(0, 60);
+
+          const seoImageName =
+            imageNumber > 1
+              ? `${seoProductName}-hmshoponline-${imageNumber}`
+              : `${seoProductName}-hmshoponline`;
+
           const uploadedUrl =
             await uploadProductImage(
               compressedFile,
+              seoImageName,
             );
 
           const normalizedUploadedUrl =
@@ -530,7 +544,7 @@ export function AdminProductEditor({
         name: form.name.trim(),
         slug,
         categorySlug: form.categorySlug,
-        sku: form.sku.trim() || undefined,
+        sku: isEditing ? form.sku.trim() || undefined : undefined,
         brand:
           form.brand.trim() || undefined,
         status:
@@ -724,15 +738,12 @@ export function AdminProductEditor({
 
                 <LightField label="SKU / Product Code">
                   <input
-                    value={form.sku}
-                    onChange={(event) =>
-                      updateForm(
-                        "sku",
-                        event.target.value,
-                      )
+                    value={
+                      form.sku ||
+                      "Automatically generated when product is saved"
                     }
-                    placeholder="HM-KIT-001"
-                    className={inputClass}
+                    readOnly
+                    className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
                   />
                 </LightField>
 

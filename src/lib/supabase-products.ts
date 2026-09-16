@@ -525,9 +525,25 @@ export async function deleteSupabaseProduct(slug: string) {
   }
 }
 
-export async function uploadProductImage(file: File) {
-  const fileExt = file.name.split(".").pop() ?? "jpg";
-  const filePath = `${crypto.randomUUID()}.${fileExt}`;
+export async function uploadProductImage(
+  file: File,
+  seoName?: string,
+) {
+  const fileExt =
+    file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+
+  const safeSeoName = seoName
+    ?.toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  const uniqueSuffix =
+    crypto.randomUUID().split("-")[0];
+
+  const filePath = safeSeoName
+    ? `${safeSeoName}-${uniqueSuffix}.${fileExt}`
+    : `${crypto.randomUUID()}.${fileExt}`;
   const { error } = await supabase.storage
     .from("product-images")
     .upload(filePath, file, {

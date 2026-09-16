@@ -463,6 +463,38 @@ create unique index if not exists idx_products_sku_unique
   on public.products (lower(btrim(sku)))
   where sku is not null and btrim(sku) <> '';
 
+-- Automatic permanent product SKU.
+-- Existing SKUs are preserved; new products without an SKU receive
+-- HM-000001, HM-000002, ... from the database sequence.
+create sequence if not exists public.product_sku_seq
+  start with 1
+  increment by 1
+  minvalue 1;
+
+create or replace function public.assign_product_sku()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.sku is null or btrim(new.sku) = '' then
+    new.sku :=
+      'HM-' ||
+      lpad(nextval('public.product_sku_seq')::text, 6, '0');
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists assign_product_sku_before_insert
+on public.products;
+
+create trigger assign_product_sku_before_insert
+before insert on public.products
+for each row
+execute function public.assign_product_sku();
+
 create index if not exists idx_products_status_created_at
   on public.products (status, created_at desc);
 
