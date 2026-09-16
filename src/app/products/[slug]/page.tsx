@@ -156,6 +156,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.name}
               </h1>
 
+              {product.sku ? (
+                <p className="mt-2 text-xs font-medium tracking-wide text-zinc-500">
+                  SKU: {product.sku}
+                </p>
+              ) : null}
+
               {product.summary ? (
                 <p className="mt-4 whitespace-pre-line text-[13px] leading-6 text-zinc-600 sm:text-sm sm:leading-7">
                   {product.summary}
