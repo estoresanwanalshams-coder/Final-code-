@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductActionBar } from "@/components/ProductActionBar";
 import { ProductMediaGallery } from "@/components/ProductMediaGallery";
+import { ProductSummary } from "@/components/ProductSummary";
 import { categories, getCategoryBySlug } from "@/lib/categories";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
 import {
@@ -163,9 +164,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               ) : null}
 
               {product.summary ? (
-                <p className="mt-4 whitespace-pre-line text-[13px] leading-6 text-zinc-600 sm:text-sm sm:leading-7">
-                  {product.summary}
-                </p>
+                <ProductSummary summary={product.summary} />
               ) : null}
 
               <div className="mt-6 border-t border-zinc-100 pt-5">
