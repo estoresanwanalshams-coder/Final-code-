@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { isAdminEmail } from "@/lib/auth-role";
 import { canSendEmail, getOwnerEmail, sendMail } from "@/lib/mailer";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin";
+import { getSupabasePublicKey } from "@/lib/supabase-env";
 
 type OrderStatus =
   | "pending"
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+      getSupabasePublicKey()!,
     );
 
     const {

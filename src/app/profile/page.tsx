@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAdminEmail } from "@/lib/auth-role";
+import { buildAuthHref } from "@/lib/auth-redirect";
 import {
   fetchCustomerProfileByAuthUserId,
   type CustomerRecord,
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [profile, setProfile] = useState<CustomerRecord | null>(null);
   const [orders, setOrders] = useState<OrderRecord[]>([]);
+  const [ordersError, setOrdersError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -66,13 +68,16 @@ export default function ProfilePage() {
       };
       setUser(nextUser);
 
-      const [nextProfile, nextOrders] = await Promise.all([
+      const [nextProfile, ordersResult] = await Promise.all([
         fetchCustomerProfileByAuthUserId(nextUser.id).catch(() => null),
-        fetchSupabaseOrdersByEmail(nextUser.email).catch(() => []),
+        fetchSupabaseOrdersByEmail(nextUser.email)
+          .then((nextOrders) => ({ orders: nextOrders, error: false }))
+          .catch(() => ({ orders: [] as OrderRecord[], error: true })),
       ]);
 
       setProfile(nextProfile);
-      setOrders(nextOrders);
+      setOrders(ordersResult.orders);
+      setOrdersError(ordersResult.error);
       setIsLoading(false);
     }, 0);
 
@@ -123,7 +128,7 @@ const displayPhone =
           <p className="mt-3 text-zinc-600">
             Please login to view your profile and order status.
           </p>
-          <Link href="/login" className="btn-soft mt-6">
+          <Link href={buildAuthHref("/login", "/profile")} className="btn-soft mt-6">
             Go to Login
           </Link>
         </div>
@@ -189,7 +194,16 @@ const displayPhone =
             </p>
           </div>
 
-          {orders.length === 0 ? (
+          {ordersError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+              <p className="font-semibold text-red-800">
+                Unable to load order history
+              </p>
+              <p className="mt-1 text-sm text-red-700">
+                Please refresh the page or try again in a moment.
+              </p>
+            </div>
+          ) : orders.length === 0 ? (
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-center">
               <p className="font-semibold text-zinc-950">No orders yet</p>
               <p className="mt-1 text-sm text-zinc-600">

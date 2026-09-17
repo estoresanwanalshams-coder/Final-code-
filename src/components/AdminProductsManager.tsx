@@ -27,7 +27,7 @@ export function AdminProductsManager({
 
     async function loadAdminProducts() {
       try {
-        const nextProducts = await fetchSupabaseProducts();
+        const nextProducts = await fetchSupabaseProducts({ includeDrafts: true });
 
         if (active) {
           setProducts(nextProducts);
@@ -134,7 +134,7 @@ export function AdminProductsManager({
 
     try {
       await deleteSupabaseProduct(product.slug);
-      setProducts(await fetchSupabaseProducts());
+      setProducts(await fetchSupabaseProducts({ includeDrafts: true }));
       setMessage("Product deleted successfully.");
     } catch (error) {
       const detail =

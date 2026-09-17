@@ -4,10 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { buildWhatsAppUrl } from "@/lib/contact";
-import {
-  isProductAvailableForPurchase,
-  upsertCartProductQuantity,
-} from "@/lib/cart";
+import { isProductAvailableForPurchase } from "@/lib/cart";
 import type { Product } from "@/lib/products";
 import { trackBeginCheckout } from "@/lib/analytics";
 
@@ -25,9 +22,8 @@ export function ProductActionBar({ product }: ProductActionBarProps) {
       return;
     }
 
-    upsertCartProductQuantity(product, quantity);
     trackBeginCheckout([{ product, quantity }]);
-    router.push(`/inquiry/${product.slug}?qty=${quantity}`);
+    router.push(`/inquiry/${product.slug}?qty=${quantity}&buyNow=1`);
   }
 
   function handleWhatsAppOrder() {

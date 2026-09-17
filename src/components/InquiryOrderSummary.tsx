@@ -1,45 +1,56 @@
 "use client";
 
 import { SafeProductImage } from "@/components/SafeProductImage";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   type CartItem,
   getApplicableShippingCharge,
-  getCartItems,
+  resolveCheckoutItems,
 } from "@/lib/cart";
 import type { Product } from "@/lib/products";
 import { defaultSiteSettings, fetchSiteSettings } from "@/lib/site-settings";
 
 type InquiryOrderSummaryProps = {
-  fallbackProduct: Product;
+  fallbackProduct?: Product | null;
   initialQuantity?: number;
+  buyNow?: boolean;
 };
 
 export function InquiryOrderSummary({
   fallbackProduct,
   initialQuantity = 1,
+  buyNow = false,
 }: InquiryOrderSummaryProps) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [hasLoadedItems, setHasLoadedItems] = useState(false);
   const [baseShippingCharge, setBaseShippingCharge] = useState(
     defaultSiteSettings.shippingCharge,
   );
 
   useEffect(() => {
-  function loadCart() {
-    setCartItems(getCartItems());
-  }
+    function loadCart() {
+      setCartItems(
+        resolveCheckoutItems({
+          buyNow,
+          fallbackProduct,
+          initialQuantity,
+        }),
+      );
+      setHasLoadedItems(true);
+    }
 
-  const timer = window.setTimeout(loadCart, 0);
+    const timer = window.setTimeout(loadCart, 0);
 
-  window.addEventListener("cart:updated", loadCart);
-  window.addEventListener("storage", loadCart);
+    window.addEventListener("cart:updated", loadCart);
+    window.addEventListener("storage", loadCart);
 
-  return () => {
-    window.clearTimeout(timer);
-    window.removeEventListener("cart:updated", loadCart);
-    window.removeEventListener("storage", loadCart);
-  };
-}, []);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("cart:updated", loadCart);
+      window.removeEventListener("storage", loadCart);
+    };
+  }, [buyNow, fallbackProduct, initialQuantity]);
 
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -52,18 +63,7 @@ export function InquiryOrderSummary({
     return () => window.clearTimeout(timer);
   }, []);
 
-  const items = useMemo(
-    () =>
-      cartItems.length > 0
-        ? cartItems
-        : [
-            {
-              product: fallbackProduct,
-              quantity: initialQuantity,
-            },
-          ],
-    [cartItems, fallbackProduct, initialQuantity],
-  );
+  const items = cartItems;
 
   const subtotal = useMemo(
     () =>
@@ -78,6 +78,32 @@ export function InquiryOrderSummary({
     [items, baseShippingCharge],
   );
   const total = subtotal + shippingCharge;
+
+  if (!hasLoadedItems) {
+    return (
+      <div className="checkout-order-summary">
+        <p className="text-sm font-bold text-zinc-900">Your items</p>
+        <p className="mt-4 text-sm text-zinc-600">Loading items...</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="checkout-order-summary">
+        <p className="text-sm font-bold text-zinc-900">Your items</p>
+        <p className="mt-4 text-sm leading-6 text-zinc-600">
+          Your cart is empty. Add products before checking out.
+        </p>
+        <Link
+          href="/products"
+          className="mt-4 inline-flex text-sm font-bold text-hm-orange"
+        >
+          Continue shopping
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="checkout-order-summary">

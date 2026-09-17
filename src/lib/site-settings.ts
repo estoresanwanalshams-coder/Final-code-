@@ -38,6 +38,23 @@ type SiteSettingsRow = {
   homepage_category_slugs: string[] | null;
 };
 
+export function normalizeBannerLinkUrl(url: string) {
+  const trimmed = url.trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  if (
+    /^(https?:\/\/|mailto:|tel:)/i.test(trimmed) ||
+    trimmed.startsWith("/")
+  ) {
+    return trimmed;
+  }
+
+  return `/${trimmed}`;
+}
+
 export const defaultHomepageBanners: HomepageBanner[] = [
   {
     id: "banner-1",
@@ -112,10 +129,9 @@ function normalizeBannerSlides(
             : `banner-${index + 1}`,
 
         imageUrl,
-        linkUrl:
-          typeof record.linkUrl === "string"
-            ? record.linkUrl.trim()
-            : "",
+        linkUrl: normalizeBannerLinkUrl(
+          typeof record.linkUrl === "string" ? record.linkUrl : "",
+        ),
         isActive:
           typeof record.isActive === "boolean"
             ? record.isActive

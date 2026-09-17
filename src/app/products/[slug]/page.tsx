@@ -60,7 +60,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     fetchMergedCategories().catch(() => categories),
   ]);
 
-  if (!product) {
+  if (!product || product.status === "draft") {
     notFound();
   }
 

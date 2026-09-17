@@ -1,35 +1,10 @@
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { InquiryOrderSummary } from "@/components/InquiryOrderSummary";
-import { fetchSupabaseProductBySlug } from "@/lib/supabase-products";
-
-type InquiryPageProps = {
-  params: Promise<{
-    slug: string;
-  }>;
-  searchParams: Promise<{
-    qty?: string;
-    buyNow?: string;
-  }>;
-};
 
 export const dynamic = "force-dynamic";
 
-export default async function InquiryPage({
-  params,
-  searchParams,
-}: InquiryPageProps) {
-  const { slug } = await params;
-  const { qty, buyNow: buyNowParam } = await searchParams;
-  const initialQuantity = Math.max(1, Number(qty ?? "1") || 1);
-  const buyNow = buyNowParam === "1" || buyNowParam === "true";
-  const product = await fetchSupabaseProductBySlug(slug).catch(() => null);
-
-  if (!product || product.status === "draft") {
-    notFound();
-  }
-
+export default function CheckoutPage() {
   return (
     <section className="checkout-shell">
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
@@ -45,11 +20,7 @@ export default async function InquiryPage({
               <p className="mt-3 text-sm leading-7 text-zinc-600">
                 Review your items and enter delivery details below.
               </p>
-              <InquiryOrderSummary
-                fallbackProduct={product}
-                initialQuantity={initialQuantity}
-                buyNow={buyNow}
-              />
+              <InquiryOrderSummary />
             </aside>
 
             <Suspense
@@ -59,11 +30,7 @@ export default async function InquiryPage({
                 </div>
               }
             >
-              <CheckoutForm
-                fallbackProduct={product}
-                initialQuantity={initialQuantity}
-                buyNow={buyNow}
-              />
+              <CheckoutForm />
             </Suspense>
           </div>
         </div>

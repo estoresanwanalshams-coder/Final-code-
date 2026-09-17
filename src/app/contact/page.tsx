@@ -10,14 +10,22 @@ export default function ContactPage() {
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [notice, setNotice] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     if (!isValidPhoneNumber(phone)) {
       setNotice("Please enter a valid phone number (7 to 15 digits).");
       return;
     }
+
+    setIsSubmitting(true);
+    setNotice("");
 
     const response = await fetch("/api/contact", {
       method: "POST",
@@ -28,9 +36,11 @@ export default function ContactPage() {
         phone,
         message,
       }),
-    });
+    }).catch(() => null);
 
-    if (!response.ok) {
+    setIsSubmitting(false);
+
+    if (!response?.ok) {
       setNotice("Unable to send your message right now. Please try again.");
       return;
     }
@@ -100,8 +110,11 @@ export default function ContactPage() {
                 required
               />
             </label>
-            <button className="animated-button btn-soft justify-center px-6 py-3 text-sm font-bold">
-              Submit
+            <button
+              className="animated-button btn-soft justify-center px-6 py-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Sending..." : "Submit"}
             </button>
             {notice ? (
               <p className="text-sm font-semibold text-zinc-700">{notice}</p>

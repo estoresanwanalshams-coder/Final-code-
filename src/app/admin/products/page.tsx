@@ -2,7 +2,7 @@ import { AdminProductsManager } from "@/components/AdminProductsManager";
 import { fetchSupabaseProducts } from "@/lib/supabase-products";
 
 export default async function AdminProductsPage() {
-  const products = await fetchSupabaseProducts();
+  const products = await fetchSupabaseProducts({ includeDrafts: true });
 
   return <AdminProductsManager initialProducts={products} />;
 }

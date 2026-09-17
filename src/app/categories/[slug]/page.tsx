@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/ProductGrid";
 import { ProductGridSkeleton } from "@/components/ProductGridSkeleton";
 import { categories, getCategoryBySlug } from "@/lib/categories";
@@ -26,14 +27,8 @@ export async function generateMetadata({
   const allCategories = await fetchMergedCategories().catch(() => categories);
   const category = getCategoryBySlug(slug, allCategories);
 
-  if (!category) {
-    return {
-      title: "Category",
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
+  if (!category || category.isActive === false) {
+    notFound();
   }
 
   return {
@@ -86,14 +81,11 @@ export default async function CategoryPage({
   const currentPage = parsePage(page);
   const currentSort = parseSort(sort);
   const allCategories = await fetchMergedCategories().catch(() => categories);
-  const category = getCategoryBySlug(slug, allCategories) ?? {
-    name: slug
-      .split("-")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" "),
-    slug,
-    description: "Browse available products in this category.",
-  };
+  const category = getCategoryBySlug(slug, allCategories);
+
+  if (!category || category.isActive === false) {
+    notFound();
+  }
 
   return (
     <section className="page-shell bg-zinc-50">
