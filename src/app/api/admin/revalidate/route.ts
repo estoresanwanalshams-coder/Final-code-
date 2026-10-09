@@ -29,23 +29,47 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => ({}))) as {
       slug?: string;
       previousSlug?: string;
+      categorySlug?: string;
+      previousCategorySlug?: string;
+      type?: "product" | "category" | "homepage";
     };
 
-    revalidatePath("/");
-    revalidatePath("/products");
-    revalidatePath("/categories");
-    revalidatePath("/search");
+    const refreshCategory = (slug?: string) => {
+      if (slug) {
+        revalidatePath(`/categories/${slug}`);
+      }
+    };
 
-    if (body.previousSlug && body.previousSlug !== body.slug) {
-      revalidatePath(`/products/${body.previousSlug}`);
-      revalidatePath(`/inquiry/${body.previousSlug}`);
+    if (body.type === "homepage") {
+      revalidatePath("/");
+    } else if (body.type === "category") {
+      revalidatePath("/");
+      revalidatePath("/categories");
+      revalidatePath("/products");
+      revalidatePath("/search");
+
+      refreshCategory(body.slug);
+      refreshCategory(body.previousSlug);
+    } else {
+      // Default to product behavior for existing callers.
+      revalidatePath("/");
+      revalidatePath("/products");
+      revalidatePath("/categories");
+      revalidatePath("/search");
+
+      if (body.previousSlug && body.previousSlug !== body.slug) {
+        revalidatePath(`/products/${body.previousSlug}`);
+        revalidatePath(`/inquiry/${body.previousSlug}`);
+      }
+
+      if (body.slug) {
+        revalidatePath(`/products/${body.slug}`);
+        revalidatePath(`/inquiry/${body.slug}`);
+      }
+
+      refreshCategory(body.categorySlug);
+      refreshCategory(body.previousCategorySlug);
     }
-
-    if (body.slug) {
-      revalidatePath(`/products/${body.slug}`);
-      revalidatePath(`/inquiry/${body.slug}`);
-    }
-
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Unable to revalidate." }, { status: 500 });

@@ -8,6 +8,7 @@ import {
   deleteSupabaseProduct,
   fetchSupabaseProducts,
 } from "@/lib/supabase-products";
+import { refreshAdminStorefrontCache } from "@/lib/admin-cache-refresh";
 
 const PRODUCTS_PER_PAGE = 25;
 
@@ -134,8 +135,28 @@ export function AdminProductsManager({
 
     try {
       await deleteSupabaseProduct(product.slug);
+
+      let cacheRefreshed = false;
+
+        try {
+        await refreshAdminStorefrontCache({
+          type: "product",
+          previousSlug: product.slug,
+          previousCategorySlug: product.categorySlug,
+        });
+
+        cacheRefreshed = true;
+      } catch (error) {
+        console.error("Product deletion cache refresh failed:", error);
+      }
+
       setProducts(await fetchSupabaseProducts());
-      setMessage("Product deleted successfully.");
+
+      setMessage(
+        cacheRefreshed
+          ? "Product deleted successfully."
+          : "Product deleted, but storefront cache refresh failed. Please retry cache refresh before assuming the live website is updated.",
+      );
     } catch (error) {
       const detail =
         error && typeof error === "object" && "message" in error

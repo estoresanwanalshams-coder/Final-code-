@@ -16,6 +16,7 @@ import {
 import { uploadProductImage } from "@/lib/supabase-products";
 import { compressImageFile } from "@/lib/image-compression";
 import { normalizeImageUrl } from "@/lib/image-url";
+import { refreshAdminStorefrontCache } from "@/lib/admin-cache-refresh";
 
 const emptyForm = {
   name: "",
@@ -231,6 +232,20 @@ export function AdminCategoryEditor({
       };
 
       await upsertSupabaseCategory(category);
+
+      try {
+        await refreshAdminStorefrontCache({
+          type: "category",
+          slug,
+          previousSlug: isEditing ? categorySlug : undefined,
+        });
+      } catch (error) {
+        console.error("Category cache refresh failed:", error);
+        setMessage(
+          "Category saved successfully, but the storefront cache refresh failed. The live website may still show older content.",
+        );
+        return;
+      }
 
       window.dispatchEvent(
         new Event(adminCategoriesUpdatedEvent),

@@ -4,7 +4,7 @@ import { CategoryVisual } from "@/components/CategoryVisual";
 import { categories } from "@/lib/categories";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Shop by Category",

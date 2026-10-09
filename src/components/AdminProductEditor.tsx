@@ -22,7 +22,7 @@ import {
   normalizeImageUrls,
 } from "@/lib/image-url";
 import { fetchMergedCategories } from "@/lib/supabase-categories";
-import { supabase } from "@/lib/supabase";
+import { refreshAdminStorefrontCache } from "@/lib/admin-cache-refresh";
 
 const emptyForm = {
   name: "",
@@ -75,6 +75,7 @@ export function AdminProductEditor({
   const [isLoading, setIsLoading] = useState(isEditing);
 
   const dragImageIndexRef = useRef<number | null>(null);
+  const originalCategorySlugRef = useRef<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -115,7 +116,7 @@ export function AdminProductEditor({
           setMessage("Product not found.");
           return;
         }
-
+        originalCategorySlugRef.current = product.categorySlug;
         setForm({
           name: product.name,
           categorySlug: product.categorySlug,
@@ -583,30 +584,31 @@ export function AdminProductEditor({
             : undefined,
       });
 
-      const {
-        data: { session },
-      } =
-        await supabase.auth.getSession();
+      let cacheRefreshError: string | null = null;
 
-      if (session?.access_token) {
-        await fetch(
-          "/api/admin/revalidate",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type":
-                "application/json",
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              slug,
-              previousSlug:
-                isEditing
-                  ? productSlug
-                  : undefined,
-            }),
-          },
-        ).catch(() => null);
+      try {
+        await refreshAdminStorefrontCache({
+          type: "product",
+          slug,
+          previousSlug: isEditing ? productSlug : undefined,
+          categorySlug: form.categorySlug,
+          previousCategorySlug: isEditing
+            ? originalCategorySlugRef.current
+            : undefined,
+        });
+      } catch (error) {
+        console.error("Product cache refresh failed:", error);
+        cacheRefreshError =
+          error instanceof Error
+            ? error.message
+            : "Unknown cache refresh error.";
+      }
+
+      if (cacheRefreshError) {
+        setMessage(
+          `Product saved successfully, but the storefront cache refresh failed: ${cacheRefreshError}`,
+        );
+        return;
       }
 
       router.push("/admin/products");

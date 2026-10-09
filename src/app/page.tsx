@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { HomePageContent } from "@/components/HomePageContent";
 import { ProductGridSkeleton } from "@/components/ProductGridSkeleton";
 
-export const revalidate = 120;
+export const revalidate = 3600;
 
 export default function Home() {
   return (

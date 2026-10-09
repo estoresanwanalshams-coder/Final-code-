@@ -18,6 +18,7 @@ import {
   type HomepageBanner,
   type SiteSettings,
 } from "@/lib/site-settings";
+import { refreshAdminStorefrontCache } from "@/lib/admin-cache-refresh";
 
 type MerchandisingSelectorProps = {
   title: string;
@@ -249,11 +250,27 @@ export function AdminSiteSettingsPanel() {
 
       await updateSiteSettings(nextSettings);
 
+      let cacheRefreshed = false;
+
+      try {
+        await refreshAdminStorefrontCache({
+          type: "homepage",
+        });
+
+        cacheRefreshed = true;
+      } catch (error) {
+        console.error("Homepage cache refresh failed:", error);
+      }
+
       setSettings(nextSettings);
       setPendingBannerFiles({});
       setBannerPreviews({});
 
-      setMessage("Homepage settings updated successfully.");
+      setMessage(
+        cacheRefreshed
+          ? "Homepage settings updated successfully."
+          : "Homepage settings saved, but storefront cache refresh failed. The live homepage may still show older content.",
+      );
     } catch (error) {
       const detail =
         error && typeof error === "object" && "message" in error
