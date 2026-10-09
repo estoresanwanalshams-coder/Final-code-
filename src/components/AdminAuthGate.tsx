@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  getAdminLoginEmails,
+  isAdminEmail,
+} from "@/lib/auth-role";
 import { supabase } from "@/lib/supabase";
 
 const adminUsername = "Murtaza sanwala";
-const adminEmail =
-  process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "murtaza.sanwala@admin.local";
 
 type AdminAuthGateProps = {
   children: React.ReactNode;
@@ -17,40 +19,89 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const timer = window.setTimeout(async () => {
+    let active = true;
+
+    async function syncSession() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      setIsAuthenticated(user?.email === adminEmail);
-      setIsLoading(false);
+      if (active) {
+        setIsAuthenticated(isAdminEmail(user?.email));
+        setIsLoading(false);
+      }
+    }
+
+    const timer = window.setTimeout(() => {
+      void syncSession();
     }, 0);
 
-    return () => window.clearTimeout(timer);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void syncSession();
+    });
+
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (username !== adminUsername) {
+    if (username.trim().toLowerCase() !== adminUsername.toLowerCase()) {
       setError("Invalid username or password.");
       return;
     }
 
-    const { data, error: loginError } = await supabase.auth.signInWithPassword({
-      email: adminEmail,
-      password,
-    });
+    setIsSubmitting(true);
+    setError("");
 
-    if (!loginError && data.user?.email === adminEmail) {
-      setIsAuthenticated(true);
-      setError("");
-      return;
+    let lastMessage = "";
+
+    try {
+      for (const email of getAdminLoginEmails()) {
+        const { data, error: loginError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+        if (!loginError && isAdminEmail(data.user?.email)) {
+          setIsAuthenticated(true);
+          setError("");
+          return;
+        }
+
+        lastMessage = loginError?.message ?? lastMessage;
+
+        if (
+          loginError &&
+          !/invalid login credentials|invalid credentials|email not confirmed/i.test(
+            loginError.message,
+          )
+        ) {
+          break;
+        }
+      }
+
+      const normalized = lastMessage.toLowerCase();
+      if (normalized.includes("email not confirmed")) {
+        setError("This admin account still needs email confirmation in Supabase.");
+      } else if (normalized.includes("too many requests")) {
+        setError("Too many attempts. Please wait and try again.");
+      } else {
+        setError("Invalid username or password.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setError("Invalid username or password.");
   }
 
   async function handleLogout() {
@@ -159,8 +210,12 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
           {error ? (
             <p className="mt-4 text-sm font-bold text-red-300">{error}</p>
           ) : null}
-          <button className="animated-button inquiry-submit mt-6 w-full">
-            Login
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="animated-button inquiry-submit mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

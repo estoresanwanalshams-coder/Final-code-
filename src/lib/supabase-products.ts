@@ -138,11 +138,19 @@ function mapProductToRow(product: Product): ProductRow {
   };
 }
 
-export async function fetchSupabaseProducts() {
-  const { data, error } = await supabase
+export async function fetchSupabaseProducts(
+  options: { includeDrafts?: boolean } = {},
+) {
+  let query = supabase
     .from("products")
     .select(PRODUCT_LIST_COLUMNS)
     .order("created_at", { ascending: false });
+
+  if (!options.includeDrafts) {
+    query = query.eq("status", "active");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;
@@ -187,7 +195,8 @@ export async function fetchSupabaseProductsPage(
     .from("products")
     .select(PRODUCT_CARD_COLUMNS, {
       count: "exact",
-    });
+    })
+    .eq("status", "active");
 
   if (options.categorySlug) {
     query = query.eq("category_slug", options.categorySlug);
@@ -273,6 +282,7 @@ export async function fetchSupabaseRelatedProducts(
   const { data, error } = await supabase
     .from("products")
     .select(PRODUCT_CARD_COLUMNS)
+    .eq("status", "active")
     .eq("category_slug", categorySlug)
     .neq("slug", excludeSlug)
     .order("created_at", { ascending: false })
@@ -329,6 +339,7 @@ export async function fetchSupabaseSearchProducts(
       .select(
         PRODUCT_LIST_COLUMNS,
       )
+      .eq("status", "active")
       .order("created_at", {
         ascending: false,
       });

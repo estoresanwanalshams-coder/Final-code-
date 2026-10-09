@@ -253,7 +253,7 @@ export function AdminOrderEditor({
             orderNumber,
           ),
 
-          fetchSupabaseProducts(),
+          fetchSupabaseProducts({ includeDrafts: true }),
 
           fetchSiteSettings().catch(
             () =>

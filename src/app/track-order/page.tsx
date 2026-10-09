@@ -2,7 +2,7 @@
 
 import { SafeProductImage } from "@/components/SafeProductImage";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   fetchSupabaseOrdersByIdentifier,
   type OrderStatus,
@@ -53,6 +53,14 @@ function getProgressIndex(status: OrderStatus) {
 }
 
 export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<section className="page-shell min-h-[70vh]" />}>
+      <TrackOrderContent />
+    </Suspense>
+  );
+}
+
+function TrackOrderContent() {
   const searchParams = useSearchParams();
   const orderNumberFromUrl = searchParams.get("order")?.trim() ?? "";
 

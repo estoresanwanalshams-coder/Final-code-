@@ -76,7 +76,7 @@ export async function createSupabaseOrder(order: OrderPayload) {
   const { error } = await supabase.from("orders").insert({
     order_number: order.orderNumber,
     full_name: order.fullName,
-    email: order.email,
+    email: order.email.trim().toLowerCase(),
     phone: order.phone,
     address_line_1: order.addressLine1,
     address_line_2: order.addressLine2,

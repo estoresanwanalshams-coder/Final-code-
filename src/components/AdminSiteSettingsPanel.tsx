@@ -58,7 +58,7 @@ export function AdminSiteSettingsPanel() {
       try {
         const [nextSettings, nextProducts, nextCategories] = await Promise.all([
           fetchSiteSettings().catch(() => defaultSiteSettings),
-          fetchSupabaseProducts().catch(() => []),
+          fetchSupabaseProducts({ includeDrafts: true }).catch(() => []),
           fetchMergedCategories().catch(() => []),
         ]);
 

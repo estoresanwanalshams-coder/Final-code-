@@ -65,10 +65,14 @@ export function CartView() {
   }
 
   function updateQuantity(slug: string, quantity: number) {
-    const nextQuantity = Math.max(1, quantity);
+    if (quantity < 1) {
+      removeItem(slug);
+      return;
+    }
+
     updateItems(
       items.map((item) =>
-        item.product.slug === slug ? { ...item, quantity: nextQuantity } : item,
+        item.product.slug === slug ? { ...item, quantity } : item,
       ),
     );
   }
@@ -295,7 +299,7 @@ export function CartView() {
               </div>
             </div>
             <Link
-              href={`/inquiry/${items[0]?.product.slug ?? ""}`}
+              href="/checkout"
               onClick={() => trackBeginCheckout(items)}
               className="mt-5 flex min-h-13 w-full items-center justify-center rounded-xl bg-hm-orange px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-hm-orange-hover active:scale-[0.99]"
             >

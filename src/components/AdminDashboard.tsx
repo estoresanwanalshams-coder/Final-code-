@@ -44,7 +44,7 @@ export function AdminDashboard({
     async function loadDashboard() {
       try {
         const [products, orders, customers, categories] = await Promise.all([
-          fetchSupabaseProducts(),
+          fetchSupabaseProducts({ includeDrafts: true }),
           fetchSupabaseOrders(),
           fetchSupabaseCustomers(),
           fetchMergedCategories(),

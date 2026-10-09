@@ -113,6 +113,39 @@ export function getApplicableShippingCharge(
   return Math.max(0, baseShippingCharge);
 }
 
+export function resolveCheckoutItems({
+  buyNow,
+  fallbackProduct,
+  initialQuantity = 1,
+}: {
+  buyNow?: boolean;
+  fallbackProduct?: Product | null;
+  initialQuantity?: number;
+}): CartItem[] {
+  const safeQuantity = Math.max(1, Math.floor(initialQuantity) || 1);
+
+  if (buyNow && fallbackProduct) {
+    return [{ product: fallbackProduct, quantity: safeQuantity }];
+  }
+
+  const cartItems = getCartItems();
+  if (cartItems.length > 0) {
+    return cartItems;
+  }
+
+  if (fallbackProduct) {
+    return [{ product: fallbackProduct, quantity: safeQuantity }];
+  }
+
+  return [];
+}
+
+export function removeProductFromCart(slug: string) {
+  saveCartItems(
+    getCartItems().filter((item) => item.product.slug !== slug),
+  );
+}
+
 export function upsertCartProductQuantity(product: Product, quantity: number) {
   if (!isProductAvailableForPurchase(product)) {
     return;

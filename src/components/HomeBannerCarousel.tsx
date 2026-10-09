@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { HomepageBanner } from "@/lib/site-settings";
+import { normalizeBannerLinkUrl } from "@/lib/site-settings";
 import Link from "next/link";
 
 type HomeBannerCarouselProps = {
@@ -60,7 +61,7 @@ export function HomeBannerCarousel({ banners }: HomeBannerCarouselProps) {
           <div key={slide.id} className="banner-carousel-slide">
             {slide.linkUrl ? (
               <Link
-                href={slide.linkUrl}
+                href={normalizeBannerLinkUrl(slide.linkUrl)}
                 className="absolute inset-0 z-[1] block cursor-pointer"
                 aria-label={`Open banner ${index + 1}`}
               >

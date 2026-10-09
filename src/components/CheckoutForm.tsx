@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isAdminEmail } from "@/lib/auth-role";
 import {
   getApplicableShippingCharge,
-  getCartItems,
   isProductAvailableForPurchase,
+  removeProductFromCart,
+  resolveCheckoutItems,
   saveCartItems,
   type CartItem,
 } from "@/lib/cart";
@@ -23,16 +25,19 @@ import { fetchSupabaseProductBySlug } from "@/lib/supabase-products";
 import { trackPurchase } from "@/lib/analytics";
 
 type CheckoutFormProps = {
-  fallbackProduct: Product;
+  fallbackProduct?: Product | null;
   initialQuantity?: number;
+  buyNow?: boolean;
 };
 
 export function CheckoutForm({
   fallbackProduct,
   initialQuantity = 1,
+  buyNow = false,
 }: CheckoutFormProps) {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
+  const [hasLoadedItems, setHasLoadedItems] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -53,16 +58,18 @@ export function CheckoutForm({
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const cartItems = getCartItems();
       setItems(
-        cartItems.length > 0
-          ? cartItems
-          : [{ product: fallbackProduct, quantity: initialQuantity }],
+        resolveCheckoutItems({
+          buyNow,
+          fallbackProduct,
+          initialQuantity,
+        }),
       );
+      setHasLoadedItems(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [fallbackProduct, initialQuantity]);
+  }, [buyNow, fallbackProduct, initialQuantity]);
 
   useEffect(() => {
     async function loadAuthenticatedCustomer() {
@@ -225,20 +232,65 @@ export function CheckoutForm({
         .join(", ");
 
       const city = emirate;
-      const orderNumber = await createNextOrderNumber();
-      await createSupabaseOrder({
-        orderNumber,
-        fullName,
-        email,
-        phone,
-        addressLine1,
-        addressLine2,
-        city,
-        shippingMethod: refreshedShippingMethod,
-        additionalNotes,
-        items: refreshedItems,
-        total: refreshedGrandTotal,
-      });
+      const normalizedEmail = email.trim().toLowerCase();
+      const orderItems = refreshedItems.map((item) => ({
+        slug: item.product.slug,
+        quantity: item.quantity,
+      }));
+
+      let orderNumber = "";
+
+      const createResponse = await fetch("/api/orders/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          email: normalizedEmail,
+          phone,
+          emirate,
+          area,
+          building,
+          unit,
+          street,
+          landmark,
+          additionalNotes,
+          items: orderItems,
+        }),
+      }).catch(() => null);
+
+      if (createResponse?.ok) {
+        const created = (await createResponse.json()) as {
+          orderNumber?: string;
+        };
+        orderNumber = created.orderNumber?.trim() ?? "";
+      } else if (createResponse?.status === 503) {
+        orderNumber = await createNextOrderNumber();
+        await createSupabaseOrder({
+          orderNumber,
+          fullName,
+          email: normalizedEmail,
+          phone,
+          addressLine1,
+          addressLine2,
+          city,
+          shippingMethod: refreshedShippingMethod,
+          additionalNotes,
+          items: refreshedItems,
+          total: refreshedGrandTotal,
+        });
+      } else {
+        const created = createResponse
+          ? ((await createResponse.json().catch(() => null)) as {
+              error?: string;
+            } | null)
+          : null;
+
+        throw new Error(created?.error ?? "Unable to place order.");
+      }
+
+      if (!orderNumber) {
+        throw new Error("Unable to place order.");
+      }
 
       trackPurchase(
         orderNumber,
@@ -253,10 +305,16 @@ export function CheckoutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderNumber,
-          email,
+          email: normalizedEmail,
         }),
       }).catch(() => null);
-      saveCartItems([]);
+
+      if (buyNow && fallbackProduct) {
+        removeProductFromCart(fallbackProduct.slug);
+      } else {
+        saveCartItems([]);
+      }
+
       router.push(`/order-success?order=${encodeURIComponent(orderNumber)}`);
     } catch (error) {
       const detail =
@@ -265,16 +323,40 @@ export function CheckoutForm({
           : "";
       if (detail.toLowerCase().includes("row-level security")) {
         setMessage(
-          "Please login first. Order access is restricted to signed-in users.",
+          "Unable to place this order right now. Please try again, or contact us if the problem continues.",
         );
       } else {
         setMessage(
-          "Unable to place order. Please check Supabase orders table.",
+          detail ||
+            "Unable to place order. Please check your details and try again.",
         );
       }
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (!hasLoadedItems) {
+    return (
+      <div className="checkout-form-panel p-8">Loading checkout...</div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="checkout-form-panel flex flex-col items-start justify-center gap-3 p-6 sm:p-8 lg:p-10">
+        <p className="text-sm font-semibold uppercase tracking-wider text-zinc-500">
+          Checkout
+        </p>
+        <h2 className="text-2xl font-bold text-zinc-950">Your cart is empty</h2>
+        <p className="text-sm leading-6 text-zinc-600">
+          Add products to your cart before placing an order.
+        </p>
+        <Link href="/products" className="btn-soft mt-2">
+          Continue shopping
+        </Link>
+      </div>
+    );
   }
 
   if (isAdminAccount) {
@@ -347,6 +429,7 @@ export function CheckoutForm({
             type="email"
             autoComplete="email"
             placeholder="Enter your email address"
+            readOnly={isAuthenticated}
             required
           />
         </label>

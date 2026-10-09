@@ -28,7 +28,9 @@ export function DynamicCategoryLinks({
 
   return (
     <>
-      {items.map((category) => (
+      {items
+        .filter((category) => category.isActive !== false)
+        .map((category) => (
         <Link
           key={category.slug}
           href={`/categories/${category.slug}`}

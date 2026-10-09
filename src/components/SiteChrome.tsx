@@ -14,7 +14,7 @@ export function SiteChrome({
   const isAdmin = pathname.startsWith("/admin");
 
   if (isAdmin) {
-    return <main className="flex-1">{children}</main>;
+    return <div className="flex-1">{children}</div>;
   }
 
   return (

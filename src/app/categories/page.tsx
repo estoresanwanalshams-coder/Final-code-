@@ -19,7 +19,7 @@ export default async function CategoriesPage() {
   const allCategories = await fetchMergedCategories().catch(() => categories);
 
   return (
-    <main className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-zinc-50">
       <section className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <div className="max-w-3xl">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-hm-orange">
@@ -97,6 +97,6 @@ export default async function CategoriesPage() {
           </Link>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

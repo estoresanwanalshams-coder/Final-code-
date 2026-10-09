@@ -28,7 +28,7 @@ export function AdminProductsManager({
 
     async function loadAdminProducts() {
       try {
-        const nextProducts = await fetchSupabaseProducts();
+        const nextProducts = await fetchSupabaseProducts({ includeDrafts: true });
 
         if (active) {
           setProducts(nextProducts);
@@ -135,10 +135,9 @@ export function AdminProductsManager({
 
     try {
       await deleteSupabaseProduct(product.slug);
-
       let cacheRefreshed = false;
 
-        try {
+      try {
         await refreshAdminStorefrontCache({
           type: "product",
           previousSlug: product.slug,
@@ -150,12 +149,14 @@ export function AdminProductsManager({
         console.error("Product deletion cache refresh failed:", error);
       }
 
-      setProducts(await fetchSupabaseProducts());
+      setProducts(
+        await fetchSupabaseProducts({ includeDrafts: true }),
+      );
 
       setMessage(
         cacheRefreshed
           ? "Product deleted successfully."
-          : "Product deleted, but storefront cache refresh failed. Please retry cache refresh before assuming the live website is updated.",
+          : "Product deleted, but storefront cache refresh failed. The live website may still show older content.",
       );
     } catch (error) {
       const detail =

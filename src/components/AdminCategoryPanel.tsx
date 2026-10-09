@@ -26,7 +26,7 @@ export function AdminCategoryPanel() {
       try {
         const [nextCategories, nextProducts] = await Promise.all([
           fetchSupabaseCategories(),
-          fetchSupabaseProducts(),
+          fetchSupabaseProducts({ includeDrafts: true }),
         ]);
 
         if (active) {
